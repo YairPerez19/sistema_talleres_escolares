@@ -8,14 +8,21 @@ import { tieneColision } from '../lib/talleres'
 import { supabase } from '../integrations/supabase/client'
 import { toast } from 'sonner'
 import gsap from 'gsap'
+import { usePageMeta } from '../hooks/usePageMeta'
 import { useGSAP } from '@gsap/react'
 import { useTalleres as useTalleresHook, useInscripciones as useInscripcionesHook, useProfile } from '../hooks/useTalleres'
+import { BajaDialog } from '../components/BajaDialog'
 
 export const Route = createFileRoute('/catalogo')({
   component: CatalogoPage,
 })
 
 function CatalogoPage() {
+  usePageMeta({
+    title: 'Catálogo de Talleres',
+    description: 'Explora el catálogo completo de talleres culturales, cívicos y deportivos del CBTis No. 61. Filtra por categoría y encuentra el taller ideal para ti.',
+    canonicalPath: '/catalogo',
+  })
   const { talleres, loading: talleresLoading } = useTalleresHook();
   const { user } = useAuth();
   const { inscritosIds, refresh: refreshInscripciones } = useInscripcionesHook(user?.id);
@@ -24,6 +31,8 @@ function CatalogoPage() {
   const [category, setCategory] = useState('');
   const [search, setSearch] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
+  const [bajaDialogOpen, setBajaDialogOpen] = useState(false);
+  const [bajaTarget, setBajaTarget] = useState<{ tallerId: string; nombre: string } | null>(null);
 
   const gridRef = React.useRef<HTMLDivElement>(null);
 
@@ -34,10 +43,10 @@ function CatalogoPage() {
   });
 
   useGSAP(() => {
-    if (gridRef.current) {
+    if (gridRef.current && !talleresLoading) {
       gsap.fromTo(gridRef.current.children, 
-        { opacity: 0, y: 30 },
-        { opacity: 1, y: 0, stagger: 0.05, duration: 0.8, ease: 'expo.out' }
+        { opacity: 0, y: 40, scale: 0.95 },
+        { opacity: 1, y: 0, scale: 1, stagger: 0.06, duration: 0.7, ease: 'back.out(1.4)' }
       );
     }
   }, [filtered.length, talleresLoading]);
@@ -82,52 +91,43 @@ function CatalogoPage() {
     setActionLoading(false);
   };
 
-  const handleBaja = async (tallerId: string, nombre: string) => {
-    if (!user) return;
+  const openBajaDialog = (tallerId: string, nombre: string) => {
     const cambiosActuales = profile?.cambios_restantes ?? 3;
     if (cambiosActuales <= 0) {
       toast.error('Has agotado tus 3 cambios permitidos.');
       return;
     }
+    setBajaTarget({ tallerId, nombre });
+    setBajaDialogOpen(true);
+  };
 
-    if (!confirm('¿Deseas darte de baja? Esto restará 1 a tus cambios permitidos.')) return;
-
-    setActionLoading(true);
-
-    // 1. Actualización optimista: quitar la luz INMEDIATAMENTE
+  const handleBaja = async (_motivo: string) => {
+    if (!user || !bajaTarget) return;
+    const cambiosActuales = profile?.cambios_restantes ?? 3;
     const nuevosCambios = Math.max(cambiosActuales - 1, 0);
+
+    setBajaDialogOpen(false);
+    setBajaTarget(null);
+    setActionLoading(true);
     setCambios(nuevosCambios);
 
-    // 2. Eliminar inscripción
-    const { error: errorBaja } = await supabase
-      .from('inscripciones')
-      .delete()
-      .match({ alumno_id: user.id, taller_id: tallerId });
+    const { data, error } = await supabase.rpc('dar_baja_taller', {
+      p_alumno_id: user.id,
+      p_taller_id: bajaTarget.tallerId,
+    });
 
-    if (errorBaja) {
-      toast.error('Error al dar de baja');
-      setCambios(cambiosActuales); // revertir si falla
-      setActionLoading(false);
-      return;
-    }
-
-    // 3. Persistir en DB
-    const { error: errorUpdate } = await supabase
-      .from('profiles')
-      .update({ cambios_restantes: nuevosCambios })
-      .eq('id', user.id);
-
-    if (errorUpdate) {
-      console.error('Error al persistir cambios_restantes:', errorUpdate);
-      toast.error('Error al guardar los cambios');
+    if (error || !data || !(data as any).success) {
+      const errMsg = error?.message || (data as any)?.error || 'Error desconocido';
+      toast.error('Error al dar de baja: ' + errMsg);
       setCambios(cambiosActuales);
       setActionLoading(false);
       return;
     }
 
-    toast.success(`Dado de baja de ${nombre}. Te queda(n) ${nuevosCambios} cambio(s).`);
+    const result = data as any;
     refreshInscripciones();
     refreshProfile();
+    toast.success(`Dado de baja de ${result.taller_nombre || bajaTarget.nombre}.`);
     setActionLoading(false);
   };
 
@@ -137,20 +137,19 @@ function CatalogoPage() {
   return (
     <div className="flex flex-col pt-4 pb-20 overflow-visible max-w-[1400px] mx-auto px-4 md:px-8">
       
-      {/* Header and Filters Container */}
-      <div className="sticky top-4 z-50 glass-card mb-8 p-4 md:p-6 rounded-[2rem] space-y-4 shadow-2xl bg-black/20 backdrop-blur-[24px]">
+      <div className="sticky top-4 z-50 bg-[#0a0205]/80 backdrop-blur-[24px] border border-white/[0.04] mb-8 p-4 md:p-6 rounded-[2rem] space-y-4 shadow-lg shadow-black/20">
         <Header />
         <div className="flex justify-between items-center px-2">
-           <Filters 
+          <Filters 
             category={category} setCategory={setCategory} 
             search={search} setSearch={setSearch} 
           />
           {profile && (
-            <div className="hidden lg:flex items-center gap-3 bg-white/5 px-4 py-2 rounded-2xl border border-white/10">
-              <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">Cambios</span>
-              <div className="flex gap-1">
+            <div className="hidden lg:flex items-center gap-3 bg-white/[0.03] px-4 py-2 rounded-2xl border border-white/[0.05]">
+              <span className="text-[10px] font-semibold text-white/30 uppercase tracking-wider">Cambios</span>
+              <div className="flex gap-1.5">
                 {[1, 2, 3].map(i => (
-                  <div key={i} className={`w-3 h-1 rounded-full ${i <= profile.cambios_restantes ? 'bg-primary-glow' : 'bg-white/10'}`} />
+                  <div key={i} className={`w-3 h-1.5 rounded-full transition-all duration-300 ${i <= profile.cambios_restantes ? 'bg-gradient-to-r from-[#ff0055] to-[#ff3377] shadow-[0_0_8px_rgba(255,0,85,0.3)]' : 'bg-white/[0.06]'}`} />
                 ))}
               </div>
             </div>
@@ -160,7 +159,7 @@ function CatalogoPage() {
 
       {talleresLoading ? (
         <div className="flex justify-center py-20">
-          <div className="w-8 h-8 border-4 border-primary/20 border-t-primary-glow rounded-full animate-spin" />
+          <div className="w-10 h-10 border-[3px] border-[#ff0055]/20 border-t-[#ff0055] rounded-full animate-spin" />
         </div>
       ) : (
         <div ref={gridRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -176,13 +175,22 @@ function CatalogoPage() {
                  inscrito={isOurs}
                  colisionaCon={colisionaCon}
                  onInscribir={() => handleInscribir(taller)}
-                 onBaja={() => handleBaja(taller.id, taller.nombre)}
-                 loading={actionLoading}
+                  onBaja={() => openBajaDialog(taller.id, taller.nombre)}
+                  loading={actionLoading}
                />
             );
           })}
         </div>
       )}
+
+      <BajaDialog
+        open={bajaDialogOpen}
+        onOpenChange={setBajaDialogOpen}
+        tallerNombre={bajaTarget?.nombre ?? ''}
+        cambiosRestantes={profile?.cambios_restantes ?? 3}
+        onConfirm={handleBaja}
+        loading={actionLoading}
+      />
     </div>
   )
 }

@@ -47,10 +47,81 @@ export class AuthService {
     });
 
     if (authError || !authData.user) {
+      if (authError?.message?.toLowerCase().includes('not confirmed')) {
+        return await this.handleUnconfirmedLogin(email, role, dto);
+      }
       throw new UnauthorizedException('Credenciales inválidas.');
     }
 
     const userId = authData.user.id;
+
+    const { data: roleData } = await this.supabaseAdmin
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', userId)
+      .single();
+
+    if (!roleData || roleData.role !== role) {
+      throw new UnauthorizedException('Credenciales inválidas.');
+    }
+
+    const { data: profile } = await this.supabaseAdmin
+      .from('profiles')
+      .select('nombre, matricula')
+      .eq('id', userId)
+      .single();
+
+    if (!profile) {
+      throw new UnauthorizedException('Credenciales inválidas.');
+    }
+
+    if (role === 'student' || role === 'instructor') {
+      if (profile.matricula !== (dto as any).matricula) {
+        throw new UnauthorizedException('Credenciales inválidas.');
+      }
+    }
+
+    if (role === 'instructor') {
+      const { data: taller } = await this.supabaseAdmin
+        .from('talleres')
+        .select('id')
+        .eq('id', (dto as any).taller_id)
+        .eq('instructor_id', userId)
+        .single();
+
+      if (!taller) {
+        throw new UnauthorizedException('Credenciales inválidas.');
+      }
+    }
+
+    return {
+      verified: true,
+      needs_otp: false,
+      access_token: authData.session.access_token,
+      refresh_token: authData.session.refresh_token,
+      role,
+      nombre: profile.nombre,
+      email_masked: email.replace(/(?<=.).(?=[^@]*?.@)/g, '*'),
+    };
+  }
+
+  private async handleUnconfirmedLogin(
+    email: string,
+    role: string,
+    dto: VerifyIdentityDto,
+  ) {
+    const { data: authUser, error: authUserError } = await this.supabaseAdmin
+      .schema('auth')
+      .from('users')
+      .select('id')
+      .eq('email', email)
+      .single();
+
+    if (authUserError || !authUser) {
+      throw new UnauthorizedException('Credenciales inválidas.');
+    }
+
+    const userId = authUser.id;
 
     const { data: roleData } = await this.supabaseAdmin
       .from('user_roles')
@@ -99,6 +170,7 @@ export class AuthService {
 
     return {
       verified: true,
+      needs_otp: true,
       email_masked: email.replace(/(?<=.).(?=[^@]*?.@)/g, '*'),
       pending_token: pendingToken,
       nombre: profile.nombre,
@@ -108,11 +180,10 @@ export class AuthService {
   async registerStudent(dto: import('./dto/register-student.dto').RegisterStudentDto) {
     const { email, password, nombre, matricula, turno } = dto;
 
-    // Crear usuario en Supabase Auth con metadata para el trigger on_auth_user_created
     const { data: authData, error: authError } = await this.supabaseAdmin.auth.admin.createUser({
       email,
       password,
-      email_confirm: true,
+      email_confirm: false,
       user_metadata: { nombre, matricula, turno },
     });
 
@@ -125,7 +196,6 @@ export class AuthService {
 
     const userId = authData.user.id;
 
-    // Insertar en profiles (upsert por si el trigger ya lo creó)
     const { error: profileError } = await this.supabaseAdmin
       .from('profiles')
       .upsert({ id: userId, nombre, matricula, turno });
@@ -135,7 +205,6 @@ export class AuthService {
       throw new InternalServerErrorException('Error al guardar el perfil del estudiante.');
     }
 
-    // Insertar en user_roles
     const { error: roleError } = await this.supabaseAdmin
       .from('user_roles')
       .insert({ user_id: userId, role: 'student' });
@@ -145,7 +214,17 @@ export class AuthService {
       throw new InternalServerErrorException('Error al asignar rol de estudiante.');
     }
 
-    return { success: true, message: 'Usuario registrado exitosamente.' };
+    const pendingToken = jwt.sign(
+      { user_id: userId, email, role: 'student' } satisfies PendingTokenPayload,
+      this.jwtSecret,
+      { expiresIn: '10m' },
+    );
+
+    return {
+      pending_token: pendingToken,
+      email_masked: email.replace(/(?<=.).(?=[^@]*?.@)/g, '*'),
+      nombre,
+    };
   }
 
   async sendOtp(pendingToken: string): Promise<{ sent: boolean; cooldown_until: string }> {
@@ -256,6 +335,10 @@ export class AuthService {
       .from('verification_codes')
       .update({ used: true })
       .eq('id', verificationCode.id);
+
+    await this.supabaseAdmin.auth.admin.updateUserById(payload.user_id, {
+      email_confirm: true,
+    });
 
     // Generar sesión mediante magic link y extraer tokens
     try {

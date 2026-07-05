@@ -3,7 +3,8 @@ import type { EstadoAsistencia } from '../../lib/types';
 import { AlumnoRow } from './AlumnoRow';
 import { useAsistencias } from '../../hooks/useAsistencias';
 import { cn } from '../../lib/utils';
-import { CheckSquare, Users, Save, Clock, RefreshCw, Zap } from '@/components/AnimatedIcons';
+import { CheckSquare, Save, Clock, RefreshCw } from '@/components/AnimatedIcons';
+import { Users, Zap } from '@/components/icons';
 import { toast } from 'sonner';
 
 interface ListaAsistenciaProps {
@@ -48,9 +49,7 @@ export function ListaAsistencia({ tallerId, tallerNombre, soloLectura = false }:
       toast.info('Todos los alumnos ya tienen registro.');
       return;
     }
-    for (const a of sinRegistro) {
-      await registrarAsistencia(a.alumno_id, 'presente');
-    }
+    await Promise.all(sinRegistro.map(a => registrarAsistencia(a.alumno_id, 'presente')));
     toast.success(`${sinRegistro.length} alumnos marcados como Presentes.`);
   };
 
@@ -81,11 +80,13 @@ export function ListaAsistencia({ tallerId, tallerNombre, soloLectura = false }:
               value={fecha}
               max={hoy}
               onChange={e => setFecha(e.target.value)}
+              aria-label="Seleccionar fecha"
               className="bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-primary/40 [color-scheme:dark]"
             />
           </div>
 
           <button
+            type="button"
             onClick={refresh}
             className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 text-white/50 hover:text-white hover:bg-white/10 transition-all flex items-center justify-center"
           >
@@ -94,6 +95,7 @@ export function ListaAsistencia({ tallerId, tallerNombre, soloLectura = false }:
 
           {!soloLectura && esHoy && (
             <button
+              type="button"
               onClick={marcarTodosPresente}
               className="flex items-center gap-2 bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/30 px-4 py-2 rounded-xl text-xs font-bold transition-all"
             >
@@ -122,6 +124,7 @@ export function ListaAsistencia({ tallerId, tallerNombre, soloLectura = false }:
           { label: 'Justif.', value: stats.justificados, icon: '📄', color: 'text-blue-400', estado: 'justificado' as EstadoAsistencia },
         ].map(({ label, value, icon, color, estado }) => (
           <button
+            type="button"
             key={label}
             onClick={() => setFiltroEstado(
               estado ? (filtroEstado === estado ? 'todos' : estado) : 'todos'

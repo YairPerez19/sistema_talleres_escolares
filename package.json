@@ -7,6 +7,7 @@
     "build": "pnpm --filter frontend build",
     "preview": "pnpm --filter frontend preview",
     "dev:frontend": "pnpm --filter frontend dev",
-    "dev:backend": "pnpm --filter backend dev"
+    "dev:backend": "pnpm --filter backend dev",
+    "doctor": "npx react-doctor@latest"
   }
 }

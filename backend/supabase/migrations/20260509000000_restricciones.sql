@@ -15,7 +15,7 @@ BEGIN
   -- If a student leaves a workshop (DELETE), decrement their remaining changes
   IF (TG_OP = 'DELETE') THEN
     UPDATE public.profiles
-    SET cambios_restantes = cambios_restantes - 1
+    SET cambios_restantes = GREATEST(COALESCE(cambios_restantes, 3) - 1, 0)
     WHERE id = OLD.alumno_id;
   END IF;
   

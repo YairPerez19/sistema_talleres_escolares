@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+
+Disallow: /admin/
+Disallow: /dashboard/
+Disallow: /instructor/
+Disallow: /verify-otp/
+
+Sitemap: https://site-cbtis61.example.com/sitemap.xml

@@ -83,10 +83,24 @@ export function useProfile(userId: string | undefined | null) {
       const { data, error } = await supabase.from('profiles').select('*').eq('id', uid).single();
       console.log('[useProfile] data:', data, 'error:', error);
       if (data) {
+        let cambios = data.cambios_restantes;
+        let limite = data.inscripcion_limite;
+
+        if (cambios == null) {
+          cambios = 3;
+          limite = limite ?? new Date(Date.now() + 21 * 24 * 60 * 60 * 1000).toISOString();
+          supabase.from('profiles')
+            .update({ cambios_restantes: 3, inscripcion_limite: limite })
+            .eq('id', uid)
+            .then(({ error: errInit }) => {
+              if (errInit) console.error('Error al inicializar cambios_restantes:', errInit);
+            });
+        }
+
         setProfile((prev: any) => ({
           ...data,
-          cambios_restantes: data.cambios_restantes ?? prev?.cambios_restantes ?? 3,
-          inscripcion_limite: data.inscripcion_limite ?? prev?.inscripcion_limite ?? new Date(Date.now() + 21 * 24 * 60 * 60 * 1000).toISOString(),
+          cambios_restantes: cambios,
+          inscripcion_limite: limite ?? prev?.inscripcion_limite ?? new Date(Date.now() + 21 * 24 * 60 * 60 * 1000).toISOString(),
         }));
       }
       setLoading(false);

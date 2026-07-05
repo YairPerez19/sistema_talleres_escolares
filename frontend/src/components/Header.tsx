@@ -1,7 +1,8 @@
 import { Link, useNavigate } from '@tanstack/react-router';
 import { useAuth } from '../hooks/useAuth';
 import { useRole } from '../hooks/useRole';
-import { LogOut, GraduationCap, LayoutDashboard, Search, ShieldCheck } from '@/components/AnimatedIcons';
+import { LogOut, LayoutDashboard, Search, ShieldCheck } from '@/components/AnimatedIcons';
+import { GraduationCap } from '@/components/icons';
 import { cn } from '../lib/utils';
 
 export function Header() {
@@ -15,10 +16,9 @@ export function Header() {
   };
 
   return (
-    <div className="flex items-center justify-between pb-4 border-b border-white/5">
-      {/* Logo */}
+    <div className="flex items-center justify-between pb-4 border-b border-white/[0.04]">
       <Link to="/" className="flex items-center gap-3 group">
-        <div className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white transition-transform group-hover:scale-110">
+        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#ff0055]/10 to-[#800020]/10 border border-[#ff0055]/15 flex items-center justify-center text-white transition-all duration-300 group-hover:shadow-[0_0_15px_rgba(255,0,85,0.2)] group-hover:scale-105">
           <GraduationCap size={18} />
         </div>
         <div>
@@ -26,26 +26,27 @@ export function Header() {
           <p className="text-[10px] text-white/40 font-semibold tracking-wider">CBTIS 61</p>
         </div>
       </Link>
-      
-      {/* Navigation */}
-      <nav className="flex items-center gap-2 md:gap-4 overflow-x-auto max-w-[50%] no-scrollbar">
-        <Link 
+
+      <nav className="flex items-center gap-1.5 md:gap-3 overflow-x-auto max-w-[50%] no-scrollbar">
+        <Link
           to="/catalogo"
           className={cn(
-            "flex items-center gap-2 px-3 py-1.5 rounded-lg text-[13px] font-medium transition-all hover:bg-white/5 text-white/70 whitespace-nowrap",
-            "[&.active]:text-white [&.active]:bg-white/10"
+            "flex items-center gap-2 px-3 py-2 rounded-xl text-[13px] font-medium transition-all duration-300 text-white/60 whitespace-nowrap",
+            "[&.active]:text-white [&.active]:bg-white/10 [&.active]:shadow-[0_0_15px_rgba(255,255,255,0.05)]",
+            "hover:text-white hover:bg-white/5"
           )}
         >
           <Search size={16} />
           <span className="hidden md:inline">Catálogo</span>
         </Link>
-        
+
         {isAdmin && (
-          <Link 
+          <Link
             to="/admin"
             className={cn(
-              "flex items-center gap-2 px-3 py-1.5 rounded-lg text-[13px] font-medium transition-all hover:bg-white/5 text-primary-glow/70 whitespace-nowrap",
-              "[&.active]:text-primary-glow [&.active]:bg-primary/10"
+              "flex items-center gap-2 px-3 py-2 rounded-xl text-[13px] font-medium transition-all duration-300 text-[#ff0055]/60 whitespace-nowrap",
+              "[&.active]:text-[#ff0055] [&.active]:bg-[#ff0055]/10 [&.active]:shadow-[0_0_15px_rgba(255,0,85,0.1)]",
+              "hover:text-[#ff0055] hover:bg-[#ff0055]/5"
             )}
           >
             <ShieldCheck size={16} />
@@ -54,11 +55,12 @@ export function Header() {
         )}
 
         {session && (
-          <Link 
+          <Link
             to="/dashboard"
             className={cn(
-              "flex items-center gap-2 px-3 py-1.5 rounded-lg text-[13px] font-medium transition-all hover:bg-white/5 text-white/70 whitespace-nowrap",
-              "[&.active]:text-white [&.active]:bg-white/10"
+              "flex items-center gap-2 px-3 py-2 rounded-xl text-[13px] font-medium transition-all duration-300 text-white/60 whitespace-nowrap",
+              "[&.active]:text-white [&.active]:bg-white/10 [&.active]:shadow-[0_0_15px_rgba(255,255,255,0.05)]",
+              "hover:text-white hover:bg-white/5"
             )}
           >
             <LayoutDashboard size={16} />
@@ -67,20 +69,20 @@ export function Header() {
         )}
       </nav>
 
-      {/* User Actions */}
       <div className="flex items-center">
         {session ? (
           <button
+            type="button"
             onClick={handleSignOut}
-            className="px-4 py-1.5 rounded-full text-[12px] font-semibold bg-transparent border border-white/20 text-white/80 hover:bg-white/10 transition-all flex items-center gap-2"
+            className="px-4 py-2 rounded-xl text-[12px] font-semibold bg-transparent border border-white/10 text-white/60 hover:text-white hover:border-red-500/30 hover:bg-red-500/5 transition-all duration-300 flex items-center gap-2"
           >
             <LogOut size={14} />
             <span className="hidden sm:inline">Salir</span>
           </button>
         ) : (
-          <Link 
+          <Link
             to="/auth"
-            className="px-4 py-1.5 rounded-full text-[12px] font-semibold bg-white/10 border border-white/20 text-white hover:bg-white/20 transition-all"
+            className="px-4 py-2 rounded-xl text-[12px] font-semibold bg-gradient-to-r from-[#ff0055] to-[#ff3377] text-white hover:shadow-[0_8px_20px_rgba(255,0,85,0.3)] transition-all duration-300"
           >
             Entrar
           </Link>

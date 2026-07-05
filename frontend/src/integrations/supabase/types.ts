@@ -270,6 +270,18 @@ export interface Database {
         }
         Returns: boolean
       }
+      dar_baja_taller: {
+        Args: {
+          p_alumno_id: string
+          p_taller_id: string
+        }
+        Returns: {
+          success: boolean
+          cambios_restantes: number
+          taller_nombre: string
+          error?: string
+        }
+      }
     }
   }
 }

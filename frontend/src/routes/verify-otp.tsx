@@ -7,92 +7,105 @@ import { sendOtp, verifyOtp, finalizeSession, getRedirectPath } from '../service
 import { toast } from 'sonner'
 import type { Role } from '../services/authService'
 import { cn } from '../lib/utils'
+import { usePageMeta } from '../hooks/usePageMeta'
 
 export const Route = createFileRoute('/verify-otp')({
   component: VerifyOtpPage,
 })
 
 function VerifyOtpPage() {
+  usePageMeta({
+    title: 'Verificar Código',
+    description: 'Verifica tu identidad con el código de acceso enviado. Sistema Integral de Talleres Escolares del CBTis No. 61.',
+    canonicalPath: '/verify-otp',
+    noindex: true,
+  })
   const navigate = useNavigate()
 
-  const [pendingToken, setPendingToken] = useState<string | null>(null)
-  const [emailMasked, setEmailMasked] = useState('')
-  const [nombre, setNombre] = useState('')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-
+  const [session, setSession] = useState({
+    pendingToken: null as string | null, emailMasked: '', nombre: '',
+    email: '', password: '', isRegistration: false,
+  })
   const [code, setCode] = useState(['', '', '', '', '', ''])
   const inputRefs = useRef<(HTMLInputElement | null)[]>([])
-  const [loading, setLoading] = useState(false)
-  const [sendingOtp, setSendingOtp] = useState(false)
+  const [loadingState, setLoadingState] = useState({ loading: false, sendingOtp: false })
 
-  const [cooldownUntil, setCooldownUntil] = useState<Date | null>(null)
-  const [expiresAt, setExpiresAt] = useState<Date>(() => new Date(Date.now() + 10 * 60 * 1000))
-  const [cooldownRemaining, setCooldownRemaining] = useState(0)
-  const [expiresRemaining, setExpiresRemaining] = useState('')
+  const [timers, setTimers] = useState({
+    cooldownUntil: null as Date | null,
+    expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+    cooldownRemaining: 0,
+    expiresRemaining: '',
+  })
+
   useEffect(() => {
-    const token = localStorage.getItem('pending_token')
-    const emailM = localStorage.getItem('pending_email_masked')
-    const name = localStorage.getItem('pending_nombre')
-    const r = localStorage.getItem('pending_role') as Role | null
-    const e = localStorage.getItem('pending_email')
-    const p = localStorage.getItem('pending_password')
+    const state = window.history.state as {
+      pendingToken?: string; emailMasked?: string; nombre?: string;
+      role?: string; email?: string; password?: string; isRegistration?: boolean;
+    } | null
 
-    if (!token || !emailM || !r || !e || !p) {
+    if (!state?.pendingToken || !state?.emailMasked || !state?.role || !state?.email || !state?.password) {
       navigate({ to: '/auth' })
       return
     }
 
-    setPendingToken(token)
-    setEmailMasked(emailM)
-    setNombre(name || '')
-    setEmail(e)
-    setPassword(p)
+    setSession({
+      pendingToken: state.pendingToken,
+      emailMasked: state.emailMasked,
+      nombre: state.nombre || '',
+      email: state.email,
+      password: state.password,
+      isRegistration: state.isRegistration ?? false,
+    })
+  }, [navigate])
+
+  useEffect(() => {
+    inputRefs.current[0]?.focus()
   }, [])
 
   useEffect(() => {
-    if (!pendingToken) return
+    if (!session.pendingToken) return
     handleSendOtp()
-  }, [pendingToken])
+  }, [session.pendingToken, handleSendOtp])
 
   const handleSendOtp = useCallback(async () => {
-    if (!pendingToken) return
-    setSendingOtp(true)
+    if (!session.pendingToken) return
+    setLoadingState(s => ({ ...s, sendingOtp: true }))
     try {
-      const result = await sendOtp(pendingToken)
+      const result = await sendOtp(session.pendingToken)
       if (result.sent) {
-        setExpiresAt(new Date(Date.now() + 10 * 60 * 1000))
-        setCooldownUntil(new Date(result.cooldown_until))
+        setTimers(t => ({ ...t, expiresAt: new Date(Date.now() + 10 * 60 * 1000), cooldownUntil: new Date(result.cooldown_until) }))
         toast.success('Código enviado a tu correo')
       } else {
-        setCooldownUntil(new Date(result.cooldown_until))
+        setTimers(t => ({ ...t, cooldownUntil: new Date(result.cooldown_until) }))
       }
     } catch (err: any) {
       toast.error(err.message || 'Error al enviar el código')
     } finally {
-      setSendingOtp(false)
+      setLoadingState(s => ({ ...s, sendingOtp: false }))
     }
-  }, [pendingToken])
+  }, [session.pendingToken])
 
   useEffect(() => {
-    if (!cooldownUntil) return
+    if (!timers.cooldownUntil) return
     const interval = setInterval(() => {
-      const remaining = Math.max(0, Math.ceil((cooldownUntil.getTime() - Date.now()) / 1000))
-      setCooldownRemaining(remaining)
-      if (remaining <= 0) setCooldownUntil(null)
+      const remaining = Math.max(0, Math.ceil((timers.cooldownUntil!.getTime() - Date.now()) / 1000))
+      setTimers(t => {
+        if (remaining <= 0) return { ...t, cooldownRemaining: 0, cooldownUntil: null }
+        return { ...t, cooldownRemaining: remaining }
+      })
     }, 200)
     return () => clearInterval(interval)
-  }, [cooldownUntil])
+  }, [timers.cooldownUntil])
 
   useEffect(() => {
     const interval = setInterval(() => {
-      const remaining = Math.max(0, Math.floor((expiresAt.getTime() - Date.now()) / 1000))
+      const remaining = Math.max(0, Math.floor((timers.expiresAt.getTime() - Date.now()) / 1000))
       const mins = Math.floor(remaining / 60)
       const secs = remaining % 60
-      setExpiresRemaining(`${mins}:${secs.toString().padStart(2, '0')}`)
+      setTimers(t => ({ ...t, expiresRemaining: `${mins}:${secs.toString().padStart(2, '0')}` }))
     }, 1000)
     return () => clearInterval(interval)
-  }, [expiresAt])
+  }, [timers.expiresAt])
 
   const handleCodeChange = (index: number, value: string) => {
     if (value && !/^\d$/.test(value)) return
@@ -128,11 +141,11 @@ function VerifyOtpPage() {
       toast.error('Ingresa el código completo de 6 dígitos')
       return
     }
-    if (!pendingToken) return
+    if (!session.pendingToken) return
 
-    setLoading(true)
+    setLoadingState(s => ({ ...s, loading: true }))
     try {
-      const result = await verifyOtp(pendingToken, fullCode)
+      const result = await verifyOtp(session.pendingToken, fullCode)
 
       if (result.access_token && result.refresh_token) {
         await supabase.auth.setSession({
@@ -140,104 +153,107 @@ function VerifyOtpPage() {
           refresh_token: result.refresh_token,
         })
       } else if (result.login_token) {
-        await finalizeSession(email, password)
+        await finalizeSession(session.email, session.password)
       }
 
-      localStorage.removeItem('pending_token')
-      localStorage.removeItem('pending_email_masked')
-      localStorage.removeItem('pending_nombre')
-      localStorage.removeItem('pending_role')
-      localStorage.removeItem('pending_email')
-      localStorage.removeItem('pending_password')
-
-      toast.success(`¡Bienvenido${nombre ? ', ' + nombre : ''}!`)
-      navigate({ to: getRedirectPath(result.role) })
+      toast.success(`¡Bienvenido${session.nombre ? ', ' + session.nombre : ''}!`)
+      navigate({ to: getRedirectPath(result.role), state: null })
     } catch (err: any) {
       toast.error(err.message || 'Código incorrecto')
       setCode(['', '', '', '', '', ''])
       inputRefs.current[0]?.focus()
     } finally {
-      setLoading(false)
+      setLoadingState(s => ({ ...s, loading: false }))
     }
   }
 
-  if (!pendingToken) return null
+  if (!session.pendingToken) return null
 
   return (
-    <div className="flex flex-col w-full min-h-screen">
-      <div className="glass-card mb-10 p-4 md:p-6 rounded-[2rem] w-full max-w-[1400px] mx-auto">
+    <div className="flex flex-col w-full min-h-screen bg-[#050102]">
+      <div className="relative z-10 p-4 md:p-6 w-full max-w-[1400px] mx-auto">
         <Header />
       </div>
-      <div className="flex-1 flex items-center justify-center p-4">
-        <div className="w-full max-w-md">
-          <button onClick={() => navigate({ to: '/auth' })} className="text-white/40 hover:text-white text-xs font-bold mb-6 flex items-center gap-1 transition-colors">
-            ← Volver
+      <div className="flex-1 flex items-center justify-center p-4 relative">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[#ff0055]/5 blur-[150px] rounded-full pointer-events-none" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-[#800020]/10 blur-[150px] rounded-full pointer-events-none" />
+
+        <div className="w-full max-w-md relative z-10">
+          <button type="button" onClick={() => navigate({ to: '/auth' })} className="text-white/30 hover:text-white text-xs font-bold mb-6 flex items-center gap-1 transition-colors">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            Volver
           </button>
-          <div className="p-8 glass-card rounded-[2.5rem] border border-white/10 shadow-2xl text-center">
-            <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary-glow border border-primary/20 mx-auto mb-6">
-              <ShieldCheck size={32} />
+          <div className="p-8 bg-[#0a0205]/80 backdrop-blur-[24px] rounded-[2.5rem] border border-white/[0.06] shadow-2xl shadow-black/30 text-center">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#ff0055]/20 to-[#800020]/20 flex items-center justify-center text-[#ff0055] border border-[#ff0055]/20 mx-auto mb-6">
+              <ShieldCheck size={28} />
             </div>
 
-            <h2 className="text-2xl font-black text-white mb-2">Verificación en dos pasos</h2>
-            <p className="text-white/50 text-sm mb-1">
-              {nombre ? `Hola ${nombre}, ` : ''}ingresa el código que enviamos a:
+            <h2 className="text-2xl font-extrabold text-white mb-2">
+              {session.isRegistration ? 'Verifica tu cuenta' : 'Verificación en dos pasos'}
+            </h2>
+            <p className="text-white/40 text-sm mb-1">
+              {session.isRegistration
+                ? 'Tu cuenta fue creada. Ingresa el código que enviamos a:'
+                : `${session.nombre ? `Hola ${session.nombre}, ` : ''}ingresa el código que enviamos a:`}
             </p>
-            <p className="text-primary-glow font-bold text-sm flex items-center justify-center gap-2 mb-8">
-              <Mail size={14} /> {emailMasked}
+            <p className="text-[#ff0055] font-bold text-sm flex items-center justify-center gap-2 mb-8">
+              <Mail size={14} /> {session.emailMasked}
             </p>
 
             <div className="flex items-center justify-center gap-3 mb-8" onPaste={handlePaste}>
-              {code.map((digit, i) => (
+              {code.map((digit, pos) => (
                 <input
-                  key={i}
-                  ref={el => { inputRefs.current[i] = el }}
+                  key={`otp-${pos}`}
+                  ref={el => { inputRefs.current[pos] = el }}
                   type="text"
                   inputMode="numeric"
                   maxLength={1}
                   value={digit}
-                  onChange={e => handleCodeChange(i, e.target.value)}
-                  onKeyDown={e => handleKeyDown(i, e)}
+                  onChange={e => handleCodeChange(pos, e.target.value)}
+                  onKeyDown={e => handleKeyDown(pos, e)}
+                  aria-label={`Dígito ${pos + 1}`}
                   className={cn(
-                    'w-12 h-14 text-center text-2xl font-black rounded-xl border transition-all outline-none',
+                    'w-12 h-14 text-center text-2xl font-bold rounded-xl border transition-all duration-200 outline-none',
                     digit
-                      ? 'border-primary/60 bg-primary/10 text-white'
-                      : 'border-white/10 bg-white/5 text-white',
-                    'focus:border-primary/60 focus:ring-2 focus:ring-primary/20',
+                      ? 'border-[#ff0055]/40 bg-[#ff0055]/10 text-white shadow-[0_0_15px_rgba(255,0,85,0.15)]'
+                      : 'border-white/[0.06] bg-white/[0.03] text-white/30',
+                    'focus:border-[#ff0055]/50 focus:shadow-[0_0_20px_rgba(255,0,85,0.2)]',
                   )}
-                  autoFocus={i === 0}
                 />
               ))}
             </div>
 
             <button
+              type="button"
               onClick={handleVerify}
-              disabled={loading || code.join('').length !== 6}
-              className="w-full py-4 rounded-xl font-bold bg-primary text-white hover:bg-primary/80 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed mb-6"
+              disabled={loadingState.loading || code.join('').length !== 6}
+              className="w-full py-4 rounded-2xl font-bold bg-gradient-to-r from-[#ff0055] to-[#ff3377] text-white hover:shadow-[0_10px_35px_rgba(255,0,85,0.4)] hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-none mb-6"
             >
-              {loading ? <Loader2 className="animate-spin" size={20} /> : <ShieldCheck size={20} />}
-              {loading ? 'Verificando...' : 'Verificar código'}
+              {loadingState.loading ? <Loader2 className="animate-spin" size={20} /> : <ShieldCheck size={20} />}
+              {loadingState.loading ? 'Verificando...' : 'Verificar código'}
             </button>
 
             <div className="flex items-center justify-between text-xs">
-              <div className="flex items-center gap-1.5 text-white/40">
+              <div className="flex items-center gap-1.5 text-white/30">
                 <Clock size={14} />
-                <span className={cn(parseInt(expiresRemaining) < 120 && 'text-amber-400')}>
-                  {expiresRemaining}
+                <span className={cn(parseInt(timers.expiresRemaining) < 120 && 'text-amber-400 font-semibold')}>
+                  {timers.expiresRemaining}
                 </span>
               </div>
 
               <button
+                type="button"
                 onClick={handleSendOtp}
-                disabled={sendingOtp || (cooldownRemaining > 0)}
-                className="flex items-center gap-1.5 text-primary-glow font-bold hover:brightness-125 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                disabled={loadingState.sendingOtp || (timers.cooldownRemaining > 0)}
+                className="flex items-center gap-1.5 text-[#ff0055] font-semibold hover:brightness-125 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                {sendingOtp ? (
+                {loadingState.sendingOtp ? (
                   <Loader2 size={14} className="animate-spin" />
                 ) : (
-                  <RefreshCw size={14} className={cn(cooldownRemaining > 0 && 'animate-spin')} />
+                  <RefreshCw size={14} className={cn(timers.cooldownRemaining > 0 && 'animate-spin')} />
                 )}
-                {cooldownRemaining > 0
-                  ? `Reenviar en ${cooldownRemaining}s`
+                {timers.cooldownRemaining > 0
+                  ? `Reenviar en ${timers.cooldownRemaining}s`
                   : 'Reenviar código'}
               </button>
             </div>

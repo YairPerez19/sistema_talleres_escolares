@@ -6,21 +6,41 @@ import { WeekCalendar } from '../components/WeekCalendar'
 import { TallerCard } from '../components/TallerCard'
 import { toast } from 'sonner'
 import { supabase } from '../integrations/supabase/client'
-import { useState, useEffect } from 'react'
-import { DollarSign, Clock, RefreshCw } from '@/components/AnimatedIcons'
+import { useState, useEffect, useRef } from 'react'
+import { Clock, RefreshCw } from '@/components/AnimatedIcons'
+import { DollarSign } from '@/components/icons'
+import { usePageMeta } from '../hooks/usePageMeta'
 import { cn } from '../lib/utils'
+import gsap from 'gsap'
+import { useGSAP } from '@gsap/react'
+import { BajaDialog } from '../components/BajaDialog'
 
 export const Route = createFileRoute('/dashboard')({
   component: Dashboard,
 })
 
 function Dashboard() {
+  usePageMeta({
+    title: 'Mi Panel',
+    description: 'Panel de alumno del Sistema Integral de Talleres Escolares. Consulta tus talleres inscritos, horarios y estado de cuenta.',
+    canonicalPath: '/dashboard',
+    noindex: true,
+  })
   const { user } = useAuth();
   const { talleres, loading: talleresLoading } = useTalleres();
   const { inscritosIds, refresh: refreshInscripciones } = useInscripciones(user?.id);
   const { profile, refreshProfile, setCambios } = useProfile(user?.id);
   const [actionLoading, setActionLoading] = useState(false);
   const [deuda, setDeuda] = useState(0);
+  const [bajaDialogOpen, setBajaDialogOpen] = useState(false);
+  const [bajaTarget, setBajaTarget] = useState<{ tallerId: string; nombre: string } | null>(null);
+  const sidebarRef = useRef<HTMLDivElement>(null)
+
+  useGSAP(() => {
+    if (sidebarRef.current) {
+      gsap.fromTo('.sidebar-card', { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: 0.5, stagger: 0.1, ease: 'back.out(1.4)', delay: 0.2 })
+    }
+  }, { scope: sidebarRef })
 
   useEffect(() => {
     if (user) {
@@ -36,52 +56,43 @@ function Dashboard() {
     }
   }, [user]);
 
-  const handleBaja = async (tallerId: string, nombre: string) => {
-    if (!user) return;
+  const openBajaDialog = (tallerId: string, nombre: string) => {
     const cambiosActuales = profile?.cambios_restantes ?? 3;
     if (cambiosActuales <= 0) {
       toast.error('No puedes darte de baja: has agotado tus 3 cambios permitidos.');
       return;
     }
+    setBajaTarget({ tallerId, nombre });
+    setBajaDialogOpen(true);
+  };
 
-    if (!confirm('¿Deseas darte de baja? Esto restará 1 a tus cambios permitidos.')) return;
-
-    setActionLoading(true);
-
-    // 1. Actualización optimista: quitar la luz INMEDIATAMENTE
+  const handleBaja = async (_motivo: string) => {
+    if (!user || !bajaTarget) return;
+    const cambiosActuales = profile?.cambios_restantes ?? 3;
     const nuevosCambios = Math.max(cambiosActuales - 1, 0);
+
+    setBajaDialogOpen(false);
+    setBajaTarget(null);
+    setActionLoading(true);
     setCambios(nuevosCambios);
 
-    // 2. Eliminar inscripción
-    const { error: errorBaja } = await supabase
-      .from('inscripciones')
-      .delete()
-      .match({ alumno_id: user.id, taller_id: tallerId });
+    const { data, error } = await supabase.rpc('dar_baja_taller', {
+      p_alumno_id: user.id,
+      p_taller_id: bajaTarget.tallerId,
+    });
 
-    if (errorBaja) {
-      toast.error('Error al dar de baja: ' + errorBaja.message);
-      setCambios(cambiosActuales); // revertir si falla
-      setActionLoading(false);
-      return;
-    }
-
-    // 3. Persistir en DB
-    const { error: errorUpdate } = await supabase
-      .from('profiles')
-      .update({ cambios_restantes: nuevosCambios })
-      .eq('id', user.id);
-
-    if (errorUpdate) {
-      console.error('Error al persistir cambios_restantes:', errorUpdate);
-      toast.error('Error al guardar los cambios');
+    if (error || !data || !(data as any).success) {
+      const errMsg = error?.message || (data as any)?.error || 'Error desconocido';
+      toast.error('Error al dar de baja: ' + errMsg);
       setCambios(cambiosActuales);
       setActionLoading(false);
       return;
     }
 
-    toast.success(`Dado de baja de ${nombre}. Te queda(n) ${nuevosCambios} cambio(s).`);
+    const result = data as any;
     refreshInscripciones();
     refreshProfile();
+    toast.success(`Dado de baja de ${result.taller_nombre || bajaTarget.nombre}.`);
     setActionLoading(false);
   };
 
@@ -96,37 +107,35 @@ function Dashboard() {
 
   return (
     <div className="flex flex-col pt-4 pb-20 w-full">
-      <div className="glass-card mb-10 p-4 md:p-6 rounded-[2rem] w-full max-w-[1400px] mx-auto">
+      <div className="bg-[#0a0205]/60 backdrop-blur-[24px] border border-white/[0.04] mb-10 p-4 md:p-6 rounded-[2rem] w-full max-w-[1400px] mx-auto shadow-lg shadow-black/20">
         <Header />
         <div className="pt-6">
-          <span className="text-[10px] uppercase font-black tracking-[0.2em] text-primary-glow mb-2 block">Mi Dashboard</span>
-          <h1 className="text-4xl font-extrabold text-white">Mi Horario Escolar</h1>
+          <span className="text-[10px] uppercase font-black tracking-[0.2em] text-[#ff0055]/70 mb-2 block">Mi Dashboard</span>
+          <h1 className="text-3xl md:text-4xl font-extrabold text-white">Mi Horario Escolar</h1>
         </div>
       </div>
 
       <div className="mt-8 mb-16 max-w-[1400px] mx-auto w-full grid grid-cols-1 lg:grid-cols-4 gap-8">
-        
-        {/* Información Estudiante */}
-        <div className="lg:col-span-1 space-y-6">
-          {/* Estado de Cuenta */}
-          <div className="glass-card p-6 rounded-3xl">
-            <div className="w-12 h-12 rounded-2xl bg-primary/20 flex items-center justify-center text-primary-glow mb-4">
-              <DollarSign size={24} />
+        <div ref={sidebarRef} className="lg:col-span-1 space-y-6">
+          <div className="sidebar-card glass-card p-6 rounded-3xl relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-[#ff0055]/5 to-transparent pointer-events-none" />
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#ff0055]/20 to-[#800020]/10 border border-[#ff0055]/15 flex items-center justify-center text-[#ff0055] mb-4">
+              <DollarSign size={22} />
             </div>
-            <h3 className="text-xl font-bold text-white mb-2">Estado de Cuenta</h3>
-            <div className="bg-black/40 rounded-2xl p-5 border border-white/5">
-              <p className="text-xs uppercase tracking-widest text-white/40 font-bold mb-1">Total a Pagar</p>
-              <p className="text-4xl font-black text-white">${deuda.toFixed(2)}</p>
+            <h3 className="text-lg font-bold text-white mb-3">Estado de Cuenta</h3>
+            <div className="bg-black/60 rounded-2xl p-5 border border-white/[0.04]">
+              <p className="text-[10px] uppercase tracking-widest text-white/30 font-bold mb-1">Total a Pagar</p>
+              <p className="text-3xl md:text-4xl font-extrabold text-white">${deuda.toFixed(2)}</p>
             </div>
           </div>
 
-          {/* Restricciones de Inscripción */}
-          <div className="glass-card p-6 rounded-3xl">
-            <div className="w-12 h-12 rounded-2xl bg-primary/20 flex items-center justify-center text-primary-glow mb-4">
-              <RefreshCw size={24} />
+          <div className="sidebar-card glass-card p-6 rounded-3xl relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-[#ff0055]/5 to-transparent pointer-events-none" />
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#ff0055]/20 to-[#800020]/10 border border-[#ff0055]/15 flex items-center justify-center text-[#ff0055] mb-4">
+              <RefreshCw size={22} />
             </div>
-            <h3 className="text-xl font-bold text-white mb-2">Cambios Disponibles</h3>
-            <p className="text-[10px] text-white/40 uppercase tracking-widest font-bold mb-4">Límite de 3 por ciclo</p>
+            <h3 className="text-lg font-bold text-white mb-2">Cambios Disponibles</h3>
+            <p className="text-[10px] text-white/30 uppercase tracking-widest font-bold mb-4">Límite de 3 por ciclo</p>
             
             {!profile ? (
               <div className="flex gap-2 mb-6 animate-pulse">
@@ -137,31 +146,33 @@ function Dashboard() {
                 {[1, 2, 3].map((i) => (
                   <div 
                     key={i} 
-                    className={`flex-1 h-2 rounded-full transition-all duration-500 ${i <= (profile?.cambios_restantes ?? 0) ? 'bg-primary-glow shadow-[0_0_10px_rgba(159,18,57,0.5)]' : 'bg-white/10'}`} 
+                    className={`flex-1 h-2 rounded-full transition-all duration-500 ${i <= (profile?.cambios_restantes ?? 0) ? 'bg-gradient-to-r from-[#ff0055] to-[#ff3377] shadow-[0_0_10px_rgba(255,0,85,0.3)]' : 'bg-white/[0.06]'}`} 
                   />
                 ))}
               </div>
             )}
 
-            <div className="flex items-center gap-3 text-white/70">
-              <Clock size={16} className={cn("text-primary-glow", !profile && "animate-pulse")} />
+            <div className="flex items-center gap-3 text-white/60">
+              <Clock size={16} className={cn("text-[#ff0055]", !profile && "animate-pulse")} />
               <div>
-                <p className="text-xs font-bold">
+                <p className="text-xs font-bold text-white/70">
                   {!profile ? 'Calculando...' : `${diasRestantes} días restantes`}
                 </p>
-                <p className="text-[10px] text-white/40">Para realizar cambios</p>
+                <p className="text-[10px] text-white/30">Para realizar cambios</p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Talleres List */}
         <div className="lg:col-span-3">
           <h2 className="text-2xl font-extrabold text-white mb-8">Mis Talleres Inscritos</h2>
           {misTalleres.length === 0 && !talleresLoading ? (
-            <div className="glass-card p-10 rounded-[2.5rem] text-center border-dashed border-white/10">
-              <p className="text-white/30 font-bold uppercase tracking-widest">No tienes talleres inscritos</p>
-              <p className="text-xs text-white/20 mt-2 italic">Ve al catálogo para elegir uno</p>
+            <div className="bg-white/[0.01] border border-white/[0.04] border-dashed p-12 rounded-[2.5rem] text-center">
+              <div className="w-16 h-16 rounded-2xl bg-white/[0.02] border border-white/[0.04] flex items-center justify-center mx-auto mb-4">
+                <RefreshCw size={24} className="text-white/20" />
+              </div>
+              <p className="text-white/20 font-semibold uppercase tracking-wider text-sm">No tienes talleres inscritos</p>
+              <p className="text-xs text-white/10 mt-2">Ve al catálogo para elegir uno</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
@@ -170,7 +181,7 @@ function Dashboard() {
                   key={taller.id} 
                   taller={taller}
                   inscrito={true}
-                  onBaja={() => handleBaja(taller.id, taller.nombre)}
+                  onBaja={() => openBajaDialog(taller.id, taller.nombre)}
                   loading={actionLoading}
                 />
               ))}
@@ -183,6 +194,15 @@ function Dashboard() {
         <h2 className="text-2xl font-extrabold text-white mb-8 max-w-[1400px] mx-auto px-4 md:px-0">Calendario Semanal</h2>
         <WeekCalendar talleres={misTalleres} />
       </div>
+
+      <BajaDialog
+        open={bajaDialogOpen}
+        onOpenChange={setBajaDialogOpen}
+        tallerNombre={bajaTarget?.nombre ?? ''}
+        cambiosRestantes={profile?.cambios_restantes ?? 3}
+        onConfirm={handleBaja}
+        loading={actionLoading}
+      />
     </div>
   )
 }

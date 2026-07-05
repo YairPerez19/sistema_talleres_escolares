@@ -12,12 +12,25 @@ interface VerifyIdentityParams {
   taller_id?: string;
 }
 
-interface VerifyIdentityResponse {
-  verified: boolean;
+interface VerifyIdentityResponseNeedsOtp {
+  verified: true;
+  needs_otp: true;
   email_masked: string;
   pending_token: string;
   nombre: string;
 }
+
+interface VerifyIdentityResponseSession {
+  verified: true;
+  needs_otp: false;
+  access_token: string;
+  refresh_token: string;
+  role: Role;
+  nombre: string;
+  email_masked: string;
+}
+
+type VerifyIdentityResponse = VerifyIdentityResponseNeedsOtp | VerifyIdentityResponseSession;
 
 interface SendOtpResponse {
   sent: boolean;
@@ -58,13 +71,19 @@ export async function verifyIdentity(params: VerifyIdentityParams): Promise<Veri
   return handleResponse<VerifyIdentityResponse>(res);
 }
 
-export async function registerStudent(params: Omit<VerifyIdentityParams, 'role' | 'taller_id'> & { nombre: string; turno: 'matutino' | 'vespertino' }): Promise<{ success: boolean; message: string }> {
+interface RegisterStudentResponse {
+  pending_token: string;
+  email_masked: string;
+  nombre: string;
+}
+
+export async function registerStudent(params: Omit<VerifyIdentityParams, 'role' | 'taller_id'> & { nombre: string; turno: 'matutino' | 'vespertino' }): Promise<RegisterStudentResponse> {
   const res = await fetch(`${API_URL}/auth/register-student`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(params),
   });
-  return handleResponse<{ success: boolean; message: string }>(res);
+  return handleResponse<RegisterStudentResponse>(res);
 }
 
 export async function sendOtp(pendingToken: string): Promise<SendOtpResponse> {

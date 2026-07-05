@@ -105,6 +105,90 @@ RETURNS TABLE (
   ORDER BY p.nombre;
 $$;
 
+-- Funciones de restricciones de cambios
+CREATE OR REPLACE FUNCTION public.handle_inscripcion_change()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+  IF (TG_OP = 'DELETE') THEN
+    UPDATE public.profiles
+    SET cambios_restantes = GREATEST(COALESCE(cambios_restantes, 3) - 1, 0)
+    WHERE id = OLD.alumno_id;
+  END IF;
+  RETURN NULL;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS on_inscripcion_deleted ON public.inscripciones;
+CREATE TRIGGER on_inscripcion_deleted
+  AFTER DELETE ON public.inscripciones
+  FOR EACH ROW EXECUTE PROCEDURE public.handle_inscripcion_change();
+
+CREATE OR REPLACE FUNCTION public.check_inscripcion_constraints()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  v_cambios int;
+  v_limite timestamptz;
+BEGIN
+  SELECT cambios_restantes, inscripcion_limite 
+  INTO v_cambios, v_limite
+  FROM public.profiles
+  WHERE id = NEW.alumno_id;
+
+  IF now() > v_limite THEN
+    RAISE EXCEPTION 'El periodo de inscripciones ha finalizado';
+  END IF;
+
+  IF v_cambios <= 0 THEN
+    RAISE EXCEPTION 'Has agotado tus 3 oportunidades de cambio de taller';
+  END IF;
+
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS check_inscripcion_constraints_trigger ON public.inscripciones;
+CREATE TRIGGER check_inscripcion_constraints_trigger
+  BEFORE INSERT ON public.inscripciones
+  FOR EACH ROW EXECUTE PROCEDURE public.check_inscripcion_constraints();
+
+-- RPC para dar de baja (atomico: DELETE + UPDATE cambios_restantes)
+CREATE OR REPLACE FUNCTION public.dar_baja_taller(p_alumno_id uuid, p_taller_id uuid)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  v_cambios_nuevos int;
+  v_taller_nombre text;
+BEGIN
+  SELECT nombre INTO v_taller_nombre FROM public.talleres WHERE id = p_taller_id;
+
+  DELETE FROM public.inscripciones
+  WHERE alumno_id = p_alumno_id AND taller_id = p_taller_id;
+
+  IF NOT FOUND THEN
+    RETURN jsonb_build_object('success', false, 'error', 'No se encontro la inscripcion');
+  END IF;
+
+  UPDATE public.profiles
+  SET cambios_restantes = GREATEST(COALESCE(cambios_restantes, 3) - 1, 0)
+  WHERE id = p_alumno_id
+  RETURNING cambios_restantes INTO v_cambios_nuevos;
+
+  RETURN jsonb_build_object(
+    'success', true,
+    'cambios_restantes', COALESCE(v_cambios_nuevos, 0),
+    'taller_nombre', v_taller_nombre
+  );
+END;
+$$;
+
 -- 5. SEMILLADO DE DATOS (TALLERES)
 INSERT INTO public.talleres (id, nombre, categoria, lugar, instructor, cupo) 
 VALUES 

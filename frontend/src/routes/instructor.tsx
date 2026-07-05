@@ -7,16 +7,24 @@ import { ListaAsistencia } from '../components/asistencia/ListaAsistencia'
 import { useState } from 'react'
 import { cn } from '../lib/utils'
 import type { TallerConInstructor } from '../lib/types'
+import { usePageMeta } from '../hooks/usePageMeta'
+import { Clock, Loader2 } from '@/components/AnimatedIcons'
 import {
-  Clock, MapPin, ChevronRight, ArrowLeft,
-  BookOpen, Wifi, Loader2, Info
-} from '@/components/AnimatedIcons'
+  MapPin, ChevronRight, ArrowLeft,
+  BookOpen, Wifi, Info
+} from '@/components/icons'
 
 export const Route = createFileRoute('/instructor')({
   component: InstructorDashboard,
 })
 
 function InstructorDashboard() {
+  usePageMeta({
+    title: 'Panel Instructor',
+    description: 'Panel de instructor del Sistema Integral de Talleres Escolares. Gestiona la asistencia de tus alumnos en el CBTis No. 61.',
+    canonicalPath: '/instructor',
+    noindex: true,
+  })
   const { user } = useAuth()
   const navigate = useNavigate()
   const { loading: roleLoading } = useRole(user?.id)
@@ -42,21 +50,21 @@ function InstructorDashboard() {
 
   return (
     <div className="flex flex-col pt-4 pb-20 w-full">
-      <div className="glass-card mb-8 p-4 md:p-6 rounded-[2rem] w-full max-w-[1400px] mx-auto">
+      <div className="bg-[#0a0205]/60 backdrop-blur-[24px] border border-white/[0.04] mb-8 p-4 md:p-6 rounded-[2rem] w-full max-w-[1400px] mx-auto shadow-lg shadow-black/20">
         <Header />
         <div className="pt-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
-            <span className="text-[10px] uppercase font-black tracking-[0.2em] text-primary-glow mb-2 block">
+            <span className="text-[10px] uppercase font-black tracking-[0.2em] text-[#ff0055]/70 mb-2 block">
               Panel de Control
             </span>
-            <h1 className="text-4xl font-extrabold text-white">
+            <h1 className="text-3xl md:text-4xl font-extrabold text-white">
               {selectedTaller ? selectedTaller.nombre : 'Mis Talleres'}
             </h1>
             <p className="text-white/40 text-sm mt-1 capitalize">{hoy}</p>
           </div>
 
           <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 px-4 py-2 rounded-2xl self-start">
-            <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.5)]" />
             <Wifi size={14} className="text-emerald-400" />
             <span className="text-emerald-400 text-xs font-bold">Tiempo Real</span>
           </div>
@@ -98,6 +106,7 @@ function InstructorDashboard() {
         {selectedTaller && (
           <div className="animate-in fade-in slide-in-from-right-4 duration-500">
             <button
+              type="button"
               onClick={() => setSelectedTaller(null)}
               className="flex items-center gap-2 text-white/50 hover:text-white transition-colors mb-6 text-sm font-bold"
             >
@@ -129,6 +138,7 @@ function TallerInstructorRow({
 }) {
   return (
     <button
+      type="button"
       onClick={onClick}
       className={cn(
         'glass-card rounded-2xl p-5 text-left border border-white/5 w-full',

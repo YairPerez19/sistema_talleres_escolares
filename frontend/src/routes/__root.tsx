@@ -3,9 +3,30 @@ import { AuthProvider, useAuth } from '../hooks/useAuth';
 import { Toaster } from 'sonner';
 import { useEffect, useRef } from 'react';
 import { Loader2 } from '@/components/AnimatedIcons';
+import { StructuredData } from '@/components/StructuredData';
 
 export const Route = createRootRoute({
   component: RootComponent,
+  head: () => ({
+    meta: [
+      {
+        name: 'description',
+        content: 'Sistema Integral de Talleres Escolares del CBTis No. 61. Descubre talleres culturales, cívicos y deportivos.',
+      },
+      {
+        name: 'keywords',
+        content: 'talleres escolares, CBTis 61, actividades culturales, deportes, talleres cívicos, bachillerato',
+      },
+      { name: 'robots', content: 'index, follow' },
+      { property: 'og:type', content: 'website' },
+      { property: 'og:site_name', content: 'SITE - CBTis No. 61' },
+      { property: 'og:locale', content: 'es_MX' },
+      { name: 'twitter:card', content: 'summary_large_image' },
+    ],
+    links: [
+      { rel: 'canonical', href: 'https://site-cbtis61.example.com/' },
+    ],
+  }),
 });
 
 const PUBLIC_ROUTES = ['/', '/auth', '/verify-otp'];
@@ -48,6 +69,8 @@ function RootComponent() {
   return (
     <AuthProvider>
       <AuthGuard>
+        <StructuredData type="Organization" />
+        <StructuredData type="WebSite" />
         <div className="min-h-screen flex flex-col bg-background text-foreground selection:bg-primary-glow selection:text-white">
           <main className={
             isAuthPage 
