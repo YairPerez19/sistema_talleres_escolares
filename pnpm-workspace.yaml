@@ -1,5 +1,6 @@
 packages:
   - "frontend"
-  - "backend"
+  - "backend/api"
 allowBuilds:
   esbuild: true
+  unrs-resolver: true

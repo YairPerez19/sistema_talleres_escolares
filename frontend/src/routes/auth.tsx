@@ -10,9 +10,9 @@ import { verifyIdentity, registerStudent, getRedirectPath } from '../services/au
 import { toast } from 'sonner'
 import type { Role } from '../services/authService'
 import { usePageMeta } from '../hooks/usePageMeta'
-import { RoleSelectionScreen } from './RoleSelectionScreen'
-import { AuthForm } from './AuthForm'
-import type { AuthFormProps } from './AuthForm'
+import { RoleSelectionScreen } from './-RoleSelectionScreen'
+import { AuthForm } from './-AuthForm'
+import type { AuthFormProps } from './-AuthForm'
 
 export const Route = createFileRoute('/auth')({
   component: LoginPage,

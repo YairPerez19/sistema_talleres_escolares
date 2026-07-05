@@ -11,8 +11,8 @@ import { useState, useEffect, useRef } from 'react'
 import { useGSAP } from '@gsap/react'
 import gsap from 'gsap'
 import { usePageMeta } from '../hooks/usePageMeta'
-import { HeroSection } from './HeroSection'
-import { QuizBot } from './QuizBot'
+import { HeroSection } from './-HeroSection'
+import { QuizBot } from './-QuizBot'
 
 export const Route = createFileRoute('/')({
   component: LandingPage,
