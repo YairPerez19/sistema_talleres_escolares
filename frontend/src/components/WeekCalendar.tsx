@@ -24,7 +24,7 @@ function renderBlock(h: Horario & { taller: Taller }) {
   return (
     <div 
       key={`${h.id}-${h.dia}`}
-      className="absolute left-1 right-1 rounded-xl p-2.5 shadow-2xl flex flex-col justify-center bg-gradient-to-r from-[#ff0055]/90 to-[#ff3377]/90 border border-white/10 z-10 transition-all hover:scale-[1.03] hover:z-20 group cursor-default"
+      className="absolute left-1 right-1 rounded-xl p-2.5 shadow-2xl flex flex-col justify-center bg-gradient-to-r from-[#8B1A32]/90 to-[#B8354D]/90 border border-white/10 z-10 transition-all hover:scale-[1.03] hover:z-20 group cursor-default"
       style={{ top, height }}
     >
       <span className="text-white font-black text-[10px] leading-tight mb-0.5 truncate">{h.taller.nombre}</span>
@@ -46,12 +46,12 @@ export function WeekCalendar({ talleres }: WeekCalendarProps) {
         <div>
           <h2 className="text-3xl font-extrabold text-white mb-2 leading-none">Horario semanal</h2>
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-[#ff0055] animate-pulse shadow-[0_0_8px_rgba(255,0,85,0.5)]" />
+            <div className="w-2 h-2 rounded-full bg-[#8B1A32] animate-pulse shadow-[0_0_8px_rgba(139,26,50,0.5)]" />
             <p className="text-[10px] font-bold text-white/25 uppercase tracking-[0.2em]">{talleres.length} {talleres.length === 1 ? 'taller activo' : 'talleres activos'}</p>
           </div>
         </div>
-        <Link to="/catalogo" className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-white/[0.03] border border-white/[0.06] text-[11px] font-semibold text-white/60 uppercase tracking-wider hover:text-white hover:bg-white/[0.06] hover:border-[#ff0055]/20 transition-all duration-300 group">
-          <Plus size={16} className="text-[#ff0055] transition-transform group-hover:rotate-90 duration-300" /> Inscribirme a otro taller
+        <Link to="/catalogo" className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-white/[0.03] border border-white/[0.06] text-[11px] font-semibold text-white/60 uppercase tracking-wider hover:text-white hover:bg-white/[0.06] hover:border-[#8B1A32]/20 transition-all duration-300 group">
+          <Plus size={16} className="text-[#8B1A32] transition-transform group-hover:rotate-90 duration-300" /> Inscribirme a otro taller
         </Link>
       </div>
 

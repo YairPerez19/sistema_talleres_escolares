@@ -9,5 +9,8 @@
     "dev:frontend": "pnpm --filter frontend dev",
     "dev:backend": "pnpm --filter backend dev",
     "doctor": "npx react-doctor@latest"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["@scarf/scarf"]
   }
 }

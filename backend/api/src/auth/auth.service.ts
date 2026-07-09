@@ -39,7 +39,7 @@ export class AuthService {
   }
 
   async verifyIdentity(dto: VerifyIdentityDto) {
-    const { email, password, role } = dto;
+    const { email, password } = dto;
 
     const { data: authData, error: authError } = await this.supabaseAnon.auth.signInWithPassword({
       email,
@@ -48,20 +48,36 @@ export class AuthService {
 
     if (authError || !authData.user) {
       if (authError?.message?.toLowerCase().includes('not confirmed')) {
-        return await this.handleUnconfirmedLogin(email, role, dto);
+        return await this.handleUnconfirmedLogin(dto);
       }
       throw new UnauthorizedException('Credenciales inválidas.');
     }
 
     const userId = authData.user.id;
+    const { nombre } = await this.validateCredentials(userId, dto);
 
+    return {
+      verified: true,
+      needs_otp: false,
+      access_token: authData.session.access_token,
+      refresh_token: authData.session.refresh_token,
+      role: dto.role,
+      nombre,
+      email_masked: email.replace(/(?<=.).(?=[^@]*?.@)/g, '*'),
+    };
+  }
+
+  private async validateCredentials(
+    userId: string,
+    dto: VerifyIdentityDto,
+  ): Promise<{ nombre: string }> {
     const { data: roleData } = await this.supabaseAdmin
       .from('user_roles')
       .select('role')
       .eq('user_id', userId)
       .single();
 
-    if (!roleData || roleData.role !== role) {
+    if (!roleData || roleData.role !== dto.role) {
       throw new UnauthorizedException('Credenciales inválidas.');
     }
 
@@ -75,17 +91,17 @@ export class AuthService {
       throw new UnauthorizedException('Credenciales inválidas.');
     }
 
-    if (role === 'student' || role === 'instructor') {
-      if (profile.matricula !== (dto as any).matricula) {
+    if (dto.role === 'student' || dto.role === 'instructor') {
+      if (profile.matricula !== dto.matricula) {
         throw new UnauthorizedException('Credenciales inválidas.');
       }
     }
 
-    if (role === 'instructor') {
+    if (dto.role === 'instructor') {
       const { data: taller } = await this.supabaseAdmin
         .from('talleres')
         .select('id')
-        .eq('id', (dto as any).taller_id)
+        .eq('id', dto.taller_id)
         .eq('instructor_id', userId)
         .single();
 
@@ -94,22 +110,12 @@ export class AuthService {
       }
     }
 
-    return {
-      verified: true,
-      needs_otp: false,
-      access_token: authData.session.access_token,
-      refresh_token: authData.session.refresh_token,
-      role,
-      nombre: profile.nombre,
-      email_masked: email.replace(/(?<=.).(?=[^@]*?.@)/g, '*'),
-    };
+    return { nombre: profile.nombre };
   }
 
-  private async handleUnconfirmedLogin(
-    email: string,
-    role: string,
-    dto: VerifyIdentityDto,
-  ) {
+  private async handleUnconfirmedLogin(dto: VerifyIdentityDto) {
+    const { email } = dto;
+
     const { data: authUser, error: authUserError } = await this.supabaseAdmin
       .schema('auth')
       .from('users')
@@ -122,48 +128,10 @@ export class AuthService {
     }
 
     const userId = authUser.id;
-
-    const { data: roleData } = await this.supabaseAdmin
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', userId)
-      .single();
-
-    if (!roleData || roleData.role !== role) {
-      throw new UnauthorizedException('Credenciales inválidas.');
-    }
-
-    const { data: profile } = await this.supabaseAdmin
-      .from('profiles')
-      .select('nombre, matricula')
-      .eq('id', userId)
-      .single();
-
-    if (!profile) {
-      throw new UnauthorizedException('Credenciales inválidas.');
-    }
-
-    if (role === 'student' || role === 'instructor') {
-      if (profile.matricula !== (dto as any).matricula) {
-        throw new UnauthorizedException('Credenciales inválidas.');
-      }
-    }
-
-    if (role === 'instructor') {
-      const { data: taller } = await this.supabaseAdmin
-        .from('talleres')
-        .select('id')
-        .eq('id', (dto as any).taller_id)
-        .eq('instructor_id', userId)
-        .single();
-
-      if (!taller) {
-        throw new UnauthorizedException('Credenciales inválidas.');
-      }
-    }
+    const { nombre } = await this.validateCredentials(userId, dto);
 
     const pendingToken = jwt.sign(
-      { user_id: userId, email, role } satisfies PendingTokenPayload,
+      { user_id: userId, email, role: dto.role } satisfies PendingTokenPayload,
       this.jwtSecret,
       { expiresIn: '10m' },
     );
@@ -173,7 +141,7 @@ export class AuthService {
       needs_otp: true,
       email_masked: email.replace(/(?<=.).(?=[^@]*?.@)/g, '*'),
       pending_token: pendingToken,
-      nombre: profile.nombre,
+      nombre,
     };
   }
 
@@ -278,7 +246,7 @@ export class AuthService {
 
     await this.emailService.sendOtpEmail(payload.email, otpCode, profile?.nombre ?? 'Usuario');
 
-    this.logger.log(`OTP enviado a ${payload.email}: ${otpCode}`);
+    this.logger.debug(`OTP enviado a ${payload.email}`);
 
     return { sent: true, cooldown_until: new Date(Date.now() + 60000).toISOString() };
   }

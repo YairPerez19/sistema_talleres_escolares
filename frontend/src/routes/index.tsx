@@ -1,395 +1,514 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { RefreshCw } from '@/components/AnimatedIcons'
-import {
-  ArrowRight, Dumbbell, Trophy,
-  Heart, Zap, Target, Shield, Activity, Footprints,
-  Swords, Users, X,
-  Bot, Theater, Music, Mic, Music2, Mic2, Palette, Camera,
-  PenTool, Flag, FlagTriangleRight, Hand
-} from '@/components/icons'
-import { useState, useEffect, useRef } from 'react'
+import { useRef, useState } from 'react'
 import { useGSAP } from '@gsap/react'
 import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { usePageMeta } from '../hooks/usePageMeta'
 import { HeroSection } from './-HeroSection'
-import { QuizBot } from './-QuizBot'
+import { ArrowUpRight, CheckCircle2, Shield, Users, Plus, Twitter, Instagram, Facebook, Menu, X } from 'lucide-react'
+
+gsap.registerPlugin(ScrollTrigger)
 
 export const Route = createFileRoute('/')({
   component: LandingPage,
 })
 
-const quotes = [
-  {
-    id: 'kahlo',
-    category: 'Cultural',
-    text: 'El arte es la expresión de los más profundos pensamientos por el camino más sencillo. Cada trazo, cada color, cada forma tiene una historia que contar.',
-    author: 'Frida Kahlo',
-    sport: 'Pintura / Artes Plásticas',
-    gradient: 'from-violet-600/30 to-indigo-600/10',
-    accent: 'border-violet-500/30',
-  },
-  {
-    id: 'vicente',
-    category: 'Musical',
-    text: 'La música es el lenguaje universal que todos podemos entender. Donde las palabras fallan, la música habla.',
-    author: 'Vicente Fernández',
-    sport: 'Música / Canción / Rondalla',
-    gradient: 'from-emerald-600/30 to-teal-600/10',
-    accent: 'border-emerald-500/30',
-  },
-  {
-    id: 'kasparov',
-    category: 'Cultural',
-    text: 'El ajedrez es como la vida misma: cada movimiento cuenta, cada decisión importa. La paciencia y la estrategia son las claves.',
-    author: 'Garry Kasparov',
-    sport: 'Ajedrez',
-    gradient: 'from-slate-600/30 to-gray-600/10',
-    accent: 'border-slate-500/30',
-  },
-  {
-    id: 'jordan',
-    category: 'Deportes',
-    text: 'He fallado una y otra vez a lo largo de mi vida. Y es por eso que he tenido éxito. El talento gana partidos, pero el trabajo en equipo gana campeonatos.',
-    author: 'Michael Jordan',
-    sport: 'Baloncesto / Basquetbol',
-    gradient: 'from-orange-600/30 to-red-600/10',
-    accent: 'border-orange-500/30',
-  },
-  {
-    id: 'pele',
-    category: 'Deportes',
-    text: 'El éxito no es la clave de la felicidad. La felicidad es la clave del éxito. Si amas lo que haces, tendrás éxito.',
-    author: 'Pelé',
-    sport: 'Fútbol',
-    gradient: 'from-green-600/30 to-emerald-600/10',
-    accent: 'border-green-500/30',
-  },
-  {
-    id: 'shakespeare',
-    category: 'Cultural',
-    text: 'El teatro es el arte de mirar el alma humana. En el escenario, cada emoción se vuelve real, cada historia cobra vida.',
-    author: 'William Shakespeare',
-    sport: 'Teatro / Actuación',
-    gradient: 'from-rose-600/30 to-pink-600/10',
-    accent: 'border-rose-500/30',
-  },
-]
-
-const categoriaTalleres = [
-  {
-    categoria: 'Difusión Cultural',
-    emoji: '🎭',
-    color: 'from-violet-500 to-purple-600',
-    bg: 'bg-violet-500/10',
-    border: 'border-violet-500/20',
-    text: 'text-violet-400',
-    glow: 'rgba(139, 92, 246, 0.15)',
-    items: [
-      { icon: <Theater className="w-5 h-5" />, title: 'Teatro', desc: 'Actuación, expresión y creación escénica.', color: '#8B5CF6' },
-      { icon: <Music className="w-5 h-5" />, title: 'Danza', desc: 'Ritmo, movimiento y expresión corporal.', color: '#EC4899' },
-      { icon: <Swords className="w-5 h-5" />, title: 'Ajedrez', desc: 'Estrategia, paciencia y mente fría.', color: '#6B7280' },
-      { icon: <Mic className="w-5 h-5" />, title: 'Oratoria', desc: 'El arte de hablar con elocuencia.', color: '#14B8A6' },
-      { icon: <Music2 className="w-5 h-5" />, title: 'Rondalla', desc: 'Música tradicional en conjunto.', color: '#F59E0B' },
-      { icon: <Mic2 className="w-5 h-5" />, title: 'Canción', desc: 'Voz, interpretación y sentimiento.', color: '#EF4444' },
-      { icon: <Palette className="w-5 h-5" />, title: 'Dibujo', desc: 'Trazo, creatividad y composición visual.', color: '#3B82F6' },
-      { icon: <Camera className="w-5 h-5" />, title: 'Fotografía', desc: 'Captura momentos que cuentan historias.', color: '#10B981' },
-      { icon: <PenTool className="w-5 h-5" />, title: 'Artesanías', desc: 'Creación manual con identidad cultural.', color: '#D97706' },
-    ],
-  },
-  {
-    categoria: 'Actividades Cívicas',
-    emoji: '🇲🇽',
-    color: 'from-amber-400 to-orange-500',
-    bg: 'bg-amber-500/10',
-    border: 'border-amber-500/20',
-    text: 'text-amber-400',
-    glow: 'rgba(245, 158, 11, 0.15)',
-    items: [
-      { icon: <Shield className="w-5 h-5" />, title: 'Banda de Guerra', desc: 'Disciplina, ritmo y tradición militar.', color: '#DC2626' },
-      { icon: <Flag className="w-5 h-5" />, title: 'Escolta', desc: 'Honor, respeto y compromiso cívico.', color: '#F97316' },
-      { icon: <FlagTriangleRight className="w-5 h-5" />, title: 'Banderas', desc: 'Protocolo y amor por la patria.', color: '#EAB308' },
-    ],
-  },
-  {
-    categoria: 'Promoción Deportiva',
-    emoji: '⚽',
-    color: 'from-emerald-400 to-green-500',
-    bg: 'bg-emerald-500/10',
-    border: 'border-emerald-500/20',
-    text: 'text-emerald-400',
-    glow: 'rgba(52, 211, 153, 0.15)',
-    items: [
-      { icon: <Dumbbell className="w-5 h-5" />, title: 'Fútbol', desc: 'Técnica, táctica y trabajo en equipo.', color: '#22C55E' },
-      { icon: <Activity className="w-5 h-5" />, title: 'Basquetbol', desc: 'Velocidad, precisión y coordinación.', color: '#F97316' },
-      { icon: <Zap className="w-5 h-5" />, title: 'Atletismo', desc: 'Supera tus marcas en pista y campo.', color: '#06B6D4' },
-      { icon: <Target className="w-5 h-5" />, title: 'Voleibol', desc: 'Reflejos, salto y comunicación.', color: '#EAB308' },
-      { icon: <Hand className="w-5 h-5" />, title: 'Handball', desc: 'Agilidad, fuerza y estrategia rápida.', color: '#A855F7' },
-      { icon: <Footprints className="w-5 h-5" />, title: 'Taekwondo', desc: 'Arte marcial, disciplina y respeto.', color: '#EC4899' },
-      { icon: <Heart className="w-5 h-5" />, title: 'Baile', desc: 'Ritmo, expresión y energía positiva.', color: '#F43F5E' },
-    ],
-  },
-]
-
 const features = [
-  { icon: <Users className="w-5 h-5" />, title: 'Instructores Capacitados', desc: 'Profesores expertos en cada disciplina, apasionados por enseñar y guiar tu desarrollo.' },
-  { icon: <Shield className="w-5 h-5" />, title: 'Instalaciones de Calidad', desc: 'Aulas, talleres, canchas y gimnasio equipados para tu máximo desempeño.' },
-  { icon: <Trophy className="w-5 h-5" />, title: 'Eventos y Competencias', desc: 'Participa en muestras culturales, cívicas y torneos deportivos interescolares.' },
-  { icon: <Heart className="w-5 h-5" />, title: 'Formación Integral', desc: 'Desarrolla habilidades artísticas, cívicas y deportivas que te acompañarán toda la vida.' },
+  {
+    title: 'Inscripción a Talleres',
+    image: '/feature_students.png',
+    footerLeft: 'Alumnos',
+    footerRight: 'Eligen taller',
+  },
+  {
+    title: 'Control de Asistencia',
+    image: '/feature_keyboard.png',
+    footerLeft: 'Instructores',
+    footerRight: 'Marcan lista',
+  },
+  {
+    title: 'Reportes de Talleres',
+    image: '/feature_sync.png',
+    footerLeft: 'Admin',
+    footerRight: 'Supervisa',
+  },
+]
+
+const stats = [
+  { value: '1,200+', label: 'Alumnos Activos', icon: <Users className="w-4 h-4 text-[#a85563]" />, iconBg: 'bg-[#722F37]/30' },
+  { value: '45', label: 'Talleres Disponibles', icon: <svg className="w-4 h-4 text-[#a85563]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>, iconBg: 'bg-[#722F37]/30' },
+  { value: '98%', label: 'Asistencia Registrada', icon: <CheckCircle2 className="w-4 h-4 text-[#a85563]" />, iconBg: 'bg-[#722F37]/30' },
+]
+
+const team = [
+  {
+    name: 'Admin Jefe',
+    role: 'Líder de Proyecto',
+    desc: 'Supervisión general de la plataforma y estrategia.',
+    image: '/team-1.png',
+  },
+  {
+    name: 'Instructor',
+    role: 'Coordinador Académico',
+    desc: 'Asegurando la calidad en cada taller gestionado.',
+    image: '/team-2.png',
+  },
+  {
+    name: 'Desarrollador Lead',
+    role: 'Tech Architect',
+    desc: 'Manteniendo el sistema a la vanguardia tecnológica.',
+    image: '/team-3.png',
+  },
+]
+
+const testimonials = [
+  {
+    quote: 'Inscribirme a mis talleres ahora es increíblemente rápido y fácil.',
+    name: 'Carlos M.',
+    role: 'Alumno',
+    image: '/avatar-carlos.png'
+  },
+  {
+    quote: 'La asistencia ahora se marca en segundos, adiós a las hojas de papel.',
+    name: 'Laura R.',
+    role: 'Instructora',
+    image: '/avatar-laura.png'
+  },
+  {
+    quote: 'La visibilidad que obtengo con los reportes en tiempo real es incomparable.',
+    name: 'Director P.',
+    role: 'Administrador',
+    image: '/avatar-director.png'
+  },
+  {
+    quote: 'Me encanta poder ver mis calificaciones y asistencia en un solo lugar.',
+    name: 'Sofía G.',
+    role: 'Alumna',
+    image: '/avatar-sofia.png'
+  },
+  {
+    quote: 'Administrar mis talleres nunca fue tan fácil y organizado.',
+    name: 'Juan A.',
+    role: 'Instructor',
+    image: '/avatar-juan.png'
+  }
+]
+
+const faqs = [
+  {
+    q: '¿Cómo ingreso por primera vez?',
+    a: 'Puedes iniciar sesión solicitando un código OTP enviado a tu correo o teléfono registrado.'
+  },
+  {
+    q: '¿Puedo cambiar de taller?',
+    a: 'Sí, durante las dos primeras semanas del semestre si hay disponibilidad de cupo en el otro taller.'
+  }
 ]
 
 function LandingPage() {
-  const [currentQuote, setCurrentQuote] = useState(0)
-  const [botOpen, setBotOpen] = useState(false)
-  const heroRef = useRef<HTMLDivElement>(null)
-  const statsRef = useRef<HTMLDivElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [openFaq, setOpenFaq] = useState<number | null>(null)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   usePageMeta({
     title: 'Inicio',
-    description: 'Sistema Integral de Talleres Escolares del CBTis No. 61. Descubre talleres culturales, cívicos y deportivos. Inscríbete y desarrolla tu talento.',
+    description: 'Sistema Integral de Talleres Escolares del CBTis No. 61.',
     canonicalPath: '/',
   })
 
   useGSAP(() => {
-    if (heroRef.current) {
-      gsap.fromTo('.hero-reveal', { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.8, stagger: 0.15, ease: 'power3.out', delay: 0.3 })
-    }
-    if (statsRef.current) {
-      gsap.fromTo('.stat-item', { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.5, stagger: 0.1, ease: 'back.out(1.7)', scrollTrigger: { trigger: statsRef.current, start: 'top 85%' } })
-    }
-  }, { scope: heroRef })
+    // Hero animations
+    gsap.fromTo('.hero-reveal', 
+      { opacity: 0, y: 30 }, 
+      { opacity: 1, y: 0, duration: 0.8, stagger: 0.15, ease: 'power3.out', delay: 0.2 }
+    )
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentQuote(prev => (prev + 1) % quotes.length)
-    }, 6000)
-    return () => clearInterval(interval)
-  }, [])
+    // Sections fade up
+    gsap.utils.toArray('.fade-up-section').forEach((section: any) => {
+      gsap.fromTo(section,
+        { opacity: 0, y: 50 },
+        { 
+          opacity: 1, 
+          y: 0, 
+          duration: 0.8, 
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: section,
+            start: 'top 80%',
+          }
+        }
+      )
+    })
+  }, { scope: containerRef })
 
   return (
-    <div className="flex flex-col overflow-x-hidden max-w-[1400px] mx-auto min-h-screen">
+    <div ref={containerRef} className="flex flex-col overflow-x-hidden min-h-screen bg-black">
       {/* === NAVBAR === */}
-      <nav className="fixed top-4 left-0 right-0 z-50 px-4 md:px-8 w-full max-w-[1480px] mx-auto">
-        <div className="mx-auto bg-[#050102]/85 backdrop-blur-xl border border-white/[0.08] rounded-[2rem] px-6 py-3.5 flex items-center justify-between shadow-[0_8px_40px_rgba(0,0,0,0.6)] shadow-[#ff0055]/5">
-          <Link to="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#ff0055]/20 to-[#800020]/20 border border-[#ff0055]/20 flex items-center justify-center group-hover:shadow-[0_0_20px_rgba(255,0,85,0.3)] transition-all duration-500">
-              <Trophy className="w-5 h-5 text-[#ff0055]" />
-            </div>
-            <div>
-              <p className="font-bold text-[16px] text-white leading-none tracking-tight">SITE</p>
-              <p className="text-[9px] text-white/40 font-semibold tracking-[0.15em]">CBTIS 61</p>
-            </div>
+      <nav className="fixed top-0 left-0 right-0 z-50 px-4 md:px-6 py-4 bg-black/50 backdrop-blur-md border-b border-white/5">
+        <div className="max-w-[1400px] mx-auto flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-2">
+            <span className="font-bold text-lg text-white tracking-tight">SITE</span>
           </Link>
 
-          <div className="flex items-center gap-3">
-            <Link to="/catalogo" className="hidden sm:flex px-5 py-2.5 rounded-xl text-[13px] font-semibold border border-white/10 text-white/70 hover:text-white hover:border-[#ff0055]/30 hover:bg-[#ff0055]/10 transition-all duration-300">
-              Catálogo
-            </Link>
-            <Link to="/auth" className="px-5 py-2.5 rounded-xl text-[13px] font-bold bg-gradient-to-r from-[#ff0055] to-[#ff3377] text-white hover:shadow-[0_8px_25px_rgba(255,0,85,0.4)] hover:scale-105 transition-all duration-300">
-              Entrar
-            </Link>
+          <div className="hidden lg:flex items-center gap-8 text-[13px] font-medium text-white/60">
+            <Link to="/" className="text-white">Inicio</Link>
+            <a href="#funciones" className="hover:text-white transition-colors">Funciones</a>
+            <a href="#estadisticas" className="hover:text-white transition-colors">Estadísticas</a>
+            <a href="#about" className="hover:text-white transition-colors">Nosotros</a>
+            <a href="#team" className="hover:text-white transition-colors">Equipo</a>
+            <a href="#testimonials" className="hover:text-white transition-colors">Testimonios</a>
           </div>
+
+          <Link to="/auth" className="hidden sm:block px-5 py-2.5 rounded-full text-[13px] font-semibold bg-gradient-to-r from-[#a85563] to-[#722F37] text-white hover:opacity-90 transition-opacity">
+            Inicio de sesión
+          </Link>
+
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="lg:hidden w-10 h-10 rounded-full bg-white/10 flex items-center justify-center"
+          >
+            {mobileMenuOpen ? (
+              <X className="w-5 h-5 text-white" />
+            ) : (
+              <Menu className="w-5 h-5 text-white" />
+            )}
+          </button>
         </div>
+
+        {mobileMenuOpen && (
+          <div className="lg:hidden absolute top-full left-0 right-0 bg-black/95 backdrop-blur-md border-b border-white/10 py-6 px-4">
+            <div className="flex flex-col gap-4">
+              <Link to="/" onClick={() => setMobileMenuOpen(false)} className="text-white text-lg font-medium py-2">Inicio</Link>
+              <a href="#funciones" onClick={() => setMobileMenuOpen(false)} className="text-white/70 hover:text-white text-lg font-medium py-2 transition-colors">Funciones</a>
+              <a href="#estadisticas" onClick={() => setMobileMenuOpen(false)} className="text-white/70 hover:text-white text-lg font-medium py-2 transition-colors">Estadísticas</a>
+              <a href="#about" onClick={() => setMobileMenuOpen(false)} className="text-white/70 hover:text-white text-lg font-medium py-2 transition-colors">Nosotros</a>
+              <a href="#team" onClick={() => setMobileMenuOpen(false)} className="text-white/70 hover:text-white text-lg font-medium py-2 transition-colors">Equipo</a>
+              <a href="#testimonials" onClick={() => setMobileMenuOpen(false)} className="text-white/70 hover:text-white text-lg font-medium py-2 transition-colors">Testimonios</a>
+              <Link to="/auth" onClick={() => setMobileMenuOpen(false)} className="sm:hidden mt-2 px-5 py-3 rounded-full text-[15px] font-semibold bg-gradient-to-r from-[#a85563] to-[#722F37] text-white text-center">
+                Inicio de sesión
+              </Link>
+            </div>
+          </div>
+        )}
       </nav>
 
-      <HeroSection heroRef={heroRef} />
+      <HeroSection heroRef={null} />
 
-      {/* === STATS === */}
-      <section ref={statsRef} className="mt-10 grid grid-cols-2 md:grid-cols-4 gap-3 relative z-10">
-        {[
-          { value: '20+', label: 'Talleres Disponibles' },
-          { value: '1,000+', label: 'Alumnos Activos' },
-          { value: '3', label: 'Áreas de Formación' },
-          { value: '97%', label: 'Participación' },
-        ].map((s) => (
-          <div key={s.label} className="stat-item glass-card p-6 text-center group rounded-2xl">
-            <p className="text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[#ff0055] to-[#ff3377] group-hover:scale-110 transition-transform duration-300">
-              {s.value}
-            </p>
-            <p className="text-[11px] text-white/40 font-semibold tracking-wider uppercase mt-1">{s.label}</p>
+      {/* === FUNCIONALIDADES === */}
+      <section id="funciones" className="fade-up-section mt-12 sm:mt-16 px-4 sm:px-6 max-w-[1200px] mx-auto w-full">
+        <div className="text-center mb-10 sm:mb-16">
+          <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-full bg-white/[0.03] border border-white/10 mb-4 sm:mb-6">
+            <span className="text-[10px] sm:text-[11px] font-medium text-white/60">Funcionalidades Clave</span>
           </div>
-        ))}
-      </section>
-
-      {/* === QUOTES CAROUSEL === */}
-      <section className="mt-16 relative z-10">
-        <hr className="section-divider mb-12" />
-        <div className="text-center mb-4">
-          <span className="text-[11px] font-bold tracking-[0.25em] uppercase text-[#ff0055]/70">Inspiración</span>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-3 sm:mb-4">
+            Potencia tu{' '}
+            <span className="text-[#722F37]">Experiencia</span>
+          </h2>
+          <p className="text-white/60 text-sm sm:text-base px-2">Herramientas diseñadas para facilitar cada proceso del ciclo de vida de un taller escolar.</p>
         </div>
-        <h2 className="text-3xl md:text-4xl font-extrabold text-center text-white mb-8">Voces que inspiran</h2>
-        <div className="relative overflow-hidden rounded-[3rem] bg-white/[0.01] border border-white/[0.04] p-1">
-          {quotes.map((q, i) => (
-            <div
-              key={q.id}
-              className={`transition-all duration-700 ${i === currentQuote ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 absolute inset-0'}`}
-              style={{ display: i === currentQuote ? 'block' : 'none' }}
-            >
-              <div className={`p-8 md:p-12 rounded-[2.5rem] bg-gradient-to-br ${q.gradient}`}>
-                <div className={`inline-block px-3 py-1 rounded-full border ${q.accent} bg-white/[0.02] text-[10px] font-bold tracking-widest uppercase text-white/60 mb-6`}>
-                  {q.category}
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          {features.map((f, i) => (
+            <div key={i} className="bg-[#0f0f11] rounded-[1.5rem] sm:rounded-[2rem] p-3 sm:p-4 flex flex-col h-[350px] sm:h-[400px] group border border-white/5 relative overflow-hidden">
+              <div className="w-full h-[60%] sm:h-[65%] rounded-xl sm:rounded-2xl overflow-hidden bg-white/5 mb-4 sm:mb-6 relative">
+                <img src={f.image} alt={f.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                <div className="absolute top-3 sm:top-4 right-3 sm:right-4 w-7 sm:w-8 h-7 sm:h-8 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center">
+                  <ArrowUpRight className="w-3 sm:w-4 h-3 sm:h-4 text-white" />
                 </div>
-                <blockquote className="text-xl md:text-2xl lg:text-3xl font-medium text-white/90 leading-relaxed mb-6 italic">
-                  "{q.text}"
-                </blockquote>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#ff0055]/30 to-[#800020]/30 flex items-center justify-center text-lg font-bold text-white">
-                    {q.author.charAt(0)}
-                  </div>
-                  <div>
-                    <p className="font-bold text-white text-sm">{q.author}</p>
-                    <p className="text-[11px] text-white/40 font-medium">{q.sport}</p>
-                  </div>
+              </div>
+              <div className="px-1 sm:px-2">
+                <h3 className="text-base sm:text-lg font-bold text-white mb-auto">{f.title}</h3>
+                <div className="flex justify-between items-center mt-4 sm:mt-6">
+                  <span className="text-[10px] sm:text-[11px] font-medium text-white/40">{f.footerLeft}</span>
+                  <span className="text-[10px] sm:text-[11px] font-medium text-white/40">{f.footerRight}</span>
                 </div>
               </div>
             </div>
           ))}
-          <div className="flex justify-center gap-2 mt-4 pb-2">
-            {quotes.map((q, i) => (
-              <button
-                type="button"
-                key={q.id}
-                aria-label={`Ir a la frase ${i + 1}`}
-                onClick={() => setCurrentQuote(i)}
-                className={`w-2 h-2 rounded-full transition-all duration-300 ${i === currentQuote ? 'bg-[#ff0055] w-6' : 'bg-white/20 hover:bg-white/40'}`}
-              />
-            ))}
+        </div>
+      </section>
+
+      {/* === PLATAFORMA === */}
+      <section id="about" className="fade-up-section mt-20 sm:mt-28 md:mt-40 px-4 sm:px-6 max-w-[1200px] mx-auto w-full">
+        <div className="text-center mb-10 sm:mb-16">
+          <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-full bg-white/[0.03] border border-white/10 mb-4 sm:mb-6">
+            <span className="text-[10px] sm:text-[11px] font-medium text-white/60">Nuestra Plataforma</span>
+          </div>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-3 sm:mb-4 leading-tight">
+            Una Solución Integral para{' '}
+            <span className="text-[#722F37]">CBTis No 61</span>
+          </h2>
+          <p className="text-white/60 max-w-2xl mx-auto text-sm sm:text-base px-2">SITE ha sido desarrollado para optimizar la organización escolar, permitiendo a todos los actores del ecosistema educativo enfocarse en lo que realmente importa.</p>
+        </div>
+
+        <div className="flex flex-col lg:flex-row gap-4 sm:gap-6">
+          <div className="lg:w-[40%] bg-[#0f0f11] rounded-[1.5rem] sm:rounded-[2rem] p-6 sm:p-8 flex flex-col justify-center border border-white/5">
+            <div className="flex flex-col gap-6 sm:gap-10">
+              <div className="flex items-start gap-3 sm:gap-4">
+                <div className="w-9 sm:w-10 h-9 sm:h-10 rounded-full bg-[#722F37]/20 flex items-center justify-center shrink-0 mt-1">
+                  <Users className="w-4 sm:w-5 h-4 sm:h-5 text-[#a85563]" />
+                </div>
+                <div>
+                  <h4 className="text-sm sm:text-base font-bold text-white mb-1 sm:mb-2">Gestión Basada en Roles</h4>
+                  <p className="text-xs sm:text-sm text-white/50 leading-relaxed">Acceso diferenciado para alumnos, instructores y administradores.</p>
+                </div>
+              </div>
+
+              <div className="w-full h-px bg-white/5" />
+
+              <div className="flex items-start gap-3 sm:gap-4">
+                <div className="w-9 sm:w-10 h-9 sm:h-10 rounded-full bg-[#722F37]/20 flex items-center justify-center shrink-0 mt-1">
+                  <svg className="w-4 sm:w-5 h-4 sm:h-5 text-[#a85563]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                </div>
+                <div>
+                  <h4 className="text-sm sm:text-base font-bold text-white mb-1 sm:mb-2">Seguimiento en Tiempo Real</h4>
+                  <p className="text-xs sm:text-sm text-white/50 leading-relaxed">Monitoreo constante de asistencia y desempeño académico.</p>
+                </div>
+              </div>
+
+              <div className="w-full h-px bg-white/5" />
+
+              <div className="flex items-start gap-3 sm:gap-4">
+                <div className="w-9 sm:w-10 h-9 sm:h-10 rounded-full bg-[#722F37]/20 flex items-center justify-center shrink-0 mt-1">
+                  <Shield className="w-4 sm:w-5 h-4 sm:h-5 text-[#a85563]" />
+                </div>
+                <div>
+                  <h4 className="text-sm sm:text-base font-bold text-white mb-1 sm:mb-2">Seguridad Avanzada</h4>
+                  <p className="text-xs sm:text-sm text-white/50 leading-relaxed">Autenticación OTP para proteger toda la información escolar.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="lg:w-[60%] bg-[#0f0f11] rounded-[1.5rem] sm:rounded-[2rem] border border-white/5 overflow-hidden h-[250px] sm:h-[350px] md:h-[500px]">
+            <img src="/platform_tablet.png" alt="Tablet showing education apps" className="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity duration-500" />
           </div>
         </div>
       </section>
 
-      {/* === CATÁLOGO DE TALLERES === */}
-      <section className="mt-20" id="talleres">
-        <hr className="section-divider mb-12" />
-        <div className="text-center mb-4">
-          <span className="text-[11px] font-bold tracking-[0.25em] uppercase text-[#ff0055]/70">Catálogo</span>
+      {/* === ESTADÍSTICAS === */}
+      <section id="estadisticas" className="fade-up-section mt-20 sm:mt-28 md:mt-40 px-4 sm:px-6 max-w-[1200px] mx-auto w-full">
+        <div className="text-center mb-10 sm:mb-16">
+          <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-full bg-white/[0.03] border border-white/10 mb-4 sm:mb-6">
+            <span className="text-[10px] sm:text-[11px] font-medium text-white/60">Resultados en Números</span>
+          </div>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-3 sm:mb-4">
+            Impacto SITE <span className="text-[#722F37]">en la Comunidad</span>
+          </h2>
+          <p className="text-white/60 text-sm sm:text-base">Estamos transformando la eficiencia operativa del CBTis No 61.</p>
         </div>
-        <h2 className="text-3xl md:text-4xl font-extrabold text-center text-white mb-3">
-          Todos los Talleres
-        </h2>
-        <p className="text-white/40 text-center max-w-xl mx-auto mb-14 text-sm">
-          Explora nuestra oferta completa de talleres culturales, cívicos y deportivos. Hay algo para cada talento.
-        </p>
 
-        {categoriaTalleres.map((cat) => (
-          <div key={cat.categoria} className="mb-16 last:mb-0">
-            <div className="flex items-center gap-4 mb-8">
-              <span className="text-2xl">{cat.emoji}</span>
-              <div>
-                <h3 className="text-2xl font-extrabold text-white tracking-tight">{cat.categoria}</h3>
-                <p className={`text-[11px] font-semibold tracking-wider uppercase ${cat.text}`}>{cat.items.length} talleres</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
+          {stats.map((s, i) => (
+            <div key={i} className="bg-[#0f0f11] rounded-[1.5rem] sm:rounded-[2rem] p-6 sm:p-10 flex flex-col items-center justify-center border border-white/5 group hover:border-[#722F37]/30 transition-colors">
+              <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+                <div className={`w-7 sm:w-8 h-7 sm:h-8 rounded-full ${s.iconBg} flex items-center justify-center`}>
+                  {s.icon}
+                </div>
+                <span className="text-xs sm:text-sm font-medium text-white/80">{s.label}</span>
+              </div>
+              <p className="text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight">{s.value}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* === TEAM === */}
+      <section id="team" className="fade-up-section mt-20 sm:mt-28 md:mt-40 mb-16 sm:mb-24 md:mb-32 px-4 sm:px-6 max-w-[1200px] mx-auto w-full">
+        <div className="text-center mb-10 sm:mb-16">
+          <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-full bg-white/[0.03] border border-white/10 mb-4 sm:mb-6">
+            <span className="text-[10px] sm:text-[11px] font-medium text-white/60">Nuestro Equipo</span>
+          </div>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-3 sm:mb-4">
+            Arquitectos de la <span className="text-[#722F37]">Solución</span>
+          </h2>
+          <p className="text-white/60 text-sm sm:text-base px-2">Profesionales comprometidos con la innovación tecnológica en el CBTis No 61.</p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
+          {team.map((t, i) => (
+            <div key={i} className="relative rounded-[1.5rem] sm:rounded-[2rem] overflow-hidden aspect-[3/4] group border border-white/5">
+              <img src={t.image} alt={t.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+
+              <div className="absolute inset-x-3 sm:inset-x-4 bottom-3 sm:bottom-4 bg-[#111111] border border-white/10 rounded-xl sm:rounded-2xl p-4 sm:p-5 flex flex-col">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-2 sm:mb-3">
+                  <h4 className="text-base sm:text-lg font-bold text-white">{t.name}</h4>
+                  <span className="text-[9px] sm:text-[10px] font-medium text-white/60 bg-white/5 px-2 py-1 rounded-md">{t.role}</span>
+                </div>
+                <p className="text-[10px] sm:text-xs text-white/50 leading-relaxed mb-3 sm:mb-4">{t.desc}</p>
+                <div className="w-7 sm:w-8 h-7 sm:h-8 rounded-full bg-white/5 flex items-center justify-center">
+                  <svg className="w-3 sm:w-4 h-3 sm:h-4 text-white/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+                </div>
               </div>
             </div>
+          ))}
+        </div>
+      </section>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {cat.items.map((t, idx) => (
-                <Link
-                  key={t.title}
-                  to="/catalogo"
-                  className="glass-card group relative p-5 overflow-hidden rounded-2xl"
-                  style={{ animationDelay: `${idx * 50}ms` }}
-                >
-                  <div
-                    className="absolute -inset-20 opacity-0 group-hover:opacity-100 transition-all duration-700 pointer-events-none"
-                    style={{ background: `radial-gradient(ellipse at 50% 0%, ${t.color}20 0%, transparent 70%)` }}
-                  />
-                  <div className="relative z-10 flex items-start gap-4">
-                    <div
-                      className="w-12 h-12 rounded-xl border flex items-center justify-center shrink-0 transition-all duration-500 group-hover:scale-110 workshop-icon-spin"
-                      style={{ borderColor: `${t.color}40`, color: t.color, backgroundColor: `${t.color}10` }}
-                    >
-                      {t.icon}
+      {/* === TESTIMONIALS === */}
+      <section id="testimonials" className="fade-up-section mt-20 sm:mt-28 md:mt-40 px-4 sm:px-6 max-w-[1400px] mx-auto w-full overflow-hidden">
+        <div className="text-center mb-10 sm:mb-16">
+          <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-full bg-white/[0.03] border border-white/10 mb-4 sm:mb-6">
+            <span className="text-[10px] sm:text-[11px] font-medium text-white/60">Voces de Nuestra Comunidad</span>
+          </div>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-3 sm:mb-4">
+            Lo que dicen <span className="text-[#722F37]">de nosotros</span>
+          </h2>
+          <p className="text-white/60 text-sm sm:text-base px-2">La satisfacción de quienes ya gestionan sus talleres con SITE.</p>
+        </div>
+
+        <div className="relative flex flex-col gap-4 sm:gap-6">
+          <div className="relative overflow-hidden">
+            <div className="flex gap-4 sm:gap-6 animate-scroll-left">
+              {[...testimonials, ...testimonials].map((t, i) => (
+                <div key={i} className="flex-shrink-0 w-[280px] sm:w-[350px] bg-[#0f0f11] rounded-[1.5rem] sm:rounded-[2rem] p-5 sm:p-6 flex flex-col justify-between border border-white/5 h-[160px] sm:h-[180px]">
+                  <p className="text-white/80 font-medium leading-relaxed text-xs sm:text-sm">"{t.quote}"</p>
+                  <div className="flex items-center gap-2 sm:gap-3 mt-3 sm:mt-4">
+                    <div className="w-8 sm:w-10 h-8 sm:h-10 rounded-full bg-gradient-to-br from-[#722F37] to-[#a85563] flex items-center justify-center text-white font-bold text-xs sm:text-sm">
+                      {t.name.charAt(0)}
                     </div>
-                    <div className="min-w-0 flex-1 pt-0.5">
-                      <h4 className="font-bold text-[15px] text-white mb-1 group-hover:text-[#ff0055] transition-colors duration-300">{t.title}</h4>
-                      <p className="text-[12px] text-white/40 font-medium leading-relaxed">{t.desc}</p>
+                    <div className="flex flex-col">
+                      <span className="text-xs sm:text-sm font-bold text-white">{t.name}</span>
+                      <span className="text-[10px] sm:text-xs text-white/50">{t.role}</span>
                     </div>
                   </div>
-                  <div
-                    className="absolute bottom-0 left-4 right-4 h-0.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-400"
-                    style={{ backgroundColor: t.color }}
-                  />
-                </Link>
+                </div>
               ))}
             </div>
           </div>
-        ))}
+
+          <div className="relative overflow-hidden">
+            <div className="flex gap-4 sm:gap-6 animate-scroll-right">
+              {[...testimonials.reverse(), ...testimonials.reverse()].map((t, i) => (
+                <div key={i} className="flex-shrink-0 w-[280px] sm:w-[350px] bg-[#0f0f11] rounded-[1.5rem] sm:rounded-[2rem] p-5 sm:p-6 flex flex-col justify-between border border-white/5 h-[160px] sm:h-[180px]">
+                  <p className="text-white/80 font-medium leading-relaxed text-xs sm:text-sm">"{t.quote}"</p>
+                  <div className="flex items-center gap-2 sm:gap-3 mt-3 sm:mt-4">
+                    <div className="w-8 sm:w-10 h-8 sm:h-10 rounded-full bg-gradient-to-br from-[#722F37] to-[#a85563] flex items-center justify-center text-white font-bold text-xs sm:text-sm">
+                      {t.name.charAt(0)}
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-xs sm:text-sm font-bold text-white">{t.name}</span>
+                      <span className="text-[10px] sm:text-xs text-white/50">{t.role}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </section>
 
-      {/* === FEATURES === */}
-      <section className="mt-20 relative z-10">
-        <hr className="section-divider mb-12" />
-        <div className="text-center mb-4">
-          <span className="text-[11px] font-bold tracking-[0.25em] uppercase text-[#ff0055]/70">Ventajas</span>
+      {/* === FAQ === */}
+      <section className="fade-up-section mt-20 sm:mt-28 md:mt-40 px-4 sm:px-6 max-w-[1000px] mx-auto w-full bg-[#0a0a0a] rounded-[1.5rem] sm:rounded-[2rem] border border-white/5 p-6 sm:p-8 md:p-16">
+        <div className="text-center mb-8 sm:mb-12">
+          <span className="text-[10px] sm:text-[11px] font-medium text-white/60 mb-4 sm:mb-6 block">Preguntas Frecuentes</span>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-3 sm:mb-4">
+            Todo lo que necesitas <span className="text-[#722F37]">saber</span>
+          </h2>
+          <p className="text-white/60 mb-6 sm:mb-8 text-sm sm:text-base">Resolvemos tus dudas sobre el uso de la plataforma.</p>
+          <button className="px-5 sm:px-6 py-2 rounded-full bg-gradient-to-r from-[#a85563]/80 to-[#722F37]/80 text-white font-medium text-xs sm:text-sm">
+            General
+          </button>
         </div>
-        <h2 className="text-3xl md:text-4xl font-extrabold text-center text-white mb-3">
-          ¿Por qué elegirnos?
-        </h2>
-        <p className="text-white/40 text-center max-w-xl mx-auto mb-14 text-sm">
-          Instalaciones, instructores y programas diseñados para tu desarrollo integral.
-        </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {features.map((f) => (
-            <div key={f.title} className="glass-card p-6 group rounded-2xl relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-[#ff0055]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <div className="relative z-10">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#ff0055]/10 to-[#800020]/10 border border-[#ff0055]/20 flex items-center justify-center text-[#ff0055] mb-5 group-hover:scale-110 group-hover:shadow-[0_0_20px_rgba(255,0,85,0.3)] transition-all duration-300">
-                  {f.icon}
+        <div className="flex flex-col gap-3 sm:gap-4">
+          {faqs.map((faq, i) => (
+            <div key={i} className="border-b border-white/5 last:border-0 pb-3 sm:pb-4">
+              <button
+                onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                className="w-full flex items-center justify-between py-3 sm:py-4 text-left group"
+              >
+                <span className="text-white font-medium text-sm sm:text-base group-hover:text-[#722F37] transition-colors">{faq.q}</span>
+                <div className="w-7 sm:w-8 h-7 sm:h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-[#722F37]/20 transition-colors shrink-0 ml-3 sm:ml-4">
+                  <Plus className={`w-3 sm:w-4 h-3 sm:h-4 text-white transition-transform duration-300 ${openFaq === i ? 'rotate-45' : ''}`} />
                 </div>
-                <h3 className="font-bold text-[15px] text-white mb-2 group-hover:text-[#ff0055] transition-colors">{f.title}</h3>
-                <p className="text-[13px] text-white/40 leading-relaxed">{f.desc}</p>
+              </button>
+              <div
+                className={`overflow-hidden transition-all duration-300 ${openFaq === i ? 'max-h-[200px] opacity-100' : 'max-h-0 opacity-0'}`}
+              >
+                <p className="text-white/50 text-xs sm:text-sm pb-3 sm:pb-4">{faq.a}</p>
               </div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* === CTA FINAL === */}
-      <section className="mt-20 mb-16 relative rounded-[3rem] overflow-hidden border border-white/[0.04]">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#050102] via-[#0a0205] to-[#050102]" />
-        <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-[#ff0055] opacity-[0.06] blur-[120px] rounded-full pointer-events-none" />
-        <div className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-[#800020] opacity-[0.08] blur-[120px] rounded-full pointer-events-none" />
-
-        <div className="relative z-10 px-8 md:px-20 py-20 md:py-28 text-center flex flex-col items-center">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#ff0055]/20 to-[#800020]/20 border border-[#ff0055]/20 flex items-center justify-center mb-8 group hover:scale-110 transition-transform duration-500">
-            <Trophy className="w-8 h-8 text-[#ff0055]" />
-          </div>
-          <h2 className="text-[3rem] md:text-[4.5rem] font-extrabold text-white mb-6 leading-none tracking-tight">
-            Comienza tu{' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ff0055] to-[#ff3377]">
-              nueva historia
-            </span>
+      {/* === CTA === */}
+      <section className="fade-up-section mt-16 sm:mt-24 md:mt-32 px-4 sm:px-6 max-w-[1200px] mx-auto w-full">
+        <div className="bg-[#0f0f11] rounded-[2rem] sm:rounded-[3rem] border border-white/5 p-8 sm:p-12 md:p-24 text-center flex flex-col items-center">
+          <span className="text-[10px] sm:text-[11px] font-medium text-white/60 mb-4 sm:mb-6 block">Comienza Ahora</span>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white mb-6 sm:mb-10 max-w-3xl leading-tight">
+            ¿Listo para optimizar la gestión de tu taller? Únete a <span className="text-[#722F37]">SITE hoy.</span>
           </h2>
-          <p className="text-white/50 text-lg md:text-xl max-w-lg mx-auto mb-12 font-medium">
-            Únete a la nueva era de talleres escolares y descubre de lo que eres capaz. ¡Tu futuro empieza aquí!
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Link to="/catalogo" className="px-8 py-4 rounded-2xl bg-white text-black font-bold text-base hover:scale-105 hover:shadow-[0_10px_40px_rgba(255,255,255,0.3)] transition-all flex items-center gap-2 group">
-              Ver Catálogo
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+            <Link to="/auth" className="px-6 sm:px-8 py-3 sm:py-3.5 rounded-full bg-gradient-to-r from-[#a85563] to-[#722F37] text-white font-medium text-sm">
+              Inicio de sesión
             </Link>
-            <Link to="/auth" className="px-8 py-4 rounded-2xl text-white/70 hover:text-white font-bold text-base border border-white/10 hover:border-[#ff0055]/30 hover:bg-[#ff0055]/5 transition-all duration-300">
-              Crear Cuenta
-            </Link>
+            <button className="px-6 sm:px-8 py-3 sm:py-3.5 rounded-full bg-black border border-white/10 text-white hover:bg-white/5 transition-colors font-medium text-sm">
+              Soporte Técnico
+            </button>
           </div>
         </div>
       </section>
 
       {/* === FOOTER === */}
-      <footer className="pb-10 pt-8">
-        <hr className="section-divider mb-8" />
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <Trophy className="w-4 h-4 text-[#ff0055]" />
-            <span className="text-[13px] font-semibold text-white/60">SITE Talleres — CBTIS No. 61</span>
+      <footer className="mt-16 sm:mt-24 md:mt-32 px-4 sm:px-6 max-w-[1200px] mx-auto w-full mb-8 sm:mb-12">
+        <div className="bg-[#0a0a0a] rounded-[1.5rem] sm:rounded-[2rem] border border-white/5 overflow-hidden flex flex-col">
+          <div className="p-6 sm:p-8 md:p-16 pb-4 sm:pb-8">
+            <h1 className="text-[15vw] sm:text-[12vw] md:text-[8rem] font-black tracking-tighter text-white leading-none whitespace-nowrap overflow-hidden">
+              SITE CBTis No 61
+            </h1>
           </div>
-          <p suppressHydrationWarning className="text-[11px] text-white/30 font-medium tracking-wide">
-            Sistema Integral de Talleres Escolares &copy; {new Date().getFullYear()}
-          </p>
+
+          <div className="px-6 sm:px-8 md:px-16 pb-6 sm:pb-8">
+            <div className="w-full h-px bg-white/10 mb-4 sm:mb-6"></div>
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4 sm:gap-6">
+              <span className="text-white/40 text-xs sm:text-sm text-center md:text-left">© 2024 CBTis No 61. Todos los derechos reservados.</span>
+              <div className="flex items-center gap-3 sm:gap-4">
+                <a href="#" className="w-9 sm:w-10 h-9 sm:h-10 rounded-full bg-white/5 hover:bg-[#722F37]/20 text-white/60 hover:text-[#722F37] flex items-center justify-center transition-colors">
+                  <Twitter className="w-4 h-4" />
+                </a>
+                <a href="#" className="w-9 sm:w-10 h-9 sm:h-10 rounded-full bg-white/5 hover:bg-[#722F37]/20 text-white/60 hover:text-[#722F37] flex items-center justify-center transition-colors">
+                  <Instagram className="w-4 h-4" />
+                </a>
+                <a href="#" className="w-9 sm:w-10 h-9 sm:h-10 rounded-full bg-white/5 hover:bg-[#722F37]/20 text-white/60 hover:text-[#722F37] flex items-center justify-center transition-colors">
+                  <Facebook className="w-4 h-4" />
+                </a>
+              </div>
+            </div>
+          </div>
         </div>
       </footer>
 
-      <QuizBot open={botOpen} setOpen={setBotOpen} />
+      <style>{`
+        @keyframes scroll-left {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        @keyframes scroll-right {
+          0% { transform: translateX(-50%); }
+          100% { transform: translateX(0); }
+        }
+        .animate-scroll-left {
+          animation: scroll-left 40s linear infinite;
+        }
+        .animate-scroll-right {
+          animation: scroll-right 40s linear infinite;
+        }
+        .animate-scroll-left:hover,
+        .animate-scroll-right:hover {
+          animation-play-state: paused;
+        }
+        @media (max-width: 640px) {
+          .animate-scroll-left {
+            animation-duration: 30s;
+          }
+          .animate-scroll-right {
+            animation-duration: 30s;
+          }
+        }
+      `}</style>
+
     </div>
   )
 }

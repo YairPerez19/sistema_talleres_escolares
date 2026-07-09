@@ -46,7 +46,7 @@ export function BajaDialog({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent
         showCloseButton={!loading}
-        className="sm:max-w-md bg-[#0d0d0d] border-[#ff0055]/20 text-white"
+        className="sm:max-w-md bg-[#0d0d0d] border-[#8B1A32]/20 text-white"
       >
         <DialogHeader>
           <DialogTitle className="text-xl font-extrabold text-white">
@@ -59,10 +59,10 @@ export function BajaDialog({
         </DialogHeader>
 
         {esUltimaOportunidad && (
-          <div className="flex items-start gap-3 rounded-xl border border-[#ff0055]/30 bg-[#ff0055]/5 p-4">
-            <AlertTriangle className="mt-0.5 size-5 shrink-0 text-[#ff0055]" />
+          <div className="flex items-start gap-3 rounded-xl border border-[#8B1A32]/30 bg-[#8B1A32]/5 p-4">
+            <AlertTriangle className="mt-0.5 size-5 shrink-0 text-[#8B1A32]" />
             <div className="text-sm">
-              <p className="font-bold text-[#ff0055]">Es tu ultima oportunidad</p>
+              <p className="font-bold text-[#8B1A32]">Es tu ultima oportunidad</p>
               <p className="text-white/50 mt-1">
                 Despues de esta baja ya no podras hacer mas cambios de taller
                 durante este ciclo.
@@ -80,7 +80,7 @@ export function BajaDialog({
             onChange={(e) => setMotivo(e.target.value)}
             placeholder="Escribe el motivo por el cual te das de baja..."
             rows={3}
-            className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-sm text-white placeholder:text-white/20 resize-none outline-none focus:border-[#ff0055]/40 focus:ring-1 focus:ring-[#ff0055]/20 transition-all"
+            className="w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-sm text-white placeholder:text-white/20 resize-none outline-none focus:border-[#8B1A32]/40 focus:ring-1 focus:ring-[#8B1A32]/20 transition-all"
             disabled={loading}
           />
         </div>
@@ -101,7 +101,7 @@ export function BajaDialog({
           <Button
             onClick={handleConfirm}
             disabled={loading}
-            className="bg-[#ff0055] hover:bg-[#ff0055]/80 text-white"
+            className="bg-[#8B1A32] hover:bg-[#8B1A32]/80 text-white"
           >
             {loading ? 'Procesando...' : 'Confirmar baja'}
           </Button>

@@ -2,5 +2,6 @@ packages:
   - "frontend"
   - "backend/api"
 allowBuilds:
+  '@scarf/scarf': false
   esbuild: true
   unrs-resolver: true

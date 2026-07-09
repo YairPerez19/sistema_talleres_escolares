@@ -12,13 +12,18 @@ import type { Role } from '../services/authService'
 import { usePageMeta } from '../hooks/usePageMeta'
 import { RoleSelectionScreen } from './-RoleSelectionScreen'
 import { AuthForm } from './-AuthForm'
-import type { AuthFormProps } from './-AuthForm'
+import type { AuthFormState } from './-AuthForm'
 
 export const Route = createFileRoute('/auth')({
   component: LoginPage,
 })
 
 export type TallerOption = { id: string; nombre: string; categoria: string }
+
+const initialForm: AuthFormState = {
+  nombre: '', email: '', password: '', matricula: '', tallerId: '',
+  turno: 'matutino', showPassword: false,
+}
 
 function LoginPage() {
   usePageMeta({
@@ -34,10 +39,7 @@ function LoginPage() {
   })
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login')
   const [loadingState, setLoadingState] = useState({ loading: false, loadingTalleres: false, talleres: [] as TallerOption[] })
-  const [form, setForm] = useState({
-    nombre: '', email: '', password: '', matricula: '', tallerId: '',
-    turno: 'matutino' as 'matutino' | 'vespertino', showPassword: false,
-  })
+  const [form, setForm] = useState<AuthFormState>(initialForm)
 
   useEffect(() => {
     if (user) {
@@ -48,7 +50,7 @@ function LoginPage() {
   const selectRole = (r: Role) => {
     setNav({ role: r, step: 'credentials' })
     setAuthMode('login')
-    setForm({ nombre: '', email: '', password: '', matricula: '', tallerId: '', turno: 'matutino', showPassword: false })
+    setForm(initialForm)
     if (r === 'instructor') {
       setLoadingState(s => ({ ...s, loadingTalleres: true }))
       supabase.from('talleres').select('id, nombre, categoria').then(({ data }) => {
@@ -59,6 +61,10 @@ function LoginPage() {
 
   const goBack = () => {
     setNav({ role: null, step: 'select-role' })
+  }
+
+  const setField = (field: keyof AuthFormState, value: string | boolean) => {
+    setForm(f => ({ ...f, [field]: value }))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -83,8 +89,9 @@ function LoginPage() {
           password: form.password,
           isRegistration: true,
         }})
-      } catch (err: any) {
-        toast.error(err.message || 'Error al crear la cuenta.')
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : 'Error al crear la cuenta.'
+        toast.error(message)
       } finally {
         setLoadingState(s => ({ ...s, loading: false }))
       }
@@ -119,8 +126,9 @@ function LoginPage() {
         password: form.password,
         isRegistration: false,
       }})
-    } catch (err: any) {
-      toast.error(err.message || 'Credenciales inválidas.')
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Credenciales inválidas.'
+      toast.error(message)
     } finally {
       setLoadingState(s => ({ ...s, loading: false }))
     }
@@ -131,11 +139,11 @@ function LoginPage() {
   }
 
   return (
-    <div className="flex flex-col w-full min-h-screen bg-[#050102] relative overflow-hidden">
+    <div className="flex flex-col w-full min-h-screen bg-[#0C0810] relative overflow-hidden">
       <div className="absolute inset-0 z-0 opacity-50">
         <Iridescence color={[0.5, 0.0, 0.13]} speed={0.6} amplitude={0} mouseReact={false} />
       </div>
-      <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-[#ff0055]/5 blur-[180px] rounded-full pointer-events-none" />
+      <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-[#8B1A32]/5 blur-[180px] rounded-full pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-[#800020]/15 blur-[180px] rounded-full pointer-events-none" />
 
       <div className="relative z-10 p-4 md:p-6 w-full max-w-[1400px] mx-auto">
@@ -144,7 +152,7 @@ function LoginPage() {
 
       <div className="flex-1 flex items-center justify-center p-4 relative z-10">
         <div className="w-full max-w-[440px]">
-          <div className="bg-[#0a0205]/80 backdrop-blur-[24px] border border-white/[0.06] rounded-[2rem] p-8 md:p-10 shadow-2xl shadow-black/30">
+          <div className="bg-[#150D18]/80 backdrop-blur-[24px] border border-white/[0.06] rounded-[2rem] p-8 md:p-10 shadow-2xl shadow-black/30">
             <div className="flex items-center justify-between mb-8">
               <button type="button" aria-label="Volver" onClick={goBack} className="text-white/30 hover:text-white hover:bg-white/5 p-2 rounded-xl transition-all duration-200">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
@@ -161,7 +169,7 @@ function LoginPage() {
                 className={`text-xl font-bold transition-all duration-300 relative pb-2 ${authMode === 'login' ? 'text-white' : 'text-white/30 hover:text-white/50'}`}
               >
                 Iniciar Sesión
-                {authMode === 'login' && <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-[2px] bg-gradient-to-r from-[#ff0055] to-[#ff3377] rounded-full" />}
+                {authMode === 'login' && <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-[2px] bg-gradient-to-r from-[#8B1A32] to-[#B8354D] rounded-full" />}
               </button>
 
               {nav.role === 'student' && (
@@ -171,13 +179,13 @@ function LoginPage() {
                   className={`text-xl font-bold transition-all duration-300 relative pb-2 ${authMode === 'register' ? 'text-white' : 'text-white/30 hover:text-white/50'}`}
                 >
                   Crear Cuenta
-                  {authMode === 'register' && <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-[2px] bg-gradient-to-r from-[#ff0055] to-[#ff3377] rounded-full" />}
+                  {authMode === 'register' && <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-[2px] bg-gradient-to-r from-[#8B1A32] to-[#B8354D] rounded-full" />}
                 </button>
               )}
             </div>
 
             <div className="flex items-center justify-center gap-2 mb-8 bg-white/[0.03] border border-white/[0.05] rounded-xl p-2.5 w-fit mx-auto px-4">
-              <div className="text-[#ff0055]">
+              <div className="text-[#8B1A32]">
                 {nav.role === 'student' ? <GraduationCap size={14} /> : nav.role === 'instructor' ? <UserCheck size={14} /> : <ShieldCheck size={14} />}
               </div>
               <span className="text-white/50 font-medium text-[10px] uppercase tracking-wider">
@@ -189,20 +197,8 @@ function LoginPage() {
               authMode={authMode}
               role={nav.role}
               loading={loadingState.loading}
-              nombre={form.nombre}
-              setNombre={v => setForm(f => ({ ...f, nombre: v }))}
-              email={form.email}
-              setEmail={v => setForm(f => ({ ...f, email: v }))}
-              password={form.password}
-              setPassword={v => setForm(f => ({ ...f, password: v }))}
-              matricula={form.matricula}
-              setMatricula={v => setForm(f => ({ ...f, matricula: v }))}
-              tallerId={form.tallerId}
-              setTallerId={v => setForm(f => ({ ...f, tallerId: v }))}
-              turno={form.turno}
-              setTurno={v => setForm(f => ({ ...f, turno: v }))}
-              showPassword={form.showPassword}
-              setShowPassword={v => setForm(f => ({ ...f, showPassword: v }))}
+              form={form}
+              setField={setField}
               handleSubmit={handleSubmit}
               talleres={loadingState.talleres}
               loadingTalleres={loadingState.loadingTalleres}

@@ -1,19 +1,27 @@
 import * as React from 'react';
 import { supabase } from '../integrations/supabase/client';
-import type { AlumnoConAsistencia, EstadoAsistencia, FiltroAsistencia } from '../lib/types';
+import type { AlumnoConAsistencia, EstadoAsistencia, FiltroAsistencia, Asistencia } from '../lib/types';
 import { toast } from 'sonner';
 
-/**
- * Hook principal para gestionar asistencia de un taller en una fecha.
- * Incluye CRUD optimista y suscripción en tiempo real.
- */
+interface AsistenciaConRelaciones extends Asistencia {
+  profiles: { nombre: string; matricula: string; turno: string } | null;
+  talleres: { nombre: string; categoria: string; instructor: string } | null;
+}
+
+export interface AdminStats {
+  totalSesiones: number;
+  promedioAsistencia: number;
+  alumnosConMasFaltas: { alumno_id: string; nombre: string; faltas: number }[];
+  talleresActivos: number;
+  sesionesHoy: number;
+}
+
 export function useAsistencias(tallerId: string | undefined, fecha: string) {
   const [alumnos, setAlumnos] = React.useState<AlumnoConAsistencia[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [saving, setSaving] = React.useState<Set<string>>(new Set());
   const [lastSaved, setLastSaved] = React.useState<Date | null>(null);
 
-  // Cargar lista de alumnos con su asistencia del día
   const fetchAlumnos = React.useCallback(async () => {
     if (!tallerId) { 
       console.log('[useAsistencias] No hay tallerId seleccionado');
@@ -25,15 +33,15 @@ export function useAsistencias(tallerId: string | undefined, fecha: string) {
     setLoading(true);
     console.log('[useAsistencias] Llamando RPC get_asistencia_taller para:', tallerId, 'fecha:', fecha);
     
-    const { data, error } = await supabase
-      .rpc('get_asistencia_taller', { p_taller_id: tallerId, p_fecha: fecha });
+    const { data, error } = await (supabase
+      .rpc('get_asistencia_taller', { p_taller_id: tallerId, p_fecha: fecha }) as ReturnType<typeof supabase.rpc>);
 
     if (error) {
       console.error('[useAsistencias] Error en RPC:', error);
       toast.error('Error al cargar alumnos: ' + error.message);
     } else {
-      console.log('[useAsistencias] Alumnos recibidos:', data?.length);
-      setAlumnos((data ?? []) as AlumnoConAsistencia[]);
+      console.log('[useAsistencias] Alumnos recibidos:', (data as unknown[])?.length);
+      setAlumnos((data ?? []) as unknown as AlumnoConAsistencia[]);
     }
     setLoading(false);
   }, [tallerId, fecha]);
@@ -42,7 +50,6 @@ export function useAsistencias(tallerId: string | undefined, fecha: string) {
     fetchAlumnos();
   }, [fetchAlumnos]);
 
-  // Suscripción realtime
   React.useEffect(() => {
     if (!tallerId) return;
 
@@ -82,7 +89,7 @@ export function useAsistencias(tallerId: string | undefined, fecha: string) {
 
     const { data: { user } } = await supabase.auth.getUser();
 
-    const { error } = await supabase
+    const { error } = await (supabase
       .from('asistencias')
       .upsert(
         {
@@ -95,7 +102,7 @@ export function useAsistencias(tallerId: string | undefined, fecha: string) {
           observaciones: observaciones ?? null,
         },
         { onConflict: 'alumno_id,taller_id,fecha' }
-      );
+      ) as unknown as { error: Error | null });
 
     setSaving(prev => {
       const next = new Set(prev);
@@ -123,11 +130,8 @@ export function useAsistencias(tallerId: string | undefined, fecha: string) {
   };
 }
 
-/**
- * Hook para el panel admin: consultar asistencias con filtros avanzados.
- */
 export function useAsistenciasAdmin(filtro: FiltroAsistencia) {
-  const [asistencias, setAsistencias] = React.useState<any[]>([]);
+  const [asistencias, setAsistencias] = React.useState<AsistenciaConRelaciones[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [refreshKey, setRefreshKey] = React.useState(0);
 
@@ -151,13 +155,8 @@ export function useAsistenciasAdmin(filtro: FiltroAsistencia) {
       if (filtro.taller_id) query = query.eq('taller_id', filtro.taller_id);
       if (filtro.estado) query = query.eq('estado', filtro.estado);
 
-      const { data, error } = await query;
-
-      if (error) {
-        console.error('[useAsistenciasAdmin] Error:', error);
-      } else {
-        setAsistencias(data ?? []);
-      }
+      const { data } = await query;
+      setAsistencias((data ?? []) as unknown as AsistenciaConRelaciones[]);
       setLoading(false);
     }
 
@@ -180,11 +179,8 @@ export function useAsistenciasAdmin(filtro: FiltroAsistencia) {
   return { asistencias, loading, refresh };
 }
 
-/**
- * Hook para estadísticas globales.
- */
 export function useEstadisticasAdmin() {
-  const [stats, setStats] = React.useState<any>({
+  const [stats, setStats] = React.useState<AdminStats>({
     totalSesiones: 0,
     promedioAsistencia: 0,
     alumnosConMasFaltas: [],
@@ -197,21 +193,43 @@ export function useEstadisticasAdmin() {
     async function fetchStats() {
       const today = new Date().toISOString().split('T')[0];
 
-      const [totalRes, hoyRes, talleresRes] = await Promise.all([
+      const [totalRes, hoyRes, talleresRes, deudaRes] = await Promise.all([
         supabase.from('asistencias').select('*', { count: 'exact', head: true }),
         supabase.from('asistencias').select('*', { count: 'exact', head: true }).eq('fecha', today),
         supabase.from('talleres').select('*', { count: 'exact', head: true }),
+        supabase.from('deuda_alumnos').select('alumno_id, faltas_injustificadas').order('faltas_injustificadas', { ascending: false }).limit(5),
       ]);
 
       const { data: allAsistencias } = await supabase.from('asistencias').select('estado');
-      const total = allAsistencias?.length ?? 0;
-      const presentes = allAsistencias?.filter(a => ['presente', 'retardo'].includes(a.estado)).length ?? 0;
+      const asistenciasData = (allAsistencias ?? []) as { estado: string }[];
+      const total = asistenciasData.length;
+      const presentes = asistenciasData.filter(a => ['presente', 'retardo'].includes(a.estado)).length;
       const promedio = total > 0 ? Math.round((presentes / total) * 100) : 0;
+
+      const deudaData = (deudaRes.data ?? []) as { alumno_id: string | null; faltas_injustificadas: number | null }[];
+      let alumnosConMasFaltas: AdminStats['alumnosConMasFaltas'] = [];
+      if (deudaData.length > 0) {
+        const alumnoIds = deudaData.map(d => d.alumno_id).filter(Boolean) as string[];
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, nombre')
+          .in('id', alumnoIds);
+
+        const profilesData = (profiles ?? []) as { id: string; nombre: string }[];
+        const nombreMap = new Map(profilesData.map(p => [p.id, p.nombre]));
+        alumnosConMasFaltas = deudaData
+          .filter(d => d.alumno_id)
+          .map(d => ({
+            alumno_id: d.alumno_id!,
+            nombre: nombreMap.get(d.alumno_id!) ?? 'Desconocido',
+            faltas: d.faltas_injustificadas ?? 0,
+          }));
+      }
 
       setStats({
         totalSesiones: totalRes.count ?? 0,
         promedioAsistencia: promedio,
-        alumnosConMasFaltas: [], // Simplificado para debug
+        alumnosConMasFaltas,
         talleresActivos: talleresRes.count ?? 0,
         sesionesHoy: hoyRes.count ?? 0,
       });
@@ -224,7 +242,7 @@ export function useEstadisticasAdmin() {
   return { stats, loading };
 }
 
-export function exportarCSV(asistencias: any[]) {
+export function exportarCSV(asistencias: AsistenciaConRelaciones[]) {
   const headers = ['Fecha', 'Alumno', 'Matrícula', 'Taller', 'Estado', 'Hora'];
   const rows = asistencias.map(a => [
     a.fecha, a.profiles?.nombre ?? '', a.profiles?.matricula ?? '', a.talleres?.nombre ?? '', a.estado, a.hora ?? ''

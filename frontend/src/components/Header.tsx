@@ -18,7 +18,7 @@ export function Header() {
   return (
     <div className="flex items-center justify-between pb-4 border-b border-white/[0.04]">
       <Link to="/" className="flex items-center gap-3 group">
-        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#ff0055]/10 to-[#800020]/10 border border-[#ff0055]/15 flex items-center justify-center text-white transition-all duration-300 group-hover:shadow-[0_0_15px_rgba(255,0,85,0.2)] group-hover:scale-105">
+        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#8B1A32]/10 to-[#5C1020]/10 border border-[#8B1A32]/15 flex items-center justify-center text-white transition-all duration-300 group-hover:shadow-[0_0_15px_rgba(255,0,85,0.2)] group-hover:scale-105">
           <GraduationCap size={18} />
         </div>
         <div>
@@ -44,9 +44,9 @@ export function Header() {
           <Link
             to="/admin"
             className={cn(
-              "flex items-center gap-2 px-3 py-2 rounded-xl text-[13px] font-medium transition-all duration-300 text-[#ff0055]/60 whitespace-nowrap",
-              "[&.active]:text-[#ff0055] [&.active]:bg-[#ff0055]/10 [&.active]:shadow-[0_0_15px_rgba(255,0,85,0.1)]",
-              "hover:text-[#ff0055] hover:bg-[#ff0055]/5"
+              "flex items-center gap-2 px-3 py-2 rounded-xl text-[13px] font-medium transition-all duration-300 text-[#8B1A32]/60 whitespace-nowrap",
+              "[&.active]:text-[#8B1A32] [&.active]:bg-[#8B1A32]/10 [&.active]:shadow-[0_0_15px_rgba(255,0,85,0.1)]",
+              "hover:text-[#8B1A32] hover:bg-[#8B1A32]/5"
             )}
           >
             <ShieldCheck size={16} />
@@ -82,7 +82,7 @@ export function Header() {
         ) : (
           <Link
             to="/auth"
-            className="px-4 py-2 rounded-xl text-[12px] font-semibold bg-gradient-to-r from-[#ff0055] to-[#ff3377] text-white hover:shadow-[0_8px_20px_rgba(255,0,85,0.3)] transition-all duration-300"
+            className="px-4 py-2 rounded-xl text-[12px] font-semibold bg-gradient-to-r from-[#8B1A32] to-[#B8354D] text-white hover:shadow-[0_8px_20px_rgba(255,0,85,0.3)] transition-all duration-300"
           >
             Entrar
           </Link>

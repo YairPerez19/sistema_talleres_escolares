@@ -13,14 +13,14 @@ export function Filters({ category, setCategory, search, setSearch }: FiltersPro
   return (
     <div className="flex flex-col lg:flex-row gap-4 items-center w-full">
       <div className="relative w-full lg:max-w-md group">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/15 group-focus-within:text-[#ff0055]/60 transition-colors duration-300" size={16} />
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/15 group-focus-within:text-[#8B1A32]/60 transition-colors duration-300" size={16} />
         <input 
           type="text" 
           value={search}
           onChange={e => setSearch(e.target.value)}
           placeholder="Buscar taller..."
           aria-label="Buscar taller"
-          className="w-full bg-white/[0.03] border border-white/[0.05] rounded-2xl h-11 pl-11 pr-4 text-sm text-white focus:outline-none focus:border-[#ff0055]/20 focus:bg-white/[0.05] transition-all duration-200 placeholder:text-white/15"
+          className="w-full bg-white/[0.03] border border-white/[0.05] rounded-2xl h-11 pl-11 pr-4 text-sm text-white focus:outline-none focus:border-[#8B1A32]/20 focus:bg-white/[0.05] transition-all duration-200 placeholder:text-white/15"
         />
       </div>
 

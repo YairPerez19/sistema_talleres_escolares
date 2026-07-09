@@ -2,24 +2,22 @@ import { Loader2 } from '@/components/AnimatedIcons'
 import type { Role } from '../services/authService'
 import type { TallerOption } from './auth'
 
+export interface AuthFormState {
+  nombre: string
+  email: string
+  password: string
+  matricula: string
+  tallerId: string
+  turno: 'matutino' | 'vespertino'
+  showPassword: boolean
+}
+
 export interface AuthFormProps {
   authMode: 'login' | 'register'
   role: Role | null
   loading: boolean
-  nombre: string
-  setNombre: (v: string) => void
-  email: string
-  setEmail: (v: string) => void
-  password: string
-  setPassword: (v: string) => void
-  matricula: string
-  setMatricula: (v: string) => void
-  tallerId: string
-  setTallerId: (v: string) => void
-  turno: 'matutino' | 'vespertino'
-  setTurno: (v: 'matutino' | 'vespertino') => void
-  showPassword: boolean
-  setShowPassword: (v: boolean) => void
+  form: AuthFormState
+  setField: (field: keyof AuthFormState, value: string | boolean) => void
   handleSubmit: (e: React.FormEvent) => void
   talleres: TallerOption[]
   loadingTalleres: boolean
@@ -27,9 +25,7 @@ export interface AuthFormProps {
 
 export function AuthForm({
   authMode, role, loading,
-  nombre, setNombre, email, setEmail, password, setPassword,
-  matricula, setMatricula, tallerId, setTallerId, turno, setTurno,
-  showPassword, setShowPassword, handleSubmit, talleres, loadingTalleres,
+  form, setField, handleSubmit, talleres, loadingTalleres,
 }: AuthFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
@@ -40,9 +36,9 @@ export function AuthForm({
             <input
               id="input-nombre"
               type="text"
-              value={nombre}
-              onChange={e => setNombre(e.target.value)}
-              className="w-full bg-white/[0.03] border border-white/[0.06] rounded-2xl px-4 py-3.5 text-white placeholder-white/15 focus:outline-none focus:border-[#ff0055]/30 focus:bg-white/[0.05] transition-all duration-200 text-sm"
+              value={form.nombre}
+              onChange={e => setField('nombre', e.target.value)}
+              className="w-full bg-white/[0.03] border border-white/[0.06] rounded-2xl px-4 py-3.5 text-white placeholder-white/15 focus:outline-none focus:border-[#8B1A32]/30 focus:bg-white/[0.05] transition-all duration-200 text-sm"
               placeholder="Juan Pérez"
               required
               minLength={3}
@@ -53,9 +49,9 @@ export function AuthForm({
             <div className="relative">
               <select
                 id="input-turno"
-                value={turno}
-                onChange={e => setTurno(e.target.value as 'matutino' | 'vespertino')}
-                className="w-full bg-white/[0.03] border border-white/[0.06] rounded-2xl px-4 py-3.5 text-white focus:outline-none focus:border-[#ff0055]/30 transition-all duration-200 appearance-none text-sm"
+                value={form.turno}
+                onChange={e => setField('turno', e.target.value as 'matutino' | 'vespertino')}
+                className="w-full bg-white/[0.03] border border-white/[0.06] rounded-2xl px-4 py-3.5 text-white focus:outline-none focus:border-[#8B1A32]/30 transition-all duration-200 appearance-none text-sm"
                 required
               >
                 <option value="matutino" className="bg-[#141414]">Matutino</option>
@@ -74,9 +70,9 @@ export function AuthForm({
         <input
           id="input-email"
           type="email"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-          className="w-full bg-white/[0.03] border border-white/[0.06] rounded-2xl px-4 py-3.5 text-white placeholder-white/15 focus:outline-none focus:border-[#ff0055]/30 focus:bg-white/[0.05] transition-all duration-200 text-sm"
+          value={form.email}
+          onChange={e => setField('email', e.target.value)}
+          className="w-full bg-white/[0.03] border border-white/[0.06] rounded-2xl px-4 py-3.5 text-white placeholder-white/15 focus:outline-none focus:border-[#8B1A32]/30 focus:bg-white/[0.05] transition-all duration-200 text-sm"
           placeholder="correo@cbtis61.edu.mx"
           required
         />
@@ -88,9 +84,9 @@ export function AuthForm({
           <input
             id="input-matricula"
             type="text"
-            value={matricula}
-            onChange={e => setMatricula(e.target.value)}
-            className="w-full bg-white/[0.03] border border-white/[0.06] rounded-2xl px-4 py-3.5 text-white placeholder-white/15 focus:outline-none focus:border-[#ff0055]/30 focus:bg-white/[0.05] transition-all duration-200 text-sm"
+            value={form.matricula}
+            onChange={e => setField('matricula', e.target.value)}
+            className="w-full bg-white/[0.03] border border-white/[0.06] rounded-2xl px-4 py-3.5 text-white placeholder-white/15 focus:outline-none focus:border-[#8B1A32]/30 focus:bg-white/[0.05] transition-all duration-200 text-sm"
             placeholder="Número de control"
             required
           />
@@ -109,9 +105,9 @@ export function AuthForm({
             <div className="relative">
               <select
                 id="input-taller"
-                value={tallerId}
-                onChange={e => setTallerId(e.target.value)}
-                className="w-full bg-white/[0.03] border border-white/[0.06] rounded-2xl px-4 py-3.5 text-white focus:outline-none focus:border-[#ff0055]/30 transition-all duration-200 appearance-none text-sm"
+                value={form.tallerId}
+                onChange={e => setField('tallerId', e.target.value)}
+                className="w-full bg-white/[0.03] border border-white/[0.06] rounded-2xl px-4 py-3.5 text-white focus:outline-none focus:border-[#8B1A32]/30 transition-all duration-200 appearance-none text-sm"
                 required
               >
                 <option value="" className="bg-[#141414]">Seleccionar taller</option>
@@ -132,21 +128,21 @@ export function AuthForm({
         <div className="relative">
           <input
             id="input-password"
-            type={showPassword ? 'text' : 'password'}
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            className="w-full bg-white/[0.03] border border-white/[0.06] rounded-2xl px-4 py-3.5 text-white placeholder-white/15 focus:outline-none focus:border-[#ff0055]/30 focus:bg-white/[0.05] transition-all duration-200 text-sm pr-12"
+            type={form.showPassword ? 'text' : 'password'}
+            value={form.password}
+            onChange={e => setField('password', e.target.value)}
+            className="w-full bg-white/[0.03] border border-white/[0.06] rounded-2xl px-4 py-3.5 text-white placeholder-white/15 focus:outline-none focus:border-[#8B1A32]/30 focus:bg-white/[0.05] transition-all duration-200 text-sm pr-12"
             placeholder="Al menos 6 caracteres"
             required
             minLength={6}
           />
           <button
             type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className={`absolute right-4 top-1/2 -translate-y-1/2 transition-all duration-300 ${showPassword ? 'text-[#ff0055]' : 'text-white/20 hover:text-white/40'}`}
+            onClick={() => setField('showPassword', !form.showPassword)}
+            className={`absolute right-4 top-1/2 -translate-y-1/2 transition-all duration-300 ${form.showPassword ? 'text-[#8B1A32]' : 'text-white/20 hover:text-white/40'}`}
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              {showPassword ? (
+              {form.showPassword ? (
                 <>
                   <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                   <circle cx="12" cy="12" r="3" fill="currentColor"></circle>
@@ -165,7 +161,7 @@ export function AuthForm({
       <button
         type="submit"
         disabled={loading}
-        className="w-full py-4 mt-8 rounded-2xl font-bold bg-gradient-to-r from-[#ff0055] to-[#ff3377] text-white hover:shadow-[0_10px_35px_rgba(255,0,85,0.4)] hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-none text-base"
+        className="w-full py-4 mt-8 rounded-2xl font-bold bg-gradient-to-r from-[#8B1A32] to-[#B8354D] text-white hover:shadow-[0_10px_35px_rgba(255,0,85,0.4)] hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-none text-base"
       >
         {loading && <Loader2 className="animate-spin" size={18} />}
         {loading ? 'Procesando...' : (authMode === 'register' ? 'Crear Cuenta' : 'Iniciar Sesión')}

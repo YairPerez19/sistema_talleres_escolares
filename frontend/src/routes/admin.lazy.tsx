@@ -14,8 +14,9 @@ import {
 import { cn } from '../lib/utils'
 import { useTalleres } from '../hooks/useTalleres'
 import { useAsistenciasAdmin, useEstadisticasAdmin, exportarCSV } from '../hooks/useAsistencias'
+import type { AdminStats } from '../hooks/useAsistencias'
 import { EstadoBadge } from '../components/asistencia/EstadoBadge'
-import type { FiltroAsistencia } from '../lib/types'
+import type { FiltroAsistencia, TallerConInstructor, Horario } from '../lib/types'
 import { useRole } from '../hooks/useRole'
 import { generateWorkshopDescription } from '../lib/ai'
 
@@ -45,7 +46,7 @@ function AdminPanel() {
   const { asistencias, loading: loadingAsistencias } = useAsistenciasAdmin(filtro);
   const { stats, loading: loadingStats } = useEstadisticasAdmin();
 
-  const [editingTaller, setEditingTaller] = useState<any>(null);
+  const [editingTaller, setEditingTaller] = useState<TallerConInstructor | null>(null);
   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
@@ -62,7 +63,7 @@ function AdminPanel() {
         <div className="bg-[#0a0205]/60 backdrop-blur-[24px] border border-white/[0.04] mb-10 p-4 md:p-6 rounded-[2rem] w-full max-w-[1400px] mx-auto shadow-lg shadow-black/20">
           <Header />
           <div className="py-20 text-center text-white">
-            <ShieldAlert size={64} className="mx-auto mb-4 text-[#ff0055]/50" />
+            <ShieldAlert size={64} className="mx-auto mb-4 text-[#8B1A32]/50" />
             <h2 className="text-3xl font-bold">Acceso Denegado</h2>
             <p className="text-white/50 mt-2">No tienes permisos administrativos.</p>
           </div>
@@ -77,7 +78,7 @@ function AdminPanel() {
         <Header />
         <div className="pt-6 flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
-            <span className="text-[10px] uppercase font-black tracking-[0.2em] text-[#ff0055]/70 mb-2 block">SITE — Control Administrativo</span>
+            <span className="text-[10px] uppercase font-black tracking-[0.2em] text-[#8B1A32]/70 mb-2 block">SITE — Control Administrativo</span>
             <h1 className="text-3xl md:text-4xl font-extrabold text-white">Panel de Control</h1>
           </div>
 
@@ -92,7 +93,7 @@ function AdminPanel() {
                 onClick={() => setActiveTab(tab.id as any)}
                 className={cn(
                   "px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap",
-                  activeTab === tab.id ? "bg-gradient-to-r from-[#ff0055] to-[#ff3377] text-white shadow-lg shadow-[#ff0055]/20" : "text-white/40 hover:text-white"
+                  activeTab === tab.id ? "bg-gradient-to-r from-[#8B1A32] to-[#B8354D] text-white shadow-lg shadow-[#8B1A32]/20" : "text-white/40 hover:text-white"
                 )}
               >
                 {tab.icon} {tab.label}
@@ -203,7 +204,7 @@ function AdminPanel() {
         {activeTab === 'talleres' && (
           <TalleresView
             talleres={talleres}
-            onEdit={(t: any) => { setEditingTaller(t); setShowModal(true); }}
+            onEdit={(t: TallerConInstructor & { horarios: Horario[] }) => { setEditingTaller(t); setShowModal(true); }}
             onNew={() => { setEditingTaller(null); setShowModal(true); }}
           />
         )}
@@ -223,7 +224,7 @@ function AdminPanel() {
   )
 }
 
-function TallerModal({ taller, onClose, onSuccess }: { taller: any, onClose: () => void, onSuccess: () => void }) {
+function TallerModal({ taller, onClose, onSuccess }: { taller: TallerConInstructor | null, onClose: () => void, onSuccess: () => void }) {
   const [loading, setLoading] = useState(false);
   const [generatingAI, setGeneratingAI] = useState(false);
   const [formData, setFormData] = useState({
@@ -235,7 +236,7 @@ function TallerModal({ taller, onClose, onSuccess }: { taller: any, onClose: () 
     descripcion: taller?.descripcion || '',
     imagen_url: taller?.imagen_url || ''
   });
-  const [horarios, setHorarios] = useState<any[]>(taller?.horarios || []);
+  const [horarios, setHorarios] = useState<Partial<Horario>[]>(taller?.horarios || []);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>(taller?.imagen_url || '');
 
@@ -637,7 +638,7 @@ function CustomSelect({
   );
 }
 
-function StatsView({ stats, loading }: any) {
+function StatsView({ stats, loading }: { stats: AdminStats; loading: boolean }) {
   if (loading) return <div className="text-center py-20"><Loader2 className="animate-spin mx-auto text-primary-glow" size={32} /></div>;
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 animate-in fade-in slide-in-from-bottom-4">
@@ -657,7 +658,7 @@ function StatsView({ stats, loading }: any) {
   )
 }
 
-function TalleresView({ talleres, onEdit, onNew }: any) {
+function TalleresView({ talleres, onEdit, onNew }: { talleres: (TallerConInstructor & { horarios: Horario[] })[], onEdit: (t: TallerConInstructor & { horarios: Horario[] }) => void, onNew: () => void }) {
   return (
     <div className="glass-card p-8 rounded-[2.5rem] border border-white/5">
       <div className="flex items-center justify-between mb-8">
@@ -668,12 +669,12 @@ function TalleresView({ talleres, onEdit, onNew }: any) {
         <button onClick={onNew} className="bg-primary text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 hover:scale-[1.05] transition-all shadow-lg shadow-primary/20"><Plus size={18}/> Nuevo Taller</button>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {talleres.map((t: any) => (
+        {talleres.map((t) => (
           <div key={t.id} className="bg-white/5 border border-white/10 rounded-[2rem] p-5 flex flex-col group hover:border-primary/40 transition-all relative overflow-hidden">
             <div className="flex justify-between items-start mb-4">
               <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center overflow-hidden border border-white/10">
                 {t.imagen_url ? (
-                  <img src={t.imagen_url} className="w-full h-full object-cover" />
+                  <img src={t.imagen_url} className="w-full h-full object-cover" alt={t.nombre} />
                 ) : (
                   <ImageIcon size={20} className="text-white/20" />
                 )}
@@ -708,7 +709,7 @@ function TalleresView({ talleres, onEdit, onNew }: any) {
                 <span className="text-[10px] font-black">{t.cupo} <span className="opacity-50">CUPO</span></span>
               </div>
               <div className="flex -space-x-2">
-                {t.horarios?.map((h: any, idx: number) => (
+                {t.horarios?.map((h, idx) => (
                   <div key={idx} className="w-6 h-6 rounded-full bg-white/10 border border-[#121212] flex items-center justify-center text-[8px] font-black text-white uppercase" title={`${h.dia}: ${h.hora_inicio}`}>
                     {h.dia.charAt(0)}
                   </div>

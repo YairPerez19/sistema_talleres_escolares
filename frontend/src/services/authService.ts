@@ -55,9 +55,15 @@ class AuthServiceError extends Error {
 
 async function handleResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
-    const body = await response.json().catch(() => ({}));
-    const errorMessage = Array.isArray(body.message) ? body.message[0] : body.message;
-    throw new AuthServiceError(errorMessage || body.error || 'Error de conexión');
+    let errorMessage = 'Error de conexión';
+    try {
+      const body = await response.json();
+      errorMessage = Array.isArray(body.message) ? body.message[0] : body.message || errorMessage;
+    } catch {
+      const text = await response.text().catch(() => '');
+      errorMessage = text || `Error del servidor (${response.status})`;
+    }
+    throw new AuthServiceError(errorMessage);
   }
   return response.json();
 }

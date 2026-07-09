@@ -22,13 +22,14 @@ export function useRole(userId: string | undefined | null): UseRoleResult {
     }
     const uid = userId;
     async function fetchRole() {
-      const { data } = await (supabase as any)
+      const { data } = await supabase
         .from('user_roles')
         .select('role')
         .eq('user_id', uid)
         .maybeSingle();
-      if (data?.role) {
-        setRole(data.role as AppRole);
+      const roleData = data as { role: string } | null;
+      if (roleData?.role) {
+        setRole(roleData.role as AppRole);
       } else {
         setRole('student');
       }

@@ -94,7 +94,7 @@ export const StickmanSports = () => {
   const StickmanSVG = ({ flip = false, className = '' }: { flip?: boolean, className?: string }) => (
     <div className={`absolute w-[120px] h-[180px] origin-center ${className}`}>
       <svg width="120" height="180" viewBox="0 0 120 180" 
-           className={`stroke-[#ff0055] stroke-[4px] fill-none overflow-visible drop-shadow-[0_0_10px_#ff0055] ${flip ? '-scale-x-100' : ''}`}>
+           className={`stroke-[#8B1A32] stroke-[4px] fill-none overflow-visible drop-shadow-[0_0_10px_#8B1A32] ${flip ? '-scale-x-100' : ''}`}>
         {/* Head */}
         <circle cx="60" cy="30" r="18" />
         {/* Torso */}
@@ -115,46 +115,46 @@ export const StickmanSports = () => {
       {/* SCENE 1: BASKETBALL */}
       <div className="stickman-scene scene-1 absolute inset-0 flex items-center justify-center scale-[0.6] md:scale-90">
         {/* Floor Line */}
-        <div className="absolute bottom-[20%] w-[150%] h-[4px] bg-[#ff0055]/30 drop-shadow-[0_0_8px_#ff0055]" />
+        <div className="absolute bottom-[20%] w-[150%] h-[4px] bg-[#8B1A32]/30 drop-shadow-[0_0_8px_#8B1A32]" />
         
         <StickmanSVG className="p1-wrapper bottom-[20%]" />
         <div className="bball absolute bottom-[20%] ml-20 text-[4rem] drop-shadow-[0_0_15px_rgba(255,0,85,1)] z-10">🏀</div>
         <StickmanSVG flip className="p2-wrapper bottom-[20%]" />
         
         {/* Basketball Hoop */}
-        <div className="absolute right-[5%] bottom-[20%] w-32 h-[350px] border-l-8 border-[#ff0055]/60 flex flex-col items-start drop-shadow-[0_0_10px_#ff0055]">
-          <div className="w-28 h-5 bg-[#ff0055] mt-[60px] rounded-r-full" />
-          <div className="w-20 h-20 border-[6px] border-[#ff0055] ml-4 rounded-b-3xl border-t-0 opacity-100" />
+        <div className="absolute right-[5%] bottom-[20%] w-32 h-[350px] border-l-8 border-[#8B1A32]/60 flex flex-col items-start drop-shadow-[0_0_10px_#8B1A32]">
+          <div className="w-28 h-5 bg-[#8B1A32] mt-[60px] rounded-r-full" />
+          <div className="w-20 h-20 border-[6px] border-[#8B1A32] ml-4 rounded-b-3xl border-t-0 opacity-100" />
         </div>
       </div>
 
       {/* SCENE 2: SOCCER */}
       <div className="stickman-scene scene-2 absolute inset-0 flex items-center justify-center scale-[0.6] md:scale-90">
         {/* Floor Line */}
-        <div className="absolute bottom-[20%] w-[150%] h-[4px] bg-[#ff0055]/30 drop-shadow-[0_0_8px_#ff0055]" />
+        <div className="absolute bottom-[20%] w-[150%] h-[4px] bg-[#8B1A32]/30 drop-shadow-[0_0_8px_#8B1A32]" />
 
         <StickmanSVG className="s-p1-wrapper bottom-[20%]" />
         <div className="sball absolute bottom-[20%] ml-20 text-[4rem] drop-shadow-[0_0_15px_rgba(255,0,85,1)] z-10">⚽</div>
         <StickmanSVG flip className="s-p2-wrapper bottom-[20%]" />
         
         {/* Soccer Goal */}
-        <div className="absolute right-[5%] bottom-[20%] w-48 h-[250px] border-[8px] border-[#ff0055] drop-shadow-[0_0_12px_#ff0055] border-r-0 border-b-0 rounded-tl-3xl opacity-100">
-          <div className="w-full h-full opacity-40 bg-[repeating-linear-gradient(45deg,transparent,transparent_15px,#ff0055_15px,#ff0055_18px)]" />
+        <div className="absolute right-[5%] bottom-[20%] w-48 h-[250px] border-[8px] border-[#8B1A32] drop-shadow-[0_0_12px_#8B1A32] border-r-0 border-b-0 rounded-tl-3xl opacity-100">
+          <div className="w-full h-full opacity-40 bg-[repeating-linear-gradient(45deg,transparent,transparent_15px,#8B1A32_15px,#8B1A32_18px)]" />
         </div>
       </div>
 
       {/* SCENE 3: VOLLEYBALL */}
       <div className="stickman-scene scene-3 absolute inset-0 flex items-center justify-center scale-[0.6] md:scale-90">
         {/* Floor Line */}
-        <div className="absolute bottom-[20%] w-[150%] h-[4px] bg-[#ff0055]/30 drop-shadow-[0_0_8px_#ff0055]" />
+        <div className="absolute bottom-[20%] w-[150%] h-[4px] bg-[#8B1A32]/30 drop-shadow-[0_0_8px_#8B1A32]" />
 
         <StickmanSVG className="v-p1-wrapper bottom-[20%]" />
         <div className="vball absolute bottom-[20%] text-[4rem] drop-shadow-[0_0_15px_rgba(255,0,85,1)] z-10">🏐</div>
         <StickmanSVG flip className="v-p2-wrapper bottom-[20%]" />
         
         {/* Volleyball Net */}
-        <div className="absolute left-[50%] -translate-x-1/2 bottom-[20%] w-4 h-[300px] bg-[#ff0055] drop-shadow-[0_0_12px_#ff0055] opacity-100 rounded-t-full">
-           <div className="w-[160px] h-[120px] bg-[repeating-linear-gradient(90deg,transparent,transparent_12px,#ff0055_12px,#ff0055_15px)] opacity-50 absolute top-0 left-1/2 -translate-x-1/2" />
+        <div className="absolute left-[50%] -translate-x-1/2 bottom-[20%] w-4 h-[300px] bg-[#8B1A32] drop-shadow-[0_0_12px_#8B1A32] opacity-100 rounded-t-full">
+           <div className="w-[160px] h-[120px] bg-[repeating-linear-gradient(90deg,transparent,transparent_12px,#8B1A32_12px,#8B1A32_15px)] opacity-50 absolute top-0 left-1/2 -translate-x-1/2" />
         </div>
       </div>
 

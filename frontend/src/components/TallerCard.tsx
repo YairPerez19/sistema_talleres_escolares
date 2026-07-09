@@ -38,7 +38,7 @@ export function TallerCard({ taller, inscrito, onInscribir, onBaja, colisionaCon
   const imageRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
 
-  const cat = useMemo(() => categoriaConfig[taller.categoria] || { accent: '#ff0055', gradient: 'from-[#800020]/90 via-[#800020]/40 to-[#0F0A0D]', emoji: '📚', label: 'Taller' }, [taller.categoria]);
+  const cat = useMemo(() => categoriaConfig[taller.categoria] || { accent: '#8B1A32', gradient: 'from-[#5C1020]/90 via-[#5C1020]/40 to-[#0F0A0D]', emoji: '📚', label: 'Taller' }, [taller.categoria]);
   const emoji = useMemo(() => {
     const key = taller.nombre.toLowerCase().trim();
     for (const [k, v] of Object.entries(tallerEmojis)) {
@@ -47,7 +47,13 @@ export function TallerCard({ taller, inscrito, onInscribir, onBaja, colisionaCon
     return cat.emoji;
   }, [taller.nombre, cat.emoji]);
 
-  const imageUrl = useMemo(() => taller.imagen_url || imagenDeTaller(taller.nombre), [taller.imagen_url, taller.nombre]);
+  const imageUrl = useMemo(() => {
+    const raw = taller.imagen_url || imagenDeTaller(taller.nombre);
+    if (raw.includes('supabase') && raw.includes('/storage/v1/object/public/')) {
+      return `${raw}?width=800&height=600&resize=cover`;
+    }
+    return raw;
+  }, [taller.imagen_url, taller.nombre]);
 
   useGSAP(() => {
     const card = cardRef.current;

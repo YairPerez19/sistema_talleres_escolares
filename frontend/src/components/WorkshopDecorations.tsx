@@ -168,7 +168,7 @@ export function PulseRings() {
         <div
           key={i}
           data-ring={r.delay}
-          className={`absolute ${r.size} rounded-full border border-[#ff0055]/30`}
+          className={`absolute ${r.size} rounded-full border border-[#8B1A32]/30`}
         />
       ))}
     </div>

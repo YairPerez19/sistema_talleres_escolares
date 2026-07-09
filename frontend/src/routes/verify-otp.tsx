@@ -170,21 +170,21 @@ function VerifyOtpPage() {
   if (!session.pendingToken) return null
 
   return (
-    <div className="flex flex-col w-full min-h-screen bg-[#050102]">
+    <div className="flex flex-col w-full min-h-screen bg-[#0C0810]">
       <div className="relative z-10 p-4 md:p-6 w-full max-w-[1400px] mx-auto">
         <Header />
       </div>
       <div className="flex-1 flex items-center justify-center p-4 relative">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[#ff0055]/5 blur-[150px] rounded-full pointer-events-none" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-[#800020]/10 blur-[150px] rounded-full pointer-events-none" />
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[#8B1A32]/5 blur-[150px] rounded-full pointer-events-none" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-[#5C1020]/10 blur-[150px] rounded-full pointer-events-none" />
 
         <div className="w-full max-w-md relative z-10">
           <button type="button" onClick={() => navigate({ to: '/auth' })} className="text-white/30 hover:text-white text-xs font-bold mb-6 flex items-center gap-1 transition-colors">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
             Volver
           </button>
-          <div className="p-8 bg-[#0a0205]/80 backdrop-blur-[24px] rounded-[2.5rem] border border-white/[0.06] shadow-2xl shadow-black/30 text-center">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#ff0055]/20 to-[#800020]/20 flex items-center justify-center text-[#ff0055] border border-[#ff0055]/20 mx-auto mb-6">
+          <div className="p-8 bg-[#150D18]/80 backdrop-blur-[24px] rounded-[2.5rem] border border-white/[0.06] shadow-2xl shadow-black/30 text-center">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#8B1A32]/20 to-[#5C1020]/20 flex items-center justify-center text-[#8B1A32] border border-[#8B1A32]/20 mx-auto mb-6">
               <ShieldCheck size={28} />
             </div>
 
@@ -196,7 +196,7 @@ function VerifyOtpPage() {
                 ? 'Tu cuenta fue creada. Ingresa el código que enviamos a:'
                 : `${session.nombre ? `Hola ${session.nombre}, ` : ''}ingresa el código que enviamos a:`}
             </p>
-            <p className="text-[#ff0055] font-bold text-sm flex items-center justify-center gap-2 mb-8">
+            <p className="text-[#8B1A32] font-bold text-sm flex items-center justify-center gap-2 mb-8">
               <Mail size={14} /> {session.emailMasked}
             </p>
 
@@ -215,9 +215,9 @@ function VerifyOtpPage() {
                   className={cn(
                     'w-12 h-14 text-center text-2xl font-bold rounded-xl border transition-all duration-200 outline-none',
                     digit
-                      ? 'border-[#ff0055]/40 bg-[#ff0055]/10 text-white shadow-[0_0_15px_rgba(255,0,85,0.15)]'
+                      ? 'border-[#8B1A32]/40 bg-[#8B1A32]/10 text-white shadow-[0_0_15px_rgba(255,0,85,0.15)]'
                       : 'border-white/[0.06] bg-white/[0.03] text-white/30',
-                    'focus:border-[#ff0055]/50 focus:shadow-[0_0_20px_rgba(255,0,85,0.2)]',
+                    'focus:border-[#8B1A32]/50 focus:shadow-[0_0_20px_rgba(255,0,85,0.2)]',
                   )}
                 />
               ))}
@@ -227,7 +227,7 @@ function VerifyOtpPage() {
               type="button"
               onClick={handleVerify}
               disabled={loadingState.loading || code.join('').length !== 6}
-              className="w-full py-4 rounded-2xl font-bold bg-gradient-to-r from-[#ff0055] to-[#ff3377] text-white hover:shadow-[0_10px_35px_rgba(255,0,85,0.4)] hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-none mb-6"
+              className="w-full py-4 rounded-2xl font-bold bg-gradient-to-r from-[#8B1A32] to-[#B8354D] text-white hover:shadow-[0_10px_35px_rgba(255,0,85,0.4)] hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-none mb-6"
             >
               {loadingState.loading ? <Loader2 className="animate-spin" size={20} /> : <ShieldCheck size={20} />}
               {loadingState.loading ? 'Verificando...' : 'Verificar código'}
@@ -245,7 +245,7 @@ function VerifyOtpPage() {
                 type="button"
                 onClick={handleSendOtp}
                 disabled={loadingState.sendingOtp || (timers.cooldownRemaining > 0)}
-                className="flex items-center gap-1.5 text-[#ff0055] font-semibold hover:brightness-125 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                className="flex items-center gap-1.5 text-[#8B1A32] font-semibold hover:brightness-125 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {loadingState.sendingOtp ? (
                   <Loader2 size={14} className="animate-spin" />

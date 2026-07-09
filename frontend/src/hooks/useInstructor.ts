@@ -1,11 +1,10 @@
 import * as React from 'react';
 import { supabase } from '../integrations/supabase/client';
+import type { Database } from '../integrations/supabase/types';
 import type { TallerConInstructor, Horario } from '../lib/types';
 
-/**
- * Hook para obtener los talleres asignados al instructor actual.
- * Filtra por instructor_id = auth.uid().
- */
+type TallerRow = Database['public']['Tables']['talleres']['Row'];
+
 export function useInstructorTalleres(instructorId: string | undefined | null) {
   const [talleres, setTalleres] = React.useState<TallerConInstructor[]>([]);
   const [loading, setLoading] = React.useState(true);
@@ -44,9 +43,8 @@ export function useInstructorTalleres(instructorId: string | undefined | null) {
       
       const horariosList = (horariosRes.data ?? []) as Horario[];
 
-      // Obtener conteo de alumnos por taller
       const conteos = await Promise.all(
-        talleresList.map(async (t: any) => {
+        talleresList.map(async (t: TallerRow) => {
           const { count } = await supabase
             .from('inscripciones')
             .select('*', { count: 'exact', head: true })
@@ -57,7 +55,7 @@ export function useInstructorTalleres(instructorId: string | undefined | null) {
 
       const conteoMap = new Map(conteos.map(c => [c.id, c.count]));
 
-      const joined = talleresList.map((t: any) => ({
+      const joined: TallerConInstructor[] = talleresList.map((t: TallerRow) => ({
         ...t,
         cupo: t.cupo ?? 0,
         horarios: horariosList.filter(h => h.taller_id === t.id),
@@ -74,9 +72,6 @@ export function useInstructorTalleres(instructorId: string | undefined | null) {
   return { talleres, loading, refresh };
 }
 
-/**
- * Hook para obtener todos los talleres (para el admin, con información de instructor).
- */
 export function useAllTalleresAdmin() {
   const [talleres, setTalleres] = React.useState<(TallerConInstructor & { alumnos_count: number })[]>([]);
   const [loading, setLoading] = React.useState(true);
@@ -98,7 +93,7 @@ export function useAllTalleresAdmin() {
       const talleresList = talleresRes.data;
 
       const conteos = await Promise.all(
-        talleresList.map(async (t: any) => {
+        talleresList.map(async (t: TallerRow) => {
           const { count } = await supabase
             .from('inscripciones')
             .select('*', { count: 'exact', head: true })
@@ -109,7 +104,7 @@ export function useAllTalleresAdmin() {
 
       const conteoMap = new Map(conteos.map(c => [c.id, c.count]));
 
-      const joined = talleresList.map((t: any) => ({
+      const joined = talleresList.map((t: TallerRow) => ({
         ...t,
         horarios: horariosList.filter(h => h.taller_id === t.id),
         alumnos_count: conteoMap.get(t.id) ?? 0,

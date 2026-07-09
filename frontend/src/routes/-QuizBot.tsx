@@ -114,7 +114,7 @@ export function QuizBot({ open, setOpen }: { open: boolean; setOpen: (v: boolean
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-2xl bg-gradient-to-br from-[#ff0055] to-[#ff3377] shadow-xl shadow-[#ff0055]/30 flex items-center justify-center hover:scale-110 transition-transform duration-300 animate-pulse-glow"
+        className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-2xl bg-gradient-to-br from-[#8B1A32] to-[#B8354D] shadow-xl shadow-[#8B1A32]/30 flex items-center justify-center hover:scale-110 transition-transform duration-300 animate-pulse-glow"
       >
         <Bot className="w-6 h-6 text-white" />
       </button>
@@ -122,8 +122,8 @@ export function QuizBot({ open, setOpen }: { open: boolean; setOpen: (v: boolean
       <div className={`fixed bottom-24 right-6 z-50 w-[380px] max-w-[calc(100vw-3rem)] rounded-2xl bg-[#0a0205]/95 backdrop-blur-[24px] border border-white/10 shadow-2xl shadow-black/50 transition-all duration-400 ${open ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 translate-y-4 pointer-events-none'}`}>
         <div className="flex items-center justify-between p-4 border-b border-white/5">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#ff0055]/20 to-[#800020]/20 border border-[#ff0055]/20 flex items-center justify-center">
-              <Bot className="w-4 h-4 text-[#ff0055]" />
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#8B1A32]/20 to-[#5C1020]/20 border border-[#8B1A32]/20 flex items-center justify-center">
+              <Bot className="w-4 h-4 text-[#8B1A32]" />
             </div>
             <div>
               <p className="font-bold text-[13px] text-white">Asistente de Talleres</p>
@@ -147,7 +147,7 @@ export function QuizBot({ open, setOpen }: { open: boolean; setOpen: (v: boolean
             <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
               <div className={`max-w-[85%] p-3 rounded-2xl text-[13px] leading-relaxed ${
                 m.role === 'user'
-                  ? 'bg-gradient-to-r from-[#ff0055] to-[#ff3377] text-white font-semibold rounded-tr-md'
+                  ? 'bg-gradient-to-r from-[#8B1A32] to-[#B8354D] text-white font-semibold rounded-tr-md'
                   : 'bg-white/5 text-white/80 rounded-tl-md'
               }`}>
                 {m.text}
@@ -157,14 +157,14 @@ export function QuizBot({ open, setOpen }: { open: boolean; setOpen: (v: boolean
 
           {!done && step < quizQuestions.length && (
             <div className="space-y-2 mt-3">
-              <p className="text-[11px] font-semibold text-[#ff0055] uppercase tracking-wider">Elige una opción:</p>
+              <p className="text-[11px] font-semibold text-[#8B1A32] uppercase tracking-wider">Elige una opción:</p>
               <div className="grid gap-1.5">
                 {quizQuestions[step].options.map((opt) => (
                   <button
                     type="button"
                     key={opt.value}
                     onClick={() => handleAnswer(opt.value)}
-                    className="text-left px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white/80 text-[12px] font-medium hover:bg-[#ff0055]/20 hover:text-white hover:border-[#ff0055]/40 transition-all duration-200"
+                    className="text-left px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white/80 text-[12px] font-medium hover:bg-[#8B1A32]/20 hover:text-white hover:border-[#8B1A32]/40 transition-all duration-200"
                   >
                     {opt.text}
                   </button>
@@ -174,7 +174,7 @@ export function QuizBot({ open, setOpen }: { open: boolean; setOpen: (v: boolean
           )}
 
           {done && (
-            <Link to="/catalogo" className="block mt-3 text-center px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#ff0055] to-[#ff3377] text-white font-bold text-[12px] hover:shadow-[0_8px_25px_rgba(255,0,85,0.4)] transition-all">
+            <Link to="/catalogo" className="block mt-3 text-center px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#8B1A32] to-[#B8354D] text-white font-bold text-[12px] hover:shadow-[0_8px_25px_rgba(255,0,85,0.4)] transition-all">
               Ver Catálogo de Talleres
             </Link>
           )}
