@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import type { EstadoAsistencia } from '../../lib/types';
 import { AlumnoRow } from './AlumnoRow';
-import { useAsistencias } from '../../hooks/useAsistencias';
+import { useAsistencias, exportarCSVInstructor } from '../../hooks/useAsistencias';
 import { cn } from '../../lib/utils';
 import { CheckSquare, Save, Clock, RefreshCw } from '@/components/AnimatedIcons';
 import { Users, Zap } from '@/components/icons';
+import { DownloadAttendanceButton } from './DownloadAttendanceButton';
 import { toast } from 'sonner';
 
 interface ListaAsistenciaProps {
@@ -92,6 +93,11 @@ export function ListaAsistencia({ tallerId, tallerNombre, soloLectura = false }:
           >
             <RefreshCw size={14} />
           </button>
+
+          <DownloadAttendanceButton
+            onDownload={() => exportarCSVInstructor(alumnos, tallerNombre, fecha)}
+            disabled={alumnos.length === 0}
+          />
 
           {!soloLectura && esHoy && (
             <button
