@@ -1,4 +1,5 @@
 import { NestFactory } from '@nestjs/core';
+import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
@@ -19,6 +20,26 @@ async function bootstrap() {
     },
     credentials: true,
   });
+
+  app.use(helmet({
+    contentSecurityPolicy: {
+      directives: {
+        'default-src': ["'self'"],
+        'script-src': ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+        'style-src': ["'self'", "'unsafe-inline'"],
+        'img-src': ["'self'", 'data:', 'https://taarmixrsznxeltawztq.supabase.co'],
+        'font-src': ["'self'"],
+        'connect-src': [
+          "'self'",
+          'https://taarmixrsznxeltawztq.supabase.co',
+          ...allowedOrigins,
+        ],
+      },
+    },
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+    crossOriginEmbedderPolicy: false,
+    crossOriginOpenerPolicy: false,
+  }));
 
   app.setGlobalPrefix('api');
 
