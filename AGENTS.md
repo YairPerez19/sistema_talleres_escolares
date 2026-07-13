@@ -37,6 +37,11 @@ The backend needs these env vars (not in `.env.example` but used in code):
 - `JWT_SECRET`
 - `DATABASE_URL` (Postgres connection string for `pg`)
 - `RESEND_API_KEY` (email service)
+- `ALLOWED_ORIGINS` (comma-separated list of CORS-allowed frontend origins, e.g. `http://localhost:5173,http://192.168.1.69:5173`)
+
+## Backend security
+
+The NestJS backend uses `helmet` middleware configured with a CSP that allows the configured `ALLOWED_ORIGINS` plus the Supabase project URL. HSTS, `X-Content-Type-Options: nosniff`, and `X-Frame-Options: SAMEORIGIN` are set by default.
 
 ## Database setup
 
