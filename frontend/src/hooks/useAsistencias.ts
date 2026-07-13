@@ -247,11 +247,27 @@ export function exportarCSV(asistencias: AsistenciaConRelaciones[]) {
   const rows = asistencias.map(a => [
     a.fecha, a.profiles?.nombre ?? '', a.profiles?.matricula ?? '', a.talleres?.nombre ?? '', a.estado, a.hora ?? ''
   ]);
+  generateCSVDownload(rows, headers, 'reporte_asistencia.csv');
+}
+
+export function exportarCSVInstructor(
+  alumnos: AlumnoConAsistencia[],
+  tallerNombre: string,
+  fecha: string
+) {
+  const headers = ['Fecha', 'Alumno', 'Matrícula', 'Taller', 'Estado', 'Turno'];
+  const rows = alumnos.map(a => [
+    fecha, a.nombre, a.matricula, tallerNombre, a.estado, a.turno
+  ]);
+  generateCSVDownload(rows, headers, `asistencia_${tallerNombre.replace(/\s+/g, '_')}_${fecha}.csv`);
+}
+
+function generateCSVDownload(rows: string[][], headers: string[], filename: string) {
   const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
   const blob = new Blob([csv], { type: 'text/csv' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
-  link.download = 'reporte_asistencia.csv';
+  link.download = filename;
   link.click();
 }
