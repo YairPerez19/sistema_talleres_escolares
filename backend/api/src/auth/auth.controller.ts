@@ -1,11 +1,31 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, BadRequestException } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import {
+  Controller,
+  Post,
+  Body,
+  HttpCode,
+  HttpStatus,
+  BadRequestException,
+  UseGuards,
+} from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
-import { VerifyIdentitySchema, VerifyIdentityDto } from './dto/verify-identity.dto';
+import {
+  VerifyIdentitySchema,
+  VerifyIdentityDto,
+} from './dto/verify-identity.dto';
 import { VerifyOtpSchema, VerifyOtpDto } from './dto/verify-otp.dto';
 import { ResendOtpSchema, ResendOtpDto } from './dto/resend-otp.dto';
-import { RegisterStudentSchema, RegisterStudentDto } from './dto/register-student.dto';
+import {
+  RegisterStudentSchema,
+  RegisterStudentDto,
+} from './dto/register-student.dto';
+import {
+  RegisterInstructorSchema,
+  RegisterInstructorDto,
+} from './dto/register-instructor.dto';
 import { ZodError } from 'zod';
+import { Roles } from '../common/roles.decorator';
+import { RolesGuard } from '../common/roles.guard';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -15,12 +35,48 @@ export class AuthController {
   @Post('register-student')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Registrar nuevo estudiante' })
-  @ApiResponse({ status: 201, description: 'Estudiante registrado exitosamente' })
-  @ApiResponse({ status: 400, description: 'Datos inválidos o correo ya registrado' })
+  @ApiResponse({
+    status: 201,
+    description: 'Estudiante registrado exitosamente',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Datos inválidos o correo ya registrado',
+  })
   async registerStudent(@Body() body: unknown) {
     try {
-      const dto = RegisterStudentSchema.parse(body) as RegisterStudentDto;
+      const dto = RegisterStudentSchema.parse(body);
       return await this.authService.registerStudent(dto);
+    } catch (err) {
+      if (err instanceof ZodError) {
+        throw new BadRequestException('Datos de registro inválidos.');
+      }
+      throw err;
+    }
+  }
+
+  @Post('register-instructor')
+  @UseGuards(RolesGuard)
+  @Roles('admin')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Crear cuenta de instructor (solo administrador)',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Instructor creado y asignado al taller',
+  })
+  @ApiResponse({ status: 400, description: 'Datos inválidos' })
+  @ApiResponse({
+    status: 409,
+    description: 'El taller ya tiene un instructor asignado',
+  })
+  @ApiResponse({ status: 403, description: 'Sin permisos de administrador' })
+  async registerInstructor(@Body() body: unknown) {
+    try {
+      const dto = RegisterInstructorSchema.parse(body);
+      return await this.authService.registerInstructor(dto);
     } catch (err) {
       if (err instanceof ZodError) {
         throw new BadRequestException('Datos de registro inválidos.');
@@ -36,7 +92,7 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Credenciales inválidas' })
   async verifyIdentity(@Body() body: unknown) {
     try {
-      const dto = VerifyIdentitySchema.parse(body) as VerifyIdentityDto;
+      const dto = VerifyIdentitySchema.parse(body);
       return await this.authService.verifyIdentity(dto);
     } catch (err) {
       if (err instanceof ZodError) {
@@ -52,7 +108,7 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'OTP enviado o en cooldown' })
   async sendOtp(@Body() body: unknown) {
     try {
-      const dto = ResendOtpSchema.parse(body) as ResendOtpDto;
+      const dto = ResendOtpSchema.parse(body);
       return await this.authService.sendOtp(dto.pending_token);
     } catch (err) {
       if (err instanceof ZodError) {
@@ -69,7 +125,7 @@ export class AuthController {
   @ApiResponse({ status: 400, description: 'Código inválido o expirado' })
   async verifyOtp(@Body() body: unknown) {
     try {
-      const dto = VerifyOtpSchema.parse(body) as VerifyOtpDto;
+      const dto = VerifyOtpSchema.parse(body);
       return await this.authService.verifyOtp(dto.pending_token, dto.code);
     } catch (err) {
       if (err instanceof ZodError) {

@@ -59,6 +59,27 @@
   --wine-700: #1d4ed8;
   --wine-800: #1e40af;
   --wine-900: #1e3a8a;
+
+  /* === WINE PALETTE (signature color #721422) === */
+  --wine: #721422;
+  --wine-light: #a82a3e;
+  --wine-bright: #d24a6b;
+  --wine-dark: #4d0e18;
+  --wine-deep: #2a0709;
+  --wine-rgb: 114, 20, 34;
+  --wine-glow: rgba(114, 20, 34, 0.55);
+  --wine-glow-soft: rgba(114, 20, 34, 0.25);
+  --wine-glow-faint: rgba(114, 20, 34, 0.12);
+
+  /* === ADMIN SURFACES === */
+  --admin-bg: #060306;
+  --admin-surface: rgba(10, 2, 5, 0.6);
+  --admin-surface-2: rgba(20, 6, 10, 0.4);
+  --admin-border: rgba(255, 255, 255, 0.06);
+  --admin-border-strong: rgba(255, 255, 255, 0.12);
+  --admin-text: #f5f5f5;
+  --admin-text-muted: rgba(255, 255, 255, 0.55);
+  --admin-text-faint: rgba(255, 255, 255, 0.25);
 }
 
 body {
@@ -474,6 +495,257 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 }
 .group:hover .workshop-icon-spin {
   transform: rotate(360deg) scale(1.1);
+}
+
+/* === ADMIN PANEL DESIGN SYSTEM === */
+
+.admin-shell {
+  background:
+    radial-gradient(ellipse 60% 40% at 0% 0%, var(--wine-glow-faint) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 100% 100%, var(--wine-glow-faint) 0%, transparent 60%),
+    var(--admin-bg);
+  position: relative;
+}
+
+.admin-shell::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--admin-border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--admin-border) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 30%, black 0%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 30%, black 0%, transparent 80%);
+  pointer-events: none;
+  opacity: 0.5;
+  z-index: 0;
+}
+
+.admin-card {
+  position: relative;
+  background: linear-gradient(180deg, rgba(20, 8, 12, 0.55) 0%, rgba(8, 2, 4, 0.7) 100%);
+  border: 1px solid var(--admin-border);
+  border-radius: 1.5rem;
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  transition: border-color 0.4s ease, box-shadow 0.4s ease, transform 0.4s ease;
+}
+
+.admin-card:hover {
+  border-color: rgba(var(--wine-rgb), 0.35);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.04) inset,
+    0 20px 50px -25px rgba(0, 0, 0, 0.6),
+    0 0 30px var(--wine-glow-faint);
+}
+
+.admin-card-elevated {
+  background:
+    linear-gradient(180deg, rgba(30, 10, 16, 0.6) 0%, rgba(12, 4, 6, 0.8) 100%);
+  border: 1px solid rgba(var(--wine-rgb), 0.18);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.04) inset,
+    0 30px 60px -30px rgba(0, 0, 0, 0.7),
+    0 0 40px var(--wine-glow-faint);
+}
+
+@layer components {
+  .admin-input {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--admin-border-strong);
+    border-radius: 0.75rem;
+    padding-block: 0.625rem;
+    padding-inline: 0.875rem;
+    color: var(--admin-text);
+    font-size: 0.875rem;
+    width: 100%;
+    transition: all 0.25s ease;
+    outline: none;
+  }
+
+  select.admin-input option {
+    background-color: var(--admin-bg);
+    color: var(--admin-text);
+  }
+
+  .admin-input::placeholder { color: var(--admin-text-faint); }
+  .admin-input:hover { border-color: rgba(255, 255, 255, 0.18); }
+  .admin-input:focus {
+    border-color: var(--wine);
+    background: rgba(255, 255, 255, 0.05);
+    box-shadow: 0 0 0 3px var(--wine-glow-faint), 0 0 18px var(--wine-glow-soft);
+  }
+}
+
+.admin-tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.875rem;
+  border-radius: 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--admin-text-muted);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+}
+.admin-tab:hover { color: var(--admin-text); }
+.admin-tab[data-active="true"] {
+  color: #fff;
+  background: linear-gradient(135deg, var(--wine) 0%, var(--wine-dark) 100%);
+  box-shadow:
+    0 4px 14px rgba(var(--wine-rgb), 0.45),
+    0 0 24px var(--wine-glow-soft),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+.admin-tab[data-active="true"]::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 0.75rem;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(var(--wine-rgb), 0.6), transparent 50%, rgba(var(--wine-rgb), 0.6));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.admin-stat-card {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba(20, 8, 12, 0.6) 0%, rgba(8, 2, 4, 0.7) 100%);
+  border: 1px solid var(--admin-border);
+  border-radius: 1.25rem;
+  padding: 1.25rem;
+  transition: all 0.4s ease;
+}
+.admin-stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(var(--wine-rgb), 0.4), transparent);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+.admin-stat-card:hover {
+  border-color: rgba(var(--wine-rgb), 0.3);
+  transform: translateY(-2px);
+}
+.admin-stat-card:hover::before { opacity: 1; }
+
+.admin-row {
+  transition: all 0.25s ease;
+  border-radius: 0.75rem;
+}
+.admin-row:hover {
+  background: linear-gradient(90deg, rgba(var(--wine-rgb), 0.06) 0%, transparent 100%);
+  box-shadow: inset 2px 0 0 var(--wine);
+}
+
+.admin-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+@keyframes wine-pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(var(--wine-rgb), 0.6); }
+  50% { opacity: 0.85; box-shadow: 0 0 0 6px rgba(var(--wine-rgb), 0); }
+}
+.admin-pulse {
+  animation: wine-pulse 2.2s ease-in-out infinite;
+}
+
+@keyframes admin-fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.admin-fade-in { animation: admin-fade-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+/* === DASHBOARD CHARTS === */
+
+@keyframes dashboard-bar-grow {
+  from { transform: scaleY(0); opacity: 0; }
+  to { transform: scaleY(1); opacity: 1; }
+}
+.dashboard-bar-grow {
+  transform-origin: bottom left;
+  animation: dashboard-bar-grow 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.dashboard-bar {
+  min-height: 2px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 0 12px rgba(114, 20, 34, 0.15);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), filter 0.3s ease;
+  transform-origin: bottom;
+}
+.dashboard-bar:hover {
+  transform: scaleY(1.04);
+  filter: brightness(1.1);
+}
+
+.dashboard-bar-segment {
+  width: 100%;
+  transition: filter 0.2s ease;
+}
+
+@keyframes donut-segment {
+  from { stroke-dashoffset: 1000; opacity: 0; }
+  to { opacity: 1; }
+}
+.donut-segment {
+  transition: stroke-width 0.25s ease, filter 0.25s ease;
+  animation: donut-segment 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.donut-segment:hover {
+  stroke-width: 26;
+  filter: brightness(1.15);
+  cursor: pointer;
+}
+
+/* === WINE GLOW TEXT (texto vino iluminado con resplandor) === */
+
+.text-wine-glow {
+  color: #721422;
+  text-shadow:
+    0 0 14px rgba(114, 20, 34, 0.95),
+    0 0 30px rgba(114, 20, 34, 0.75),
+    0 0 55px rgba(114, 20, 34, 0.45);
+}
+
+/* === WINE GLOW BUTTON (botón vino con resplandor) === */
+
+.btn-wine-glow {
+  position: relative;
+  background: linear-gradient(135deg, #a82a3e 0%, #721422 100%);
+  color: #fff;
+  font-weight: 600;
+  border-radius: 9999px;
+  box-shadow:
+    0 4px 18px rgba(114, 20, 34, 0.75),
+    0 0 35px rgba(114, 20, 34, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+.btn-wine-glow:hover {
+  box-shadow:
+    0 8px 28px rgba(114, 20, 34, 0.95),
+    0 0 55px rgba(114, 20, 34, 0.7),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  transform: translateY(-2px) scale(1.02);
 }
 
 /* === SECTION DIVIDER === */

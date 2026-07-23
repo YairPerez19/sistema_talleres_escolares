@@ -159,7 +159,7 @@ function LandingPage() {
             <a href="#testimonials" className="hover:text-white transition-colors">Testimonios</a>
           </div>
 
-          <Link to="/auth" className="hidden sm:block px-5 py-2.5 rounded-full text-[13px] font-semibold bg-gradient-to-r from-[#a85563] to-[#722F37] text-white hover:opacity-90 transition-opacity">
+          <Link to="/auth" className="btn-wine-glow hidden sm:block px-5 py-2.5 text-[13px]">
             Inicio de sesión
           </Link>
 
@@ -184,7 +184,7 @@ function LandingPage() {
               <a href="#about" onClick={() => setMobileMenuOpen(false)} className="text-white/70 hover:text-white text-lg font-medium py-2 transition-colors">Nosotros</a>
               <a href="#team" onClick={() => setMobileMenuOpen(false)} className="text-white/70 hover:text-white text-lg font-medium py-2 transition-colors">Equipo</a>
               <a href="#testimonials" onClick={() => setMobileMenuOpen(false)} className="text-white/70 hover:text-white text-lg font-medium py-2 transition-colors">Testimonios</a>
-              <Link to="/auth" onClick={() => setMobileMenuOpen(false)} className="sm:hidden mt-2 px-5 py-3 rounded-full text-[15px] font-semibold bg-gradient-to-r from-[#a85563] to-[#722F37] text-white text-center">
+              <Link to="/auth" onClick={() => setMobileMenuOpen(false)} className="btn-wine-glow sm:hidden mt-2 px-5 py-3 text-[15px] text-center">
                 Inicio de sesión
               </Link>
             </div>
@@ -202,7 +202,7 @@ function LandingPage() {
           </div>
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-3 sm:mb-4">
             Potencia tu{' '}
-            <span className="text-[#722F37]">Experiencia</span>
+            <span className="text-wine-glow">Experiencia</span>
           </h2>
           <p className="text-white/60 text-sm sm:text-base px-2">Herramientas diseñadas para facilitar cada proceso del ciclo de vida de un taller escolar.</p>
         </div>
@@ -236,7 +236,7 @@ function LandingPage() {
           </div>
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-3 sm:mb-4 leading-tight">
             Una Solución Integral para{' '}
-            <span className="text-[#722F37]">CBTis No 61</span>
+            <span className="text-wine-glow">CBTis No 61</span>
           </h2>
           <p className="text-white/60 max-w-2xl mx-auto text-sm sm:text-base px-2">SITE ha sido desarrollado para optimizar la organización escolar, permitiendo a todos los actores del ecosistema educativo enfocarse en lo que realmente importa.</p>
         </div>
@@ -293,7 +293,7 @@ function LandingPage() {
             <span className="text-[10px] sm:text-[11px] font-medium text-white/60">Resultados en Números</span>
           </div>
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-3 sm:mb-4">
-            Impacto SITE <span className="text-[#722F37]">en la Comunidad</span>
+            Impacto SITE <span className="text-wine-glow">en la Comunidad</span>
           </h2>
           <p className="text-white/60 text-sm sm:text-base">Estamos transformando la eficiencia operativa del CBTis No 61.</p>
         </div>
@@ -320,7 +320,7 @@ function LandingPage() {
             <span className="text-[10px] sm:text-[11px] font-medium text-white/60">Nuestro Equipo</span>
           </div>
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-3 sm:mb-4">
-            Arquitectos de la <span className="text-[#722F37]">Solución</span>
+            Arquitectos de la <span className="text-wine-glow">Solución</span>
           </h2>
           <p className="text-white/60 text-sm sm:text-base px-2">Profesionales comprometidos con la innovación tecnológica en el CBTis No 61.</p>
         </div>
@@ -352,7 +352,7 @@ function LandingPage() {
             <span className="text-[10px] sm:text-[11px] font-medium text-white/60">Voces de Nuestra Comunidad</span>
           </div>
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-3 sm:mb-4">
-            Lo que dicen <span className="text-[#722F37]">de nosotros</span>
+            Lo que dicen <span className="text-wine-glow">de nosotros</span>
           </h2>
           <p className="text-white/60 text-sm sm:text-base px-2">La satisfacción de quienes ya gestionan sus talleres con SITE.</p>
         </div>
@@ -403,7 +403,7 @@ function LandingPage() {
         <div className="text-center mb-8 sm:mb-12">
           <span className="text-[10px] sm:text-[11px] font-medium text-white/60 mb-4 sm:mb-6 block">Preguntas Frecuentes</span>
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-3 sm:mb-4">
-            Todo lo que necesitas <span className="text-[#722F37]">saber</span>
+            Todo lo que necesitas <span className="text-wine-glow">saber</span>
           </h2>
           <p className="text-white/60 mb-6 sm:mb-8 text-sm sm:text-base">Resolvemos tus dudas sobre el uso de la plataforma.</p>
           <button className="px-5 sm:px-6 py-2 rounded-full bg-gradient-to-r from-[#a85563]/80 to-[#722F37]/80 text-white font-medium text-xs sm:text-sm">
@@ -418,7 +418,7 @@ function LandingPage() {
                 onClick={() => setOpenFaq(openFaq === i ? null : i)}
                 className="w-full flex items-center justify-between py-3 sm:py-4 text-left group"
               >
-                <span className="text-white font-medium text-sm sm:text-base group-hover:text-[#722F37] transition-colors">{faq.q}</span>
+                <span className="text-white font-medium text-sm sm:text-base group-hover:text-wine-glow transition-colors">{faq.q}</span>
                 <div className="w-7 sm:w-8 h-7 sm:h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-[#722F37]/20 transition-colors shrink-0 ml-3 sm:ml-4">
                   <Plus className={`w-3 sm:w-4 h-3 sm:h-4 text-white transition-transform duration-300 ${openFaq === i ? 'rotate-45' : ''}`} />
                 </div>
@@ -438,10 +438,10 @@ function LandingPage() {
         <div className="bg-[#0f0f11] rounded-[2rem] sm:rounded-[3rem] border border-white/5 p-8 sm:p-12 md:p-24 text-center flex flex-col items-center">
           <span className="text-[10px] sm:text-[11px] font-medium text-white/60 mb-4 sm:mb-6 block">Comienza Ahora</span>
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white mb-6 sm:mb-10 max-w-3xl leading-tight">
-            ¿Listo para optimizar la gestión de tu taller? Únete a <span className="text-[#722F37]">SITE hoy.</span>
+            ¿Listo para optimizar la gestión de tu taller? Únete a <span className="text-wine-glow">SITE hoy.</span>
           </h2>
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-            <Link to="/auth" className="px-6 sm:px-8 py-3 sm:py-3.5 rounded-full bg-gradient-to-r from-[#a85563] to-[#722F37] text-white font-medium text-sm">
+            <Link to="/auth" className="btn-wine-glow px-6 sm:px-8 py-3 sm:py-3.5 text-sm">
               Inicio de sesión
             </Link>
             <button className="px-6 sm:px-8 py-3 sm:py-3.5 rounded-full bg-black border border-white/10 text-white hover:bg-white/5 transition-colors font-medium text-sm">
@@ -465,13 +465,13 @@ function LandingPage() {
             <div className="flex flex-col md:flex-row justify-between items-center gap-4 sm:gap-6">
               <span className="text-white/40 text-xs sm:text-sm text-center md:text-left">© 2024 CBTis No 61. Todos los derechos reservados.</span>
               <div className="flex items-center gap-3 sm:gap-4">
-                <a href="#" className="w-9 sm:w-10 h-9 sm:h-10 rounded-full bg-white/5 hover:bg-[#722F37]/20 text-white/60 hover:text-[#722F37] flex items-center justify-center transition-colors">
+                <a href="#" className="w-9 sm:w-10 h-9 sm:h-10 rounded-full bg-white/5 hover:bg-[#722F37]/20 text-white/60 hover:text-wine-glow flex items-center justify-center transition-colors">
                   <Twitter className="w-4 h-4" />
                 </a>
-                <a href="#" className="w-9 sm:w-10 h-9 sm:h-10 rounded-full bg-white/5 hover:bg-[#722F37]/20 text-white/60 hover:text-[#722F37] flex items-center justify-center transition-colors">
+                <a href="#" className="w-9 sm:w-10 h-9 sm:h-10 rounded-full bg-white/5 hover:bg-[#722F37]/20 text-white/60 hover:text-wine-glow flex items-center justify-center transition-colors">
                   <Instagram className="w-4 h-4" />
                 </a>
-                <a href="#" className="w-9 sm:w-10 h-9 sm:h-10 rounded-full bg-white/5 hover:bg-[#722F37]/20 text-white/60 hover:text-[#722F37] flex items-center justify-center transition-colors">
+                <a href="#" className="w-9 sm:w-10 h-9 sm:h-10 rounded-full bg-white/5 hover:bg-[#722F37]/20 text-white/60 hover:text-wine-glow flex items-center justify-center transition-colors">
                   <Facebook className="w-4 h-4" />
                 </a>
               </div>

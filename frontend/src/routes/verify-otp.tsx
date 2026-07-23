@@ -24,7 +24,7 @@ function VerifyOtpPage() {
 
   const [session, setSession] = useState({
     pendingToken: null as string | null, emailMasked: '', nombre: '',
-    email: '', password: '', isRegistration: false,
+    email: '', password: '', isRegistration: false, role: '',
   })
   const [code, setCode] = useState(['', '', '', '', '', ''])
   const inputRefs = useRef<(HTMLInputElement | null)[]>([])
@@ -55,17 +55,13 @@ function VerifyOtpPage() {
       email: state.email,
       password: state.password,
       isRegistration: state.isRegistration ?? false,
+      role: state.role,
     })
   }, [navigate])
 
   useEffect(() => {
     inputRefs.current[0]?.focus()
   }, [])
-
-  useEffect(() => {
-    if (!session.pendingToken) return
-    handleSendOtp()
-  }, [session.pendingToken, handleSendOtp])
 
   const handleSendOtp = useCallback(async () => {
     if (!session.pendingToken) return
@@ -84,6 +80,11 @@ function VerifyOtpPage() {
       setLoadingState(s => ({ ...s, sendingOtp: false }))
     }
   }, [session.pendingToken])
+
+  useEffect(() => {
+    if (!session.pendingToken) return
+    handleSendOtp()
+  }, [session.pendingToken, handleSendOtp])
 
   useEffect(() => {
     if (!timers.cooldownUntil) return
@@ -156,8 +157,14 @@ function VerifyOtpPage() {
         await finalizeSession(session.email, session.password)
       }
 
+      // Save role in local storage for useRole hook to bypass RLS issues
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (sessionData.session?.user?.id) {
+        localStorage.setItem(`role_${sessionData.session.user.id}`, result.role || session.role);
+      }
+
       toast.success(`¡Bienvenido${session.nombre ? ', ' + session.nombre : ''}!`)
-      navigate({ to: getRedirectPath(result.role), state: null })
+      navigate({ to: getRedirectPath(result.role || session.role), state: null })
     } catch (err: any) {
       toast.error(err.message || 'Código incorrecto')
       setCode(['', '', '', '', '', ''])

@@ -21,31 +21,39 @@ async function bootstrap() {
     credentials: true,
   });
 
-  app.use(helmet({
-    contentSecurityPolicy: {
-      directives: {
-        'default-src': ["'self'"],
-        'script-src': ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-        'style-src': ["'self'", "'unsafe-inline'"],
-        'img-src': ["'self'", 'data:', 'https://taarmixrsznxeltawztq.supabase.co'],
-        'font-src': ["'self'"],
-        'connect-src': [
-          "'self'",
-          'https://taarmixrsznxeltawztq.supabase.co',
-          ...allowedOrigins,
-        ],
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          'default-src': ["'self'"],
+          'script-src': ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+          'style-src': ["'self'", "'unsafe-inline'"],
+          'img-src': [
+            "'self'",
+            'data:',
+            'https://taarmixrsznxeltawztq.supabase.co',
+          ],
+          'font-src': ["'self'"],
+          'connect-src': [
+            "'self'",
+            'https://taarmixrsznxeltawztq.supabase.co',
+            ...allowedOrigins,
+          ],
+        },
       },
-    },
-    crossOriginResourcePolicy: { policy: 'cross-origin' },
-    crossOriginEmbedderPolicy: false,
-    crossOriginOpenerPolicy: false,
-  }));
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
+      crossOriginEmbedderPolicy: false,
+      crossOriginOpenerPolicy: false,
+    }),
+  );
 
   app.setGlobalPrefix('api');
 
   const config = new DocumentBuilder()
     .setTitle('SITE API — Sistema Integral de Talleres Escolares')
-    .setDescription('API de autenticación para el sistema de talleres del CBTis No. 61')
+    .setDescription(
+      'API de autenticación para el sistema de talleres del CBTis No. 61',
+    )
     .setVersion('1.0')
     .addTag('auth', 'Autenticación con OTP')
     .build();

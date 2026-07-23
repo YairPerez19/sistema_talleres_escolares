@@ -109,6 +109,13 @@ function LoginPage() {
           access_token: result.access_token,
           refresh_token: result.refresh_token,
         })
+        
+        // Save role in local storage for useRole hook to bypass RLS issues
+        const { data: sessionData } = await supabase.auth.getSession();
+        if (sessionData.session?.user?.id) {
+          localStorage.setItem(`role_${sessionData.session.user.id}`, result.role);
+        }
+
         toast.success(`¡Bienvenido${result.nombre ? ', ' + result.nombre : ''}!`)
         navigate({ to: getRedirectPath(result.role) })
         return

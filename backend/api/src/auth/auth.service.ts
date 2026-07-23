@@ -1,4 +1,11 @@
-import { Injectable, Logger, UnauthorizedException, BadRequestException, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  UnauthorizedException,
+  BadRequestException,
+  InternalServerErrorException,
+  ConflictException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import * as bcrypt from 'bcryptjs';
@@ -26,7 +33,9 @@ export class AuthService {
     private emailService: EmailService,
   ) {
     const url = this.configService.get<string>('SUPABASE_URL')!;
-    const serviceKey = this.configService.get<string>('SUPABASE_SERVICE_ROLE_KEY')!;
+    const serviceKey = this.configService.get<string>(
+      'SUPABASE_SERVICE_ROLE_KEY',
+    )!;
     const anonKey = this.configService.get<string>('SUPABASE_ANON_KEY')!;
     this.jwtSecret = this.configService.get<string>('JWT_SECRET')!;
 
@@ -41,10 +50,11 @@ export class AuthService {
   async verifyIdentity(dto: VerifyIdentityDto) {
     const { email, password } = dto;
 
-    const { data: authData, error: authError } = await this.supabaseAnon.auth.signInWithPassword({
-      email,
-      password,
-    });
+    const { data: authData, error: authError } =
+      await this.supabaseAnon.auth.signInWithPassword({
+        email,
+        password,
+      });
 
     if (authError || !authData.user) {
       if (authError?.message?.toLowerCase().includes('not confirmed')) {
@@ -145,21 +155,26 @@ export class AuthService {
     };
   }
 
-  async registerStudent(dto: import('./dto/register-student.dto').RegisterStudentDto) {
+  async registerStudent(
+    dto: import('./dto/register-student.dto').RegisterStudentDto,
+  ) {
     const { email, password, nombre, matricula, turno } = dto;
 
-    const { data: authData, error: authError } = await this.supabaseAdmin.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: false,
-      user_metadata: { nombre, matricula, turno },
-    });
+    const { data: authData, error: authError } =
+      await this.supabaseAdmin.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: false,
+        user_metadata: { nombre, matricula, turno },
+      });
 
     if (authError || !authData.user) {
       if (authError?.message.includes('already registered')) {
         throw new BadRequestException('El correo ya está registrado.');
       }
-      throw new InternalServerErrorException(`Error al crear usuario: ${authError?.message}`);
+      throw new InternalServerErrorException(
+        `Error al crear usuario: ${authError?.message}`,
+      );
     }
 
     const userId = authData.user.id;
@@ -170,7 +185,9 @@ export class AuthService {
 
     if (profileError) {
       await this.supabaseAdmin.auth.admin.deleteUser(userId);
-      throw new InternalServerErrorException('Error al guardar el perfil del estudiante.');
+      throw new InternalServerErrorException(
+        'Error al guardar el perfil del estudiante.',
+      );
     }
 
     const { error: roleError } = await this.supabaseAdmin
@@ -179,7 +196,9 @@ export class AuthService {
 
     if (roleError) {
       await this.supabaseAdmin.auth.admin.deleteUser(userId);
-      throw new InternalServerErrorException('Error al asignar rol de estudiante.');
+      throw new InternalServerErrorException(
+        'Error al asignar rol de estudiante.',
+      );
     }
 
     const pendingToken = jwt.sign(
@@ -195,7 +214,102 @@ export class AuthService {
     };
   }
 
-  async sendOtp(pendingToken: string): Promise<{ sent: boolean; cooldown_until: string }> {
+  async registerInstructor(
+    dto: import('./dto/register-instructor.dto').RegisterInstructorDto,
+  ) {
+    const { nombre, email, password, matricula, taller_id } = dto;
+
+    const { data: taller, error: tallerError } = await this.supabaseAdmin
+      .from('talleres')
+      .select('id, instructor_id, instructor')
+      .eq('id', taller_id)
+      .maybeSingle();
+
+    if (tallerError) {
+      throw new InternalServerErrorException(
+        `Error al consultar el taller: ${tallerError.message}`,
+      );
+    }
+    if (!taller) {
+      throw new BadRequestException('El taller seleccionado no existe.');
+    }
+    if (taller.instructor_id) {
+      throw new ConflictException(
+        'El taller ya tiene un instructor asignado. Elimínalo primero.',
+      );
+    }
+
+    const { data: authData, error: authError } =
+      await this.supabaseAdmin.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+        user_metadata: { nombre, matricula, role: 'instructor' },
+      });
+
+    if (authError || !authData.user) {
+      if (authError?.message.includes('already registered')) {
+        throw new BadRequestException('El correo ya está registrado.');
+      }
+      throw new InternalServerErrorException(
+        `Error al crear usuario: ${authError?.message}`,
+      );
+    }
+
+    const userId = authData.user.id;
+
+    const { error: profileError } = await this.supabaseAdmin
+      .from('profiles')
+      .upsert({ id: userId, nombre, matricula, turno: 'matutino' });
+
+    if (profileError) {
+      await this.supabaseAdmin.auth.admin.deleteUser(userId);
+      throw new InternalServerErrorException(
+        'Error al guardar el perfil del instructor.',
+      );
+    }
+
+    const { error: roleError } = await this.supabaseAdmin
+      .from('user_roles')
+      .insert({ user_id: userId, role: 'instructor' });
+
+    if (roleError) {
+      await this.supabaseAdmin.auth.admin.deleteUser(userId);
+      throw new InternalServerErrorException(
+        'Error al asignar rol de instructor.',
+      );
+    }
+
+    const { error: tallerUpdateError } = await this.supabaseAdmin
+      .from('talleres')
+      .update({ instructor_id: userId, instructor: nombre })
+      .eq('id', taller_id);
+
+    if (tallerUpdateError) {
+      await this.supabaseAdmin
+        .from('user_roles')
+        .delete()
+        .eq('user_id', userId)
+        .eq('role', 'instructor');
+      await this.supabaseAdmin.auth.admin.deleteUser(userId);
+      throw new InternalServerErrorException(
+        'Error al asignar el instructor al taller.',
+      );
+    }
+
+    this.logger.log(`Instructor creado: ${email} → taller ${taller_id}`);
+
+    return {
+      user_id: userId,
+      email,
+      nombre,
+      taller_id,
+    };
+  }
+
+  async sendOtp(
+    pendingToken: string,
+  ): Promise<{ sent: boolean; cooldown_until: string }> {
     let payload: PendingTokenPayload;
     try {
       payload = jwt.verify(pendingToken, this.jwtSecret) as PendingTokenPayload;
@@ -215,7 +329,9 @@ export class AuthService {
     if (lastCode) {
       const elapsed = Date.now() - new Date(lastCode.created_at).getTime();
       if (elapsed < 60000) {
-        const cooldownUntil = new Date(Date.now() + (60000 - elapsed)).toISOString();
+        const cooldownUntil = new Date(
+          Date.now() + (60000 - elapsed),
+        ).toISOString();
         return { sent: false, cooldown_until: cooldownUntil };
       }
     }
@@ -244,11 +360,18 @@ export class AuthService {
       .eq('id', payload.user_id)
       .single();
 
-    await this.emailService.sendOtpEmail(payload.email, otpCode, profile?.nombre ?? 'Usuario');
+    await this.emailService.sendOtpEmail(
+      payload.email,
+      otpCode,
+      profile?.nombre ?? 'Usuario',
+    );
 
     this.logger.debug(`OTP enviado a ${payload.email}`);
 
-    return { sent: true, cooldown_until: new Date(Date.now() + 60000).toISOString() };
+    return {
+      sent: true,
+      cooldown_until: new Date(Date.now() + 60000).toISOString(),
+    };
   }
 
   async verifyOtp(pendingToken: string, code: string) {
@@ -256,7 +379,9 @@ export class AuthService {
     try {
       payload = jwt.verify(pendingToken, this.jwtSecret) as PendingTokenPayload;
     } catch {
-      throw new UnauthorizedException('Sesión expirada. Inicia sesión nuevamente.');
+      throw new UnauthorizedException(
+        'Sesión expirada. Inicia sesión nuevamente.',
+      );
     }
 
     const { data: codes } = await this.supabaseAdmin
@@ -268,7 +393,9 @@ export class AuthService {
       .limit(1);
 
     if (!codes || codes.length === 0) {
-      throw new BadRequestException('No hay un código de verificación activo. Solicita uno nuevo.');
+      throw new BadRequestException(
+        'No hay un código de verificación activo. Solicita uno nuevo.',
+      );
     }
 
     const verificationCode = codes[0];
@@ -278,7 +405,9 @@ export class AuthService {
         .from('verification_codes')
         .update({ used: true })
         .eq('id', verificationCode.id);
-      throw new BadRequestException('El código ha expirado. Solicita uno nuevo.');
+      throw new BadRequestException(
+        'El código ha expirado. Solicita uno nuevo.',
+      );
     }
 
     if (verificationCode.attempts >= 5) {
@@ -286,7 +415,9 @@ export class AuthService {
         .from('verification_codes')
         .update({ used: true })
         .eq('id', verificationCode.id);
-      throw new BadRequestException('Demasiados intentos fallidos. Solicita un nuevo código.');
+      throw new BadRequestException(
+        'Demasiados intentos fallidos. Solicita un nuevo código.',
+      );
     }
 
     const isValid = await bcrypt.compare(code, verificationCode.code_hash);
@@ -296,7 +427,9 @@ export class AuthService {
         .update({ attempts: verificationCode.attempts + 1 })
         .eq('id', verificationCode.id);
       const remaining = 4 - verificationCode.attempts;
-      throw new BadRequestException(`Código incorrecto. Te quedan ${remaining} intento(s).`);
+      throw new BadRequestException(
+        `Código incorrecto. Te quedan ${remaining} intento(s).`,
+      );
     }
 
     await this.supabaseAdmin
@@ -310,22 +443,27 @@ export class AuthService {
 
     // Generar sesión mediante magic link y extraer tokens
     try {
-      const serviceKey = this.configService.get<string>('SUPABASE_SERVICE_ROLE_KEY')!;
+      const serviceKey = this.configService.get<string>(
+        'SUPABASE_SERVICE_ROLE_KEY',
+      )!;
       const supabaseUrl = this.configService.get<string>('SUPABASE_URL')!;
 
-      const response = await fetch(`${supabaseUrl}/auth/v1/admin/generate_link`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': serviceKey,
-          'Authorization': `Bearer ${serviceKey}`,
+      const response = await fetch(
+        `${supabaseUrl}/auth/v1/admin/generate_link`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            apikey: serviceKey,
+            Authorization: `Bearer ${serviceKey}`,
+          },
+          body: JSON.stringify({
+            type: 'magiclink',
+            email: payload.email,
+            redirect_to: 'http://localhost:5173/verify-otp',
+          }),
         },
-        body: JSON.stringify({
-          type: 'magiclink',
-          email: payload.email,
-          redirect_to: 'http://localhost:5173/verify-otp',
-        }),
-      });
+      );
 
       const linkData = await response.json();
 
@@ -350,7 +488,12 @@ export class AuthService {
 
     // Fallback: devolver login_token para que el frontend haga signInWithPassword
     const loginToken = jwt.sign(
-      { user_id: payload.user_id, email: payload.email, role: payload.role, otp_verified: true },
+      {
+        user_id: payload.user_id,
+        email: payload.email,
+        role: payload.role,
+        otp_verified: true,
+      },
       this.jwtSecret,
       { expiresIn: '5m' },
     );

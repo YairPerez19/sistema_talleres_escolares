@@ -21,7 +21,6 @@ jest.mock('bcryptjs', () => ({
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let mockSupabaseClient: any;
 
 describe('AuthService', () => {
@@ -63,11 +62,16 @@ describe('AuthService', () => {
           useValue: {
             get: jest.fn((key: string) => {
               switch (key) {
-                case 'SUPABASE_URL': return 'https://test.supabase.co';
-                case 'SUPABASE_SERVICE_ROLE_KEY': return 'service-role-key';
-                case 'SUPABASE_ANON_KEY': return 'anon-key';
-                case 'JWT_SECRET': return 'jwt-secret';
-                default: return null;
+                case 'SUPABASE_URL':
+                  return 'https://test.supabase.co';
+                case 'SUPABASE_SERVICE_ROLE_KEY':
+                  return 'service-role-key';
+                case 'SUPABASE_ANON_KEY':
+                  return 'anon-key';
+                case 'JWT_SECRET':
+                  return 'jwt-secret';
+                default:
+                  return null;
               }
             }),
           },
@@ -98,12 +102,17 @@ describe('AuthService', () => {
         error: { message: 'Invalid login' },
       });
 
-      await expect(service.verifyIdentity(dto)).rejects.toThrow(UnauthorizedException);
+      await expect(service.verifyIdentity(dto)).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
 
     it('throws UnauthorizedException when role does not match', async () => {
       mockSupabaseClient.auth.signInWithPassword.mockResolvedValue({
-        data: { user: { id: 'user-1' }, session: { access_token: 'at', refresh_token: 'rt' } },
+        data: {
+          user: { id: 'user-1' },
+          session: { access_token: 'at', refresh_token: 'rt' },
+        },
         error: null,
       });
 
@@ -112,7 +121,9 @@ describe('AuthService', () => {
         error: null,
       });
 
-      await expect(service.verifyIdentity(dto)).rejects.toThrow(UnauthorizedException);
+      await expect(service.verifyIdentity(dto)).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
   });
 
@@ -140,7 +151,9 @@ describe('AuthService', () => {
         throw new Error('invalid token');
       });
 
-      await expect(service.sendOtp('bad-token')).rejects.toThrow(UnauthorizedException);
+      await expect(service.sendOtp('bad-token')).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
 
     it('returns cooldown when OTP was recently sent', async () => {
@@ -169,7 +182,9 @@ describe('AuthService', () => {
         throw new Error('expired');
       });
 
-      await expect(service.verifyOtp('expired-token', '123456')).rejects.toThrow(UnauthorizedException);
+      await expect(
+        service.verifyOtp('expired-token', '123456'),
+      ).rejects.toThrow(UnauthorizedException);
     });
 
     it('throws BadRequestException when no active code exists', async () => {
@@ -185,7 +200,9 @@ describe('AuthService', () => {
         }),
       });
 
-      await expect(service.verifyOtp('valid-token', '123456')).rejects.toThrow(BadRequestException);
+      await expect(service.verifyOtp('valid-token', '123456')).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 });

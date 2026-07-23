@@ -90,7 +90,7 @@ export function HeroSection({ heroRef }: { heroRef: React.RefObject<HTMLDivEleme
 
         <h1 className="hero-reveal text-3xl sm:text-4xl md:text-5xl lg:text-[4.5rem] font-bold leading-[1.1] tracking-tight text-white mb-4 sm:mb-6">
           Gestiona talleres escolares{' '}
-          <span className="text-[#722F37]">
+          <span className="text-wine-glow">
             sin complicaciones
           </span>
         </h1>
@@ -99,7 +99,7 @@ export function HeroSection({ heroRef }: { heroRef: React.RefObject<HTMLDivEleme
         </p>
 
         <div className="hero-reveal flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center">
-          <Link to="/auth" className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 rounded-full bg-gradient-to-r from-[#a85563] to-[#722F37] text-white font-semibold text-[14px] sm:text-[15px] hover:shadow-[0_8px_30px_rgba(114,47,55,0.3)] hover:scale-[1.02] transition-all duration-300 text-center">
+          <Link to="/auth" className="btn-wine-glow w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 text-[14px] sm:text-[15px] text-center">
             Inicio de sesión
           </Link>
           <button className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 rounded-full text-white/80 hover:text-white font-semibold text-[14px] sm:text-[15px] hover:bg-white/5 transition-all duration-300">

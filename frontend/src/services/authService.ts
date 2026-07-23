@@ -92,6 +92,41 @@ export async function registerStudent(params: Omit<VerifyIdentityParams, 'role' 
   return handleResponse<RegisterStudentResponse>(res);
 }
 
+interface RegisterInstructorParams {
+  nombre: string;
+  email: string;
+  password: string;
+  matricula: string;
+  taller_id: string;
+}
+
+interface RegisterInstructorResponse {
+  user_id: string;
+  email: string;
+  nombre: string;
+  taller_id: string;
+}
+
+export async function registerInstructor(
+  params: RegisterInstructorParams,
+): Promise<RegisterInstructorResponse> {
+  const { data: { session } } = await supabase.auth.getSession();
+  const token = session?.access_token;
+  if (!token) {
+    throw new AuthServiceError('No hay sesión activa. Inicia sesión nuevamente.');
+  }
+
+  const res = await fetch(`${API_URL}/auth/register-instructor`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(params),
+  });
+  return handleResponse<RegisterInstructorResponse>(res);
+}
+
 export async function sendOtp(pendingToken: string): Promise<SendOtpResponse> {
   const res = await fetch(`${API_URL}/auth/send-otp`, {
     method: 'POST',

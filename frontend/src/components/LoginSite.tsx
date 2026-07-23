@@ -1,4 +1,4 @@
-﻿import { type ReactNode } from "react";
+import { type ReactNode } from "react";
 import {
   Eye,
   EyeOff,
@@ -162,7 +162,7 @@ function ModePill({
         style={
           canRegister
             ? {
-                left: "4px",
+                left: mode === "login" ? "4px" : "50%",
                 right: mode === "login" ? "50%" : "4px",
               }
             : { left: "4px", right: "4px" }
@@ -172,7 +172,7 @@ function ModePill({
       <ModeTab
         active={mode === "login"}
         onClick={() => onChange("login")}
-        label="Iniciar sesiÃ³n"
+        label="Iniciar sesión"
       />
       {canRegister && (
         <ModeTab
@@ -223,7 +223,7 @@ function RolePill({ role, onBack }: { role: Role; onBack: () => void }) {
       <button
         type="button"
         onClick={onBack}
-        aria-label="Volver a selecciÃ³n de rol"
+        aria-label="Volver a selección de rol"
         className="group flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1.5 text-xs font-semibold text-white/70 backdrop-blur-md transition hover:bg-white/[0.08] hover:text-white"
       >
         <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5" />
@@ -242,7 +242,7 @@ function RolePill({ role, onBack }: { role: Role; onBack: () => void }) {
 function Footer() {
   return (
     <p className="mt-8 text-center text-xs font-medium text-white/40">
-      Â© {new Date().getFullYear()} Sistema Integral de Talleres Escolares â€” CBTis
+      © {new Date().getFullYear()} Sistema Integral de Talleres Escolares — CBTis
       No. 61
     </p>
   );
@@ -300,7 +300,7 @@ function LoginForm({
         autoComplete="off"
       >
         <Field
-          label={role === "admin" ? "Correo" : "Correo o matrÃ­cula"}
+          label={role === "admin" ? "Correo" : "Correo o matrícula"}
           icon={<Mail className="h-4 w-4" />}
           type="email"
           value={form.email}
@@ -315,12 +315,12 @@ function LoginForm({
 
         {role !== "admin" && (
           <Field
-            label="MatrÃ­cula"
+            label="Matrícula"
             icon={<Hash className="h-4 w-4" />}
             type="text"
             value={form.matricula}
             onChange={(v) => setField("matricula", v)}
-            placeholder="NÃºmero de control"
+            placeholder="Número de control"
             required
           />
         )}
@@ -336,7 +336,7 @@ function LoginForm({
         )}
 
         <Field
-          label="ContraseÃ±a"
+          label="Contraseña"
           icon={<Lock className="h-4 w-4" />}
           type={form.showPassword ? "text" : "password"}
           value={form.password}
@@ -350,19 +350,19 @@ function LoginForm({
               onClick={() => setField("showPassword", !form.showPassword)}
               className="flex h-7 w-7 items-center justify-center rounded-md text-white/40 transition hover:bg-white/[0.08] hover:text-white"
               aria-label={
-                form.showPassword ? "Ocultar contraseÃ±a" : "Mostrar contraseÃ±a"
+                form.showPassword ? "Ocultar contraseña" : "Mostrar contraseña"
               }
             >
               {form.showPassword ? (
-                <EyeOff className="h-4 w-4" />
-              ) : (
                 <Eye className="h-4 w-4" />
+              ) : (
+                <EyeOff className="h-4 w-4" />
               )}
             </button>
           }
         />
 
-        <SubmitButton loading={loading}>Iniciar sesiÃ³n</SubmitButton>
+        <SubmitButton loading={loading}>Iniciar sesión</SubmitButton>
       </form>
     </>
   );
@@ -389,7 +389,7 @@ function RegisterForm({
         </span>
       </h1>
       <p className="mt-2 text-sm font-medium text-white/50">
-        Ãšnete a los talleres del CBTis No. 61 en menos de un minuto.
+        Únete a los talleres del CBTis No. 61 en menos de un minuto.
       </p>
 
       <form
@@ -403,7 +403,7 @@ function RegisterForm({
           type="text"
           value={form.nombre}
           onChange={(v) => setField("nombre", v)}
-          placeholder="Juan PÃ©rez"
+          placeholder="Juan Pérez"
           required
           minLength={3}
         />
@@ -424,22 +424,22 @@ function RegisterForm({
         />
 
         <Field
-          label="MatrÃ­cula"
+          label="Matrícula"
           icon={<Hash className="h-4 w-4" />}
           type="text"
           value={form.matricula}
           onChange={(v) => setField("matricula", v)}
-          placeholder="NÃºmero de control"
+          placeholder="Número de control"
           required
         />
 
         <Field
-          label="ContraseÃ±a"
+          label="Contraseña"
           icon={<Lock className="h-4 w-4" />}
           type={form.showPassword ? "text" : "password"}
           value={form.password}
           onChange={(v) => setField("password", v)}
-          placeholder="MÃ­nimo 6 caracteres"
+          placeholder="Mínimo 6 caracteres"
           required
           minLength={6}
           rightSlot={
@@ -447,12 +447,12 @@ function RegisterForm({
               type="button"
               onClick={() => setField("showPassword", !form.showPassword)}
               className="flex h-7 w-7 items-center justify-center rounded-md text-white/40 transition hover:bg-white/[0.08] hover:text-white"
-              aria-label="Mostrar u ocultar contraseÃ±a"
+              aria-label="Mostrar u ocultar contraseña"
             >
               {form.showPassword ? (
-                <EyeOff className="h-4 w-4" />
-              ) : (
                 <Eye className="h-4 w-4" />
+              ) : (
+                <EyeOff className="h-4 w-4" />
               )}
             </button>
           }
@@ -461,7 +461,7 @@ function RegisterForm({
         <SubmitButton loading={loading}>Crear cuenta</SubmitButton>
 
         <p className="pt-1 text-center text-xs text-white/40">
-          Al crear tu cuenta aceptas los tÃ©rminos del CBTis No. 61.
+          Al crear tu cuenta aceptas los términos del CBTis No. 61.
         </p>
       </form>
     </>
@@ -624,7 +624,7 @@ function TallerSelect({
             </option>
             {talleres.map((t) => (
               <option key={t.id} value={t.id} className="bg-[#0C0810]">
-                {t.nombre} â€” {t.categoria}
+                {t.nombre} — {t.categoria}
               </option>
             ))}
           </select>
@@ -667,7 +667,7 @@ function SubmitButton({
             aria-hidden
             className="transition-transform group-hover:translate-x-0.5"
           >
-            â†’
+            →
           </span>
         )}
       </span>
@@ -687,21 +687,21 @@ function EaglePanel({
 }) {
   const textByMode = {
     login: {
-      badge: "Sistema acadÃ©mico",
+      badge: "Sistema académico",
       title: "Tu camino, tus talleres.",
-      sub: "Culturales, cÃ­vicos y deportivos en un solo lugar.",
+      sub: "Culturales, cívicos y deportivos en un solo lugar.",
     },
     register: {
       badge: "Comunidad SITE",
       title: "Conecta con tu red.",
-      sub: "Forma parte de mÃ¡s de 20 talleres activos.",
+      sub: "Forma parte de más de 20 talleres activos.",
     },
   }[mode];
 
   const roleTag = {
     student: "Estudiante",
     instructor: "Docente",
-    admin: "AdministraciÃ³n",
+    admin: "Administración",
   }[role];
 
   return (
@@ -736,7 +736,7 @@ function EaglePanel({
       <div className="absolute bottom-0 left-0 right-0 p-7 text-white">
         <div className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] backdrop-blur-md">
           <span className="h-1.5 w-1.5 rounded-full bg-[#f4d78e]" />
-          {textByMode.badge} Â· {roleTag}
+          {textByMode.badge} · {roleTag}
         </div>
         <h2 className="text-2xl font-black leading-tight tracking-tight">
           {textByMode.title}

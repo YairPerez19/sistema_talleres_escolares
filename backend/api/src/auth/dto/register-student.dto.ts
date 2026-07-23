@@ -5,7 +5,9 @@ export const RegisterStudentSchema = z.object({
   email: z.string().email('Correo electrónico inválido'),
   password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres'),
   matricula: z.string().min(4, 'Matrícula inválida'),
-  turno: z.enum(['matutino', 'vespertino'], { message: 'Selecciona un turno válido' }),
+  turno: z.enum(['matutino', 'vespertino'], {
+    message: 'Selecciona un turno válido',
+  }),
 });
 
 export type RegisterStudentDto = z.infer<typeof RegisterStudentSchema>;

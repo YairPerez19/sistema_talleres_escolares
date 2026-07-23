@@ -17,10 +17,10 @@ export function EstadoBadge({ estado, size = 'md' }: EstadoBadgeProps) {
         config.color,
         config.bg,
         config.border,
-        size === 'sm' ? 'text-[10px] px-2 py-0.5' : 'text-xs px-3 py-1'
+        size === 'sm' ? 'text-[10px] px-2.5 py-0.5' : 'text-xs px-3 py-1'
       )}
     >
-      <span>{config.emoji}</span>
+      <span className="leading-none">{config.emoji}</span>
       {config.label}
     </span>
   );

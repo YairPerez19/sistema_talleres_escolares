@@ -14,7 +14,9 @@ export class EmailService {
     const port = this.configService.get<number>('SMTP_PORT');
     const user = this.configService.get<string>('SMTP_USER');
     const pass = this.configService.get<string>('SMTP_PASS');
-    this.from = this.configService.get<string>('SMTP_FROM') || '"SITE CBTis 61" <noreply@cbtis61.edu.mx>';
+    this.from =
+      this.configService.get<string>('SMTP_FROM') ||
+      '"SITE CBTis 61" <noreply@cbtis61.edu.mx>';
 
     if (host && port && user && pass) {
       this.transporter = nodemailer.createTransport({
@@ -25,11 +27,17 @@ export class EmailService {
       });
       this.logger.log(`Email configurado: ${user} via ${host}:${port}`);
     } else {
-      this.logger.warn('SMTP no configurado. Los correos no se enviaran realmente.');
+      this.logger.warn(
+        'SMTP no configurado. Los correos no se enviaran realmente.',
+      );
     }
   }
 
-  async sendOtpEmail(to: string, otpCode: string, nombre: string): Promise<void> {
+  async sendOtpEmail(
+    to: string,
+    otpCode: string,
+    nombre: string,
+  ): Promise<void> {
     if (!this.transporter) {
       this.logger.warn('[MOCK EMAIL] SMTP no configurado.');
       this.logger.log(`[MOCK EMAIL] Para: ${to} | Codigo: ${otpCode}`);

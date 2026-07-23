@@ -18,6 +18,13 @@ const AuthContext = React.createContext<AuthContextType>({
 });
 
 const signOut = async () => {
+  // Limpiar roles guardados en localStorage
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key?.startsWith('role_')) {
+      localStorage.removeItem(key);
+    }
+  }
   await supabase.auth.signOut();
 };
 
