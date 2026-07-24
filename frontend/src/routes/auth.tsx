@@ -6,6 +6,7 @@ import { toast } from 'sonner'
 import type { Role } from '../services/authService'
 import { usePageMeta } from '../hooks/usePageMeta'
 import { useAuth } from '../hooks/useAuth'
+import { useRole } from '../hooks/useRole'
 import { RoleSelectionScreen } from './-RoleSelectionScreen'
 import LoginSite, { type AuthFormState } from '@/components/LoginSite'
 
@@ -27,6 +28,7 @@ function LoginPage() {
     canonicalPath: '/auth',
   })
   const { user } = useAuth()
+  const { role, loading: roleLoading } = useRole(user?.id)
   const navigate = useNavigate()
 
   const [nav, setNav] = useState<{ role: Role | null; step: 'select-role' | 'credentials' }>({
@@ -37,10 +39,16 @@ function LoginPage() {
   const [form, setForm] = useState<AuthFormState>(initialForm)
 
   useEffect(() => {
-    if (user) {
-      navigate({ to: '/admin' })
+    if (user && !roleLoading) {
+      if (role === 'admin') {
+        navigate({ to: '/admin' })
+      } else if (role === 'instructor') {
+        navigate({ to: '/instructor' })
+      } else {
+        navigate({ to: '/dashboard' })
+      }
     }
-  }, [user, navigate])
+  }, [user, role, roleLoading, navigate])
 
   const selectRole = (r: Role) => {
     setNav({ role: r, step: 'credentials' })

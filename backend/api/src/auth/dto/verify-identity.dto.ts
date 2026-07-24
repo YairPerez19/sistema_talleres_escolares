@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { uuidLike } from '../../common/validators';
 
 export const VerifyIdentitySchema = z.discriminatedUnion('role', [
   z.object({
@@ -12,7 +13,7 @@ export const VerifyIdentitySchema = z.discriminatedUnion('role', [
     email: z.string().email(),
     password: z.string().min(6),
     matricula: z.string().min(1),
-    taller_id: z.string().uuid(),
+    taller_id: uuidLike('Taller inválido'),
   }),
   z.object({
     role: z.literal('admin'),

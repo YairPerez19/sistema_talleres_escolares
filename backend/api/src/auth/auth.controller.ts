@@ -7,7 +7,12 @@ import {
   BadRequestException,
   UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import {
   VerifyIdentitySchema,
@@ -49,7 +54,10 @@ export class AuthController {
       return await this.authService.registerStudent(dto);
     } catch (err) {
       if (err instanceof ZodError) {
-        throw new BadRequestException('Datos de registro inválidos.');
+        const detail = err.issues
+          .map((i) => `${i.path.join('.') || 'campo'}: ${i.message}`)
+          .join('; ');
+        throw new BadRequestException(`Datos de registro inválidos. ${detail}`);
       }
       throw err;
     }
@@ -79,7 +87,10 @@ export class AuthController {
       return await this.authService.registerInstructor(dto);
     } catch (err) {
       if (err instanceof ZodError) {
-        throw new BadRequestException('Datos de registro inválidos.');
+        const detail = err.issues
+          .map((i) => `${i.path.join('.') || 'campo'}: ${i.message}`)
+          .join('; ');
+        throw new BadRequestException(`Datos de registro inválidos. ${detail}`);
       }
       throw err;
     }

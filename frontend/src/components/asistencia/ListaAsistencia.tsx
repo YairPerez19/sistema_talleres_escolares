@@ -4,7 +4,7 @@ import { AlumnoRow } from './AlumnoRow';
 import { useAsistencias, exportarCSVInstructor } from '../../hooks/useAsistencias';
 import { cn } from '../../lib/utils';
 import { CheckSquare, Save, Clock, RefreshCw } from '@/components/AnimatedIcons';
-import { Users, Zap } from '@/components/icons';
+import { Users, Zap, Check, X, FileText } from '@/components/icons';
 import { DownloadAttendanceButton } from './DownloadAttendanceButton';
 import { toast } from 'sonner';
 
@@ -123,12 +123,12 @@ export function ListaAsistencia({ tallerId, tallerNombre, soloLectura = false }:
       {/* Estadísticas rápidas */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         {[
-          { label: 'Total', value: stats.total, icon: <Users size={14} />, color: 'text-white/70' },
-          { label: 'Presentes', value: stats.presentes, icon: '✅', color: 'text-emerald-400', estado: 'presente' as EstadoAsistencia },
-          { label: 'Ausentes', value: stats.ausentes, icon: '❌', color: 'text-red-400', estado: 'ausente' as EstadoAsistencia },
-          { label: 'Retardos', value: stats.retardos, icon: '⏰', color: 'text-amber-400', estado: 'retardo' as EstadoAsistencia },
-          { label: 'Justif.', value: stats.justificados, icon: '📄', color: 'text-blue-400', estado: 'justificado' as EstadoAsistencia },
-        ].map(({ label, value, icon, color, estado }) => (
+          { label: 'Total',      value: stats.total,        icon: <Users size={13} />,     color: 'text-white/50',  ring: 'border-white/10' },
+          { label: 'Presentes',  value: stats.presentes,    icon: <CheckSquare size={13} />, color: 'text-emerald-300', ring: 'border-emerald-400/20',  estado: 'presente'   as EstadoAsistencia },
+          { label: 'Ausentes',   value: stats.ausentes,     icon: <X size={13} strokeWidth={2.6} />, color: 'text-[#d24a6b]', ring: 'border-[#8B1A32]/30', estado: 'ausente'    as EstadoAsistencia },
+          { label: 'Retardos',   value: stats.retardos,     icon: <Clock size={13} />,     color: 'text-[#f4d78e]',  ring: 'border-[#f4d78e]/25',   estado: 'retardo'    as EstadoAsistencia },
+          { label: 'Justif.',    value: stats.justificados, icon: <FileText size={13} />,  color: 'text-white/50',  ring: 'border-white/10' },
+        ].map(({ label, value, icon, color, ring, estado }) => (
           <button
             type="button"
             key={label}
@@ -139,12 +139,12 @@ export function ListaAsistencia({ tallerId, tallerNombre, soloLectura = false }:
               'glass-card rounded-2xl p-3 text-center border transition-all',
               estado && filtroEstado === estado
                 ? 'border-primary/40 bg-primary/10'
-                : 'border-white/5 hover:border-white/10'
+                : `${ring} hover:border-white/15`
             )}
           >
             <div className={cn('text-xl font-black', color)}>{value}</div>
             <div className="text-[10px] text-white/30 uppercase tracking-widest font-bold mt-0.5 flex items-center justify-center gap-1">
-              <span>{typeof icon === 'string' ? icon : icon}</span>
+              {icon}
               {label}
             </div>
           </button>

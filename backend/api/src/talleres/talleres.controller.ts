@@ -12,7 +12,12 @@ import {
   BadRequestException,
   ParseUUIDPipe,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { ZodError } from 'zod';
 import { TalleresService } from './talleres.service';
 import { CreateTallerSchema } from './dto/create-taller.dto';
@@ -32,10 +37,14 @@ export class TalleresController {
   @UseGuards(RolesGuard)
   @Roles('admin', 'instructor', 'student')
   @ApiOperation({ summary: 'Listar talleres con filtros opcionales' })
-  @ApiResponse({ status: 200, description: 'Lista de talleres con cupo calculado' })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de talleres con cupo calculado',
+  })
   async findAll(@Query() query: Record<string, string>) {
-    return this.parse(() => FilterTallerSchema.parse(query), (dto) =>
-      this.service.findAll(dto),
+    return this.parse(
+      () => FilterTallerSchema.parse(query),
+      (dto) => this.service.findAll(dto),
     );
   }
 
@@ -58,8 +67,9 @@ export class TalleresController {
   @ApiResponse({ status: 400, description: 'Datos inválidos' })
   @ApiResponse({ status: 403, description: 'Sin permisos' })
   async create(@Body() body: unknown) {
-    return this.parse(() => CreateTallerSchema.parse(body), (dto) =>
-      this.service.create(dto),
+    return this.parse(
+      () => CreateTallerSchema.parse(body),
+      (dto) => this.service.create(dto),
     );
   }
 
@@ -68,14 +78,18 @@ export class TalleresController {
   @Roles('admin')
   @ApiOperation({ summary: 'Actualizar un taller (solo admin)' })
   @ApiResponse({ status: 200, description: 'Taller actualizado' })
-  @ApiResponse({ status: 400, description: 'Datos inválidos o cupo < inscritos' })
+  @ApiResponse({
+    status: 400,
+    description: 'Datos inválidos o cupo < inscritos',
+  })
   @ApiResponse({ status: 404, description: 'Taller no encontrado' })
   async update(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() body: unknown,
   ) {
-    return this.parse(() => UpdateTallerSchema.parse(body), (dto) =>
-      this.service.update(id, dto),
+    return this.parse(
+      () => UpdateTallerSchema.parse(body),
+      (dto) => this.service.update(id, dto),
     );
   }
 

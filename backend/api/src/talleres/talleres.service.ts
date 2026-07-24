@@ -38,7 +38,8 @@ export class TalleresService {
       .order('nombre', { ascending: true });
 
     if (filter.categoria) query = query.eq('categoria', filter.categoria);
-    if (filter.instructor_id) query = query.eq('instructor_id', filter.instructor_id);
+    if (filter.instructor_id)
+      query = query.eq('instructor_id', filter.instructor_id);
     if (filter.q) query = query.ilike('nombre', `%${filter.q}%`);
 
     const { data, error } = await query;
@@ -66,10 +67,7 @@ export class TalleresService {
     if (!data) throw new NotFoundException(`Taller ${id} no encontrado.`);
 
     const counts = await this.countInscritos([id]);
-    return this.attachCupo(
-      data as unknown as TallerConHorarios,
-      counts.get(id) ?? 0,
-    );
+    return this.attachCupo(data, counts.get(id) ?? 0);
   }
 
   async create(dto: CreateTallerDto): Promise<TallerConHorarios> {
@@ -83,7 +81,9 @@ export class TalleresService {
 
     if (error) {
       if (this.isUniqueViolation(error)) {
-        throw new ConflictException('Ya existe un taller con esos datos únicos.');
+        throw new ConflictException(
+          'Ya existe un taller con esos datos únicos.',
+        );
       }
       this.fail('crear taller', error);
     }
@@ -135,7 +135,10 @@ export class TalleresService {
       );
     }
 
-    const { error } = await this.supabase.from('talleres').delete().eq('id', id);
+    const { error } = await this.supabase
+      .from('talleres')
+      .delete()
+      .eq('id', id);
     if (error) this.fail(`eliminar taller ${id}`, error);
     return { id, deleted: true };
   }
@@ -190,7 +193,10 @@ export class TalleresService {
     };
   }
 
-  private isUniqueViolation(error: { code?: string; message?: string }): boolean {
+  private isUniqueViolation(error: {
+    code?: string;
+    message?: string;
+  }): boolean {
     return (
       error.code === '23505' ||
       error.message?.toLowerCase().includes('duplicate key') === true

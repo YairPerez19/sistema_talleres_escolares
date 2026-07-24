@@ -2,6 +2,9 @@
 // Tipos compartidos para el módulo de asistencia
 // ============================================================
 
+import { Check, X, Clock, FileText, Minus } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
+
 export type AppRole = 'admin' | 'instructor' | 'student';
 
 export type EstadoAsistencia = 'presente' | 'ausente' | 'retardo' | 'justificado' | 'sin_registro';
@@ -79,37 +82,49 @@ export const ESTADO_CONFIG: Record<EstadoAsistencia, {
 }> = {
   presente: {
     label: 'Presente',
-    emoji: '✅',
-    color: 'text-emerald-400',
+    emoji: '',
+    color: 'text-emerald-300',
     bg: 'bg-emerald-500/20',
     border: 'border-emerald-500/30',
   },
   ausente: {
     label: 'Ausente',
-    emoji: '❌',
-    color: 'text-red-400',
-    bg: 'bg-red-500/20',
-    border: 'border-red-500/30',
+    emoji: '',
+    color: 'text-[#f4d78e]',
+    bg: 'bg-[#8B1A32]/25',
+    border: 'border-[#8B1A32]/40',
   },
   retardo: {
     label: 'Retardo',
-    emoji: '⏰',
-    color: 'text-amber-400',
-    bg: 'bg-amber-500/20',
-    border: 'border-amber-500/30',
+    emoji: '',
+    color: 'text-[#f4d78e]',
+    bg: 'bg-[#8B1A32]/15',
+    border: 'border-[#f4d78e]/30',
   },
   justificado: {
     label: 'Justificado',
-    emoji: '📄',
-    color: 'text-blue-400',
-    bg: 'bg-blue-500/20',
-    border: 'border-blue-500/30',
+    emoji: '',
+    color: 'text-white/70',
+    bg: 'bg-white/10',
+    border: 'border-white/20',
   },
   sin_registro: {
     label: 'Sin registro',
-    emoji: '—',
+    emoji: '',
     color: 'text-white/30',
     bg: 'bg-white/5',
     border: 'border-white/10',
   },
+};
+
+/**
+ * Iconos Lucide asociados a cada estado de asistencia.
+ * Usados en EstadoBadge y en los botones rápidos de AlumnoRow.
+ */
+export const ESTADO_ICON: Record<EstadoAsistencia, LucideIcon> = {
+  presente:    Check,
+  ausente:     X,
+  retardo:     Clock,
+  justificado: FileText,
+  sin_registro: Minus,
 };

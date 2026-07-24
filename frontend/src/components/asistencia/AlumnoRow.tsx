@@ -4,12 +4,13 @@ import { ESTADO_CONFIG } from '../../lib/types';
 import { EstadoBadge } from './EstadoBadge';
 import { cn } from '../../lib/utils';
 import { MessageSquare, Loader2 } from '@/components/AnimatedIcons';
+import { Check, X, Clock, FileText } from '@/components/icons';
 
-const OPCIONES_RAPIDAS: { estado: EstadoAsistencia; icon: string }[] = [
-  { estado: 'presente', icon: '✅' },
-  { estado: 'ausente', icon: '❌' },
-  { estado: 'retardo', icon: '⏰' },
-  { estado: 'justificado', icon: '📄' },
+const OPCIONES_RAPIDAS: { estado: EstadoAsistencia; icon: React.ReactNode }[] = [
+  { estado: 'presente',    icon: <Check    size={15} strokeWidth={2.6} /> },
+  { estado: 'ausente',     icon: <X        size={15} strokeWidth={2.6} /> },
+  { estado: 'retardo',     icon: <Clock    size={15} strokeWidth={2.4} /> },
+  { estado: 'justificado', icon: <FileText size={15} strokeWidth={2.2} /> },
 ];
 
 interface AlumnoRowProps {
@@ -81,8 +82,8 @@ export function AlumnoRow({ alumno, onMarcar, isSaving, soloLectura = false }: A
                   'w-9 h-9 rounded-xl border text-sm font-bold transition-all duration-150 flex items-center justify-center',
                   'hover:scale-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed',
                   isActive
-                    ? cn(config.bg, config.border, 'shadow-lg')
-                    : 'bg-white/5 border-white/10 hover:bg-white/10'
+                    ? cn(config.bg, config.border, config.color, 'shadow-lg shadow-[#8B1A32]/20')
+                    : 'bg-white/5 border-white/10 text-white/40 hover:bg-white/10 hover:text-white/70'
                 )}
               >
                 {isSaving && isActive
@@ -99,7 +100,7 @@ export function AlumnoRow({ alumno, onMarcar, isSaving, soloLectura = false }: A
             className={cn(
               'w-9 h-9 rounded-xl border text-xs transition-all duration-150 flex items-center justify-center',
               showObs
-                ? 'bg-blue-500/20 border-blue-500/30 text-blue-400'
+                ? 'bg-[#8B1A32]/20 border-[#8B1A32]/40 text-[#f4d78e]'
                 : 'bg-white/5 border-white/10 text-white/30 hover:text-white/60 hover:bg-white/10'
             )}
           >

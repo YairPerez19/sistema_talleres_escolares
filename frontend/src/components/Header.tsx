@@ -1,13 +1,13 @@
 import { Link, useNavigate } from '@tanstack/react-router';
 import { useAuth } from '../hooks/useAuth';
 import { useRole } from '../hooks/useRole';
-import { LogOut, LayoutDashboard, Search, ShieldCheck } from '@/components/AnimatedIcons';
+import { LogOut, LayoutDashboard, Search, ShieldCheck, UserCheck } from '@/components/AnimatedIcons';
 import { GraduationCap } from '@/components/icons';
 import { cn } from '../lib/utils';
 
 export function Header() {
   const { user, session, signOut } = useAuth();
-  const { isAdmin } = useRole(user?.id);
+  const { isAdmin, isInstructor } = useRole(user?.id);
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
@@ -52,6 +52,20 @@ export function Header() {
           >
             <ShieldCheck className="size-4" />
             <span className="hidden md:inline">Panel Admin</span>
+          </Link>
+        )}
+
+        {isInstructor && (
+          <Link
+            to="/instructor"
+            className={cn(
+              "flex items-center gap-2 px-3 py-2 rounded-xl text-[13px] font-medium transition-all duration-300 text-amber-400/80 whitespace-nowrap",
+              "[&.active]:text-white [&.active]:bg-gradient-to-br [&.active]:from-amber-600/40 [&.active]:to-orange-700/40 [&.active]:shadow-[0_4px_14px_rgba(217,119,6,0.3)]",
+              "hover:text-amber-300 hover:bg-amber-500/10"
+            )}
+          >
+            <UserCheck className="size-4" />
+            <span className="hidden md:inline">Panel Instructor</span>
           </Link>
         )}
 

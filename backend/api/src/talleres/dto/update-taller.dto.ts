@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { CATEGORIAS_TALLER } from '../taller.entity';
 import { HorarioSchema } from './horario.dto';
+import { uuidLike } from '../../common/validators';
 
 // Todos los campos opcionales;提供服务 parcial.
 export const UpdateTallerSchema = z
@@ -9,7 +10,7 @@ export const UpdateTallerSchema = z
     categoria: z.enum(CATEGORIAS_TALLER).optional(),
     lugar: z.string().trim().min(1).max(120).optional(),
     instructor: z.string().trim().min(2).max(120).optional(),
-    instructor_id: z.string().uuid().nullable().optional(),
+    instructor_id: uuidLike().nullable().optional(),
     descripcion: z.string().trim().max(2000).nullable().optional(),
     cupo: z.number().int().min(1).max(500).optional(),
     imagen_url: z.string().url().nullable().optional(),

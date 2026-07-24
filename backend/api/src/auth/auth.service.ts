@@ -47,6 +47,80 @@ export class AuthService {
     });
   }
 
+  /**
+   * Detecta si un error de Supabase Auth indica que el email ya existe,
+   * independientemente del campo donde venga (message, code, status).
+   */
+  private isEmailAlreadyRegistered(authError: unknown): boolean {
+    if (!authError || typeof authError !== 'object') return false;
+    const e = authError as {
+      message?: string;
+      msg?: string;
+      code?: string;
+      status?: number;
+      error_code?: string;
+      err?: { message?: string; code?: string };
+    };
+    const haystack = [
+      e.message,
+      e.msg,
+      e.code,
+      e.error_code,
+      e.err?.message,
+      e.err?.code,
+    ]
+      .filter((s): s is string => typeof s === 'string')
+      .join(' | ')
+      .toLowerCase();
+    if (!haystack) return false;
+    if (haystack.includes('already registered')) return true;
+    if (haystack.includes('user already')) return true;
+    if (haystack.includes('email already')) return true;
+    if (e.status === 422 && haystack.includes('email')) return true;
+    if (haystack.includes('email_exists')) return true;
+    if (haystack.includes('user_already_exists')) return true;
+    return false;
+  }
+
+  /**
+   * Devuelve una descripción textual útil del error de Supabase Auth,
+   * extrayendo información de cualquier campo disponible.
+   */
+  private describeAuthError(authError: unknown): string {
+    if (!authError) return 'error desconocido';
+    if (typeof authError === 'string') return authError;
+    if (typeof authError !== 'object') return String(authError);
+    const e = authError as {
+      message?: string;
+      msg?: string;
+      error_description?: string;
+      code?: string;
+      error_code?: string;
+      status?: number;
+      name?: string;
+      cause?: unknown;
+      err?: { message?: string };
+    };
+    const parts: string[] = [];
+    if (e.name) parts.push(`[${e.name}]`);
+    if (e.status) parts.push(`status=${e.status}`);
+    if (e.message) parts.push(e.message);
+    if (e.error_description) parts.push(e.error_description);
+    if (e.code) parts.push(`code=${e.code}`);
+    if (e.error_code) parts.push(`error_code=${e.error_code}`);
+    if (e.err?.message) parts.push(e.err.message);
+    if (parts.length === 0) {
+      try {
+        const json = JSON.stringify(authError);
+        if (json && json !== '{}') return json;
+      } catch {
+        // ignore
+      }
+      return 'error sin detalles (revisa los logs del servidor)';
+    }
+    return parts.join(' · ');
+  }
+
   async verifyIdentity(dto: VerifyIdentityDto) {
     const { email, password } = dto;
 
@@ -169,11 +243,15 @@ export class AuthService {
       });
 
     if (authError || !authData.user) {
-      if (authError?.message.includes('already registered')) {
+      this.logger.error(
+        `auth.admin.createUser falló para ${email}: ${JSON.stringify(authError)}`,
+      );
+      if (this.isEmailAlreadyRegistered(authError)) {
         throw new BadRequestException('El correo ya está registrado.');
       }
+      const detail = this.describeAuthError(authError);
       throw new InternalServerErrorException(
-        `Error al crear usuario: ${authError?.message}`,
+        `Error al crear usuario: ${detail}`,
       );
     }
 
@@ -244,15 +322,19 @@ export class AuthService {
         email,
         password,
         email_confirm: true,
-        user_metadata: { nombre, matricula, role: 'instructor' },
+        user_metadata: { nombre, matricula, role: 'instructor', turno: 'matutino' },
       });
 
     if (authError || !authData.user) {
-      if (authError?.message.includes('already registered')) {
+      this.logger.error(
+        `auth.admin.createUser falló para ${email}: ${JSON.stringify(authError)}`,
+      );
+      if (this.isEmailAlreadyRegistered(authError)) {
         throw new BadRequestException('El correo ya está registrado.');
       }
+      const detail = this.describeAuthError(authError);
       throw new InternalServerErrorException(
-        `Error al crear usuario: ${authError?.message}`,
+        `Error al crear usuario: ${detail}`,
       );
     }
 
