@@ -11,6 +11,10 @@
     "doctor": "npx react-doctor@latest"
   },
   "pnpm": {
-    "onlyBuiltDependencies": ["@scarf/scarf"]
+    "onlyBuiltDependencies": [
+      "@scarf/scarf",
+      "core-js",
+      "esbuild"
+    ]
   }
 }
