@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { EstadoAsistencia } from '../../lib/types';
 import { AlumnoRow } from './AlumnoRow';
-import { useAsistencias, exportarCSVInstructor } from '../../hooks/useAsistencias';
+import { useAsistencias, exportarPDFInstructor } from '../../hooks/useAsistencias';
 import { cn } from '../../lib/utils';
 import { CheckSquare, Save, Clock, RefreshCw } from '@/components/AnimatedIcons';
 import { Users, Zap, Check, X, FileText } from '@/components/icons';
@@ -95,7 +95,15 @@ export function ListaAsistencia({ tallerId, tallerNombre, soloLectura = false }:
           </button>
 
           <DownloadAttendanceButton
-            onDownload={() => exportarCSVInstructor(alumnos, tallerNombre, fecha)}
+            onDownload={async () => {
+              try {
+                await exportarPDFInstructor(alumnos, tallerNombre, fecha);
+                toast.success('PDF descargado');
+              } catch (e) {
+                toast.error('Error al generar PDF');
+                console.error(e);
+              }
+            }}
             disabled={alumnos.length === 0}
           />
 
