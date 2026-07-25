@@ -3,5 +3,6 @@ packages:
   - "backend/api"
 allowBuilds:
   '@scarf/scarf': false
+  core-js: true
   esbuild: true
   unrs-resolver: true
