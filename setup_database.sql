@@ -78,6 +78,62 @@ CREATE TABLE IF NOT EXISTS public.asistencias (
   UNIQUE(alumno_id, taller_id, fecha)
 );
 
+ALTER TABLE public.asistencias ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Alumno ve su asistencia"                     ON public.asistencias;
+DROP POLICY IF EXISTS "Admin ve todas las asistencias"              ON public.asistencias;
+DROP POLICY IF EXISTS "Instructor ve sus asistencias"               ON public.asistencias;
+DROP POLICY IF EXISTS "Instructor ve asistencias de sus talleres"   ON public.asistencias;
+DROP POLICY IF EXISTS "Instructor gestiona asistencias de sus talleres" ON public.asistencias;
+DROP POLICY IF EXISTS "Admin gestiona todas las asistencias"         ON public.asistencias;
+
+CREATE POLICY "Alumno ve su asistencia"
+  ON public.asistencias FOR SELECT
+  USING (auth.uid() = alumno_id);
+
+CREATE POLICY "Admin ve todas las asistencias"
+  ON public.asistencias FOR SELECT
+  USING (public.has_role(auth.uid(), 'admin'));
+
+CREATE POLICY "Instructor ve asistencias de sus talleres"
+  ON public.asistencias FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.talleres t
+      WHERE t.id = public.asistencias.taller_id
+        AND t.instructor_id = auth.uid()
+    )
+    OR public.has_role(auth.uid(), 'instructor')
+    OR public.has_role(auth.uid(), 'admin')
+  );
+
+CREATE POLICY "Admin gestiona todas las asistencias"
+  ON public.asistencias FOR ALL
+  USING (public.has_role(auth.uid(), 'admin'))
+  WITH CHECK (public.has_role(auth.uid(), 'admin'));
+
+CREATE POLICY "Instructor gestiona asistencias de sus talleres"
+  ON public.asistencias FOR ALL
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.talleres t
+      WHERE t.id = public.asistencias.taller_id
+        AND t.instructor_id = auth.uid()
+    )
+    OR public.has_role(auth.uid(), 'instructor')
+    OR public.has_role(auth.uid(), 'admin')
+  )
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM public.talleres t
+      WHERE t.id = public.asistencias.taller_id
+        AND t.instructor_id = auth.uid()
+    )
+    OR public.has_role(auth.uid(), 'instructor')
+    OR public.has_role(auth.uid(), 'admin')
+  );
+
+
 -- 4. VISTAS Y FUNCIONES ANALÍTICAS
 CREATE OR REPLACE VIEW public.deuda_alumnos AS
 SELECT
