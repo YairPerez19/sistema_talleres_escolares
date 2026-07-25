@@ -37,92 +37,102 @@ export function AlumnoRow({ alumno, onMarcar, isSaving, soloLectura = false }: A
 
   return (
     <div className={cn(
-      'group flex flex-col sm:flex-row sm:items-center gap-3 p-4 rounded-2xl border transition-all duration-200',
+      'group flex flex-col gap-3 p-4 rounded-2xl border transition-all duration-200',
       'bg-white/[0.02] border-white/5 hover:bg-white/[0.04] hover:border-white/10'
     )}>
-      {/* Info del alumno */}
-      <div className="flex items-center gap-3 flex-1 min-w-0">
-        <div className="w-10 h-10 rounded-xl bg-primary/20 border border-primary/20 flex items-center justify-center flex-shrink-0">
-          <span className="text-primary-glow font-black text-sm">
-            {alumno.nombre.charAt(0).toUpperCase()}
-          </span>
+      {/* Fila principal */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 w-full">
+        {/* Info del alumno */}
+        <div className="flex items-center gap-3 flex-1 min-w-0">
+          <div className="w-10 h-10 rounded-xl bg-primary/20 border border-primary/20 flex items-center justify-center flex-shrink-0">
+            <span className="text-primary-glow font-black text-sm">
+              {alumno.nombre.charAt(0).toUpperCase()}
+            </span>
+          </div>
+          <div className="min-w-0">
+            <p className="text-white font-semibold text-sm truncate">{alumno.nombre}</p>
+            <p className="text-[10px] text-white/40 font-mono">{alumno.matricula}</p>
+          </div>
+          <div className="hidden md:block ml-2 flex-shrink-0">
+            <span className="text-[9px] uppercase tracking-widest text-white/30 font-bold px-2 py-0.5 rounded-full bg-white/5">
+              {alumno.turno}
+            </span>
+          </div>
         </div>
-        <div className="min-w-0">
-          <p className="text-white font-semibold text-sm truncate">{alumno.nombre}</p>
-          <p className="text-[10px] text-white/40 font-mono">{alumno.matricula}</p>
-        </div>
-        <div className="hidden md:block ml-2">
-          <span className="text-[9px] uppercase tracking-widest text-white/30 font-bold px-2 py-0.5 rounded-full bg-white/5">
-            {alumno.turno}
-          </span>
-        </div>
-      </div>
 
-      {/* Estado actual */}
-      <div className="flex items-center gap-2 flex-shrink-0">
-        <EstadoBadge estado={alumno.estado} size="sm" />
-        {alumno.hora && (
-          <span className="text-[10px] text-white/30 font-mono">{alumno.hora.slice(0, 5)}</span>
-        )}
-      </div>
+        {/* Estado y acciones rápidas */}
+        <div className="flex items-center gap-3 justify-between sm:justify-end flex-shrink-0">
+          {/* Estado actual */}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <EstadoBadge estado={alumno.estado} size="sm" />
+            {alumno.hora && (
+              <span className="text-[10px] text-white/30 font-mono">{alumno.hora.slice(0, 5)}</span>
+            )}
+          </div>
 
-      {/* Botones de acción rápida */}
-      {!soloLectura && (
-        <div className="flex items-center gap-1.5">
-          {OPCIONES_RAPIDAS.map(({ estado, icon }) => {
-            const isActive = alumno.estado === estado;
-            const config = ESTADO_CONFIG[estado];
-            return (
+          {/* Botones de acción rápida */}
+          {!soloLectura && (
+            <div className="flex items-center gap-1.5 flex-shrink-0">
+              {OPCIONES_RAPIDAS.map(({ estado, icon }) => {
+                const isActive = alumno.estado === estado;
+                const config = ESTADO_CONFIG[estado];
+                return (
+                  <button
+                    key={estado}
+                    onClick={() => handleMarcar(estado)}
+                    disabled={isSaving}
+                    title={config.label}
+                    className={cn(
+                      'w-9 h-9 rounded-xl border text-sm font-bold transition-all duration-150 flex items-center justify-center',
+                      'hover:scale-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed',
+                      isActive
+                        ? cn(config.bg, config.border, config.color, 'shadow-lg shadow-[#8B1A32]/20')
+                        : 'bg-white/5 border-white/10 text-white/40 hover:bg-white/10 hover:text-white/70'
+                    )}
+                  >
+                    {isSaving && isActive
+                      ? <Loader2 size={12} className="animate-spin text-white/50" />
+                      : icon}
+                  </button>
+                );
+              })}
+
+              {/* Botón de observaciones */}
               <button
-                key={estado}
-                onClick={() => handleMarcar(estado)}
-                disabled={isSaving}
-                title={config.label}
+                onClick={() => setShowObs(v => !v)}
+                title="Agregar observación"
                 className={cn(
-                  'w-9 h-9 rounded-xl border text-sm font-bold transition-all duration-150 flex items-center justify-center',
-                  'hover:scale-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed',
-                  isActive
-                    ? cn(config.bg, config.border, config.color, 'shadow-lg shadow-[#8B1A32]/20')
-                    : 'bg-white/5 border-white/10 text-white/40 hover:bg-white/10 hover:text-white/70'
+                  'w-9 h-9 rounded-xl border text-xs transition-all duration-150 flex items-center justify-center',
+                  showObs || alumno.observaciones
+                    ? 'bg-[#8B1A32]/20 border-[#8B1A32]/40 text-[#f4d78e]'
+                    : 'bg-white/5 border-white/10 text-white/30 hover:text-white/60 hover:bg-white/10'
                 )}
               >
-                {isSaving && isActive
-                  ? <Loader2 size={12} className="animate-spin text-white/50" />
-                  : icon}
+                <MessageSquare size={14} />
               </button>
-            );
-          })}
-
-          {/* Botón de observaciones */}
-          <button
-            onClick={() => setShowObs(v => !v)}
-            title="Agregar observación"
-            className={cn(
-              'w-9 h-9 rounded-xl border text-xs transition-all duration-150 flex items-center justify-center',
-              showObs
-                ? 'bg-[#8B1A32]/20 border-[#8B1A32]/40 text-[#f4d78e]'
-                : 'bg-white/5 border-white/10 text-white/30 hover:text-white/60 hover:bg-white/10'
-            )}
-          >
-            <MessageSquare size={14} />
-          </button>
+            </div>
+          )}
         </div>
-      )}
+      </div>
 
-      {/* Observaciones expandible */}
+      {/* Observaciones expandibles (debajo de la fila principal) */}
       {showObs && !soloLectura && (
-        <div className="w-full flex gap-2 mt-1">
+        <div className="w-full flex items-center gap-2 pt-2 border-t border-white/5 animate-in fade-in slide-in-from-top-1 duration-200">
           <input
             value={obs}
             onChange={e => setObs(e.target.value)}
-            placeholder="Observación (opcional)..."
+            placeholder="Observación (opcional, ej. Justificante médico)..."
             className="flex-1 bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-primary/40"
+            onKeyDown={e => {
+              if (e.key === 'Enter') handleGuardarObs();
+            }}
           />
           <button
             onClick={handleGuardarObs}
-            className="px-4 py-2 rounded-xl bg-primary/20 text-primary-glow text-xs font-bold border border-primary/20 hover:bg-primary/30 transition-all"
+            disabled={isSaving}
+            className="px-4 py-2 rounded-xl bg-primary/20 text-primary-glow text-xs font-bold border border-primary/20 hover:bg-primary/30 transition-all flex-shrink-0"
           >
-            Guardar
+            {isSaving ? <Loader2 size={12} className="animate-spin" /> : 'Guardar'}
           </button>
         </div>
       )}
