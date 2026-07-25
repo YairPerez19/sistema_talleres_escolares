@@ -482,3 +482,177 @@ function generateCSVDownload(rows: string[][], headers: string[], filename: stri
   link.download = filename;
   link.click();
 }
+
+const ESTADO_LABELS: Record<EstadoAsistencia, string> = {
+  presente: 'Presente',
+  ausente: 'Ausente',
+  retardo: 'Retardo',
+  justificado: 'Justificado',
+  sin_registro: 'Sin registro',
+};
+
+const ESTADO_COLORS: Record<EstadoAsistencia, [number, number, number]> = {
+  presente: [16, 185, 129],
+  ausente: [210, 74, 107],
+  retardo: [244, 215, 142],
+  justificado: [148, 163, 184],
+  sin_registro: [120, 120, 120],
+};
+
+function formatFechaLarga(fecha: string): string {
+  const [y, m, d] = fecha.split('-').map(Number);
+  const date = new Date(y, (m ?? 1) - 1, d ?? 1);
+  return date.toLocaleDateString('es-MX', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
+}
+
+function formatTurno(turno: string): string {
+  const t = turno.toLowerCase();
+  if (t.includes('mat')) return 'Matutino';
+  if (t.includes('vesp')) return 'Vespertino';
+  return turno.charAt(0).toUpperCase() + turno.slice(1);
+}
+
+export async function exportarPDFInstructor(
+  alumnos: AlumnoConAsistencia[],
+  tallerNombre: string,
+  fecha: string
+) {
+  const [{ default: jsPDF }, autoTableModule] = await Promise.all([
+    import('jspdf'),
+    import('jspdf-autotable'),
+  ]);
+  const autoTable = (autoTableModule as { default?: unknown }).default ?? autoTableModule;
+
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const pageWidth = doc.internal.pageSize.getWidth();
+
+  const presentes = alumnos.filter(a => a.estado === 'presente').length;
+  const ausentes = alumnos.filter(a => a.estado === 'ausente').length;
+  const retardos = alumnos.filter(a => a.estado === 'retardo').length;
+  const justificados = alumnos.filter(a => a.estado === 'justificado').length;
+  const sinRegistro = alumnos.filter(a => a.estado === 'sin_registro').length;
+  const turno = alumnos[0]?.turno ? formatTurno(alumnos[0].turno) : '—';
+
+  doc.setFillColor(30, 41, 59);
+  doc.rect(0, 0, pageWidth, 32, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(18);
+  doc.text('Lista de Asistencia', 14, 14);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(11);
+  doc.text(tallerNombre, 14, 22);
+  doc.setFontSize(9);
+  doc.setTextColor(203, 213, 225);
+  doc.text(`Generado: ${new Date().toLocaleString('es-MX')}`, pageWidth - 14, 22, { align: 'right' });
+
+  doc.setTextColor(30, 41, 59);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(11);
+  doc.text('Fecha:', 14, 42);
+  doc.setFont('helvetica', 'normal');
+  doc.text(formatFechaLarga(fecha), 35, 42);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Turno:', 14, 48);
+  doc.setFont('helvetica', 'normal');
+  doc.text(turno, 35, 48);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Total alumnos:', 14, 54);
+  doc.setFont('helvetica', 'normal');
+  doc.text(String(alumnos.length), 45, 54);
+
+  const headers: [string, string, string, string, string, string] = [
+    '#', 'Alumno', 'Matrícula', 'Taller', 'Estado', 'Turno',
+  ];
+
+  const body = alumnos.map((a, i) => [
+    String(i + 1),
+    a.nombre,
+    a.matricula,
+    tallerNombre,
+    ESTADO_LABELS[a.estado] ?? a.estado,
+    formatTurno(a.turno),
+  ]);
+
+  (autoTable as (opts: unknown) => void)(doc, {
+    startY: 62,
+    head: [headers],
+    body,
+    theme: 'striped',
+    styles: { fontSize: 9, cellPadding: 3, textColor: [30, 41, 59] },
+    headStyles: { fillColor: [79, 70, 229], textColor: 255, fontStyle: 'bold', halign: 'center' },
+    alternateRowStyles: { fillColor: [248, 250, 252] },
+    columnStyles: {
+      0: { halign: 'center', cellWidth: 10 },
+      1: { halign: 'left' },
+      2: { halign: 'center', cellWidth: 25 },
+      3: { halign: 'left' },
+      4: { halign: 'center' },
+      5: { halign: 'center', cellWidth: 22 },
+    },
+    didParseCell: (data: { section: string; column: { index: number }; cell: { raw?: unknown; styles: { textColor?: unknown; fontStyle?: string } } }) => {
+      if (data.section === 'body' && data.column.index === 4) {
+        const estadoKey = (Object.keys(ESTADO_LABELS) as EstadoAsistencia[]).find(
+          k => ESTADO_LABELS[k] === data.cell.raw
+        );
+        if (estadoKey) {
+          const [r, g, b] = ESTADO_COLORS[estadoKey];
+          data.cell.styles.textColor = [r, g, b];
+          data.cell.styles.fontStyle = 'bold';
+        }
+      }
+    },
+  });
+
+  const finalY = (doc as unknown as { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY ?? 62;
+  let summaryY = finalY + 8;
+  const pageHeight = doc.internal.pageSize.getHeight();
+  if (summaryY + 28 > pageHeight - 15) { summaryY = pageHeight - 43; }
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(11);
+  doc.setTextColor(30, 41, 59);
+  doc.text('Resumen', 14, summaryY);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(10);
+  const summary: [string, number, [number, number, number]][] = [
+    ['Presentes', presentes, ESTADO_COLORS.presente],
+    ['Ausentes', ausentes, ESTADO_COLORS.ausente],
+    ['Retardos', retardos, ESTADO_COLORS.retardo],
+    ['Justificados', justificados, ESTADO_COLORS.justificado],
+    ['Sin registro', sinRegistro, ESTADO_COLORS.sin_registro],
+  ];
+  const cellW = (pageWidth - 28) / summary.length;
+  summary.forEach(([label, value, color], i) => {
+    const x = 14 + i * cellW;
+    doc.setDrawColor(226, 232, 240);
+    doc.setFillColor(248, 250, 252);
+    doc.roundedRect(x, summaryY + 4, cellW - 3, 18, 2, 2, 'FD');
+    doc.setTextColor(color[0], color[1], color[2]);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(13);
+    doc.text(String(value), x + (cellW - 3) / 2, summaryY + 12, { align: 'center' });
+    doc.setTextColor(100, 116, 139);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.text(label, x + (cellW - 3) / 2, summaryY + 18, { align: 'center' });
+  });
+
+  const totalPages = (doc.internal as unknown as { getNumberOfPages: () => number }).getNumberOfPages();
+  for (let i = 1; i <= totalPages; i++) {
+    doc.setPage(i);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor(148, 163, 184);
+    doc.text(
+      `Página ${i} de ${totalPages}`,
+      pageWidth - 14,
+      doc.internal.pageSize.getHeight() - 8,
+      { align: 'right' }
+    );
+  }
+
+  const filename = `asistencia_${tallerNombre.replace(/\s+/g, '_')}_${fecha}.pdf`;
+  doc.save(filename);
+}
