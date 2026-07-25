@@ -45,7 +45,7 @@ The NestJS backend uses `helmet` middleware configured with a CSP that allows th
 
 ## Database setup
 
-Run `setup_database.sql` against the Supabase project to create all tables, functions, and seed data. Migrations in `backend/supabase/migrations/` track incremental changes.
+Run `setup_database.sql` against the Supabase project to create all tables, functions, and seed data. Migrations in `backend/supabase/migrations/` track incremental changes (e.g. `20260724000000_fix_asistencias_rls_policy.sql` for instructor & admin RLS attendance permissions).
 
 ## Code style (backend)
 
