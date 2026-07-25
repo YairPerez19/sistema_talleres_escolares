@@ -24,16 +24,16 @@
   --surface: #0a0a0a;
   --foreground: #FFFFFF;
   --foreground-muted: #A1A1AA;
-  --primary: #3b82f6;
-  --primary-glow: #60a5fa;
-  --primary-light: #93c5fd;
-  --secondary: #1d4ed8;
-  --secondary-deep: #1e3a8a;
-  --glass-bg: rgba(10, 10, 10, 0.75);
-  --glass-border: rgba(59, 130, 246, 0.2);
+  --primary: #8B1A32;
+  --primary-glow: #B8354D;
+  --primary-light: #D24A6B;
+  --secondary: #5C1020;
+  --secondary-deep: #3A0813;
+  --glass-bg: rgba(10, 2, 5, 0.75);
+  --glass-border: rgba(139, 26, 50, 0.25);
   --shadow-premium: 0 15px 40px -10px rgba(0, 0, 0, 0.8);
-  --shadow-glow: 0 0 25px rgba(59, 130, 246, 0.5);
-  --shadow-glow-light: 0 0 40px rgba(96, 165, 250, 0.3);
+  --shadow-glow: 0 0 25px rgba(139, 26, 50, 0.4);
+  --shadow-glow-light: 0 0 40px rgba(184, 53, 77, 0.25);
   --card: #0a0a0a;
   --card-foreground: #FFFFFF;
   --popover: #0a0a0a;
@@ -42,34 +42,34 @@
   --secondary-foreground: #FFFFFF;
   --muted: #171717;
   --muted-foreground: #A1A1AA;
-  --accent: #1e1b4b;
+  --accent: #4D0E18;
   --accent-foreground: #FFFFFF;
   --destructive: #ef4444;
-  --border: rgba(59, 130, 246, 0.2);
-  --input: rgba(59, 130, 246, 0.1);
-  --ring: #3b82f6;
+  --border: rgba(139, 26, 50, 0.25);
+  --input: rgba(139, 26, 50, 0.15);
+  --ring: #8B1A32;
   --radius: 0.625rem;
-  --wine-50: #eff6ff;
-  --wine-100: #dbeafe;
-  --wine-200: #bfdbfe;
-  --wine-300: #93c5fd;
-  --wine-400: #60a5fa;
-  --wine-500: #3b82f6;
-  --wine-600: #2563eb;
-  --wine-700: #1d4ed8;
-  --wine-800: #1e40af;
-  --wine-900: #1e3a8a;
+  --wine-50: #fdf2f4;
+  --wine-100: #fbe5e9;
+  --wine-200: #f7cbd4;
+  --wine-300: #f0a2b4;
+  --wine-400: #e46b89;
+  --wine-500: #8B1A32;
+  --wine-600: #791429;
+  --wine-700: #630d20;
+  --wine-800: #540e1c;
+  --wine-900: #3a0813;
 
-  /* === WINE PALETTE (signature color #721422) === */
-  --wine: #721422;
-  --wine-light: #a82a3e;
+  /* === WINE PALETTE (signature color #8B1A32) === */
+  --wine: #8B1A32;
+  --wine-light: #b8354d;
   --wine-bright: #d24a6b;
-  --wine-dark: #4d0e18;
-  --wine-deep: #2a0709;
-  --wine-rgb: 114, 20, 34;
-  --wine-glow: rgba(114, 20, 34, 0.55);
-  --wine-glow-soft: rgba(114, 20, 34, 0.25);
-  --wine-glow-faint: rgba(114, 20, 34, 0.12);
+  --wine-dark: #5c1020;
+  --wine-deep: #3a0813;
+  --wine-rgb: 139, 26, 50;
+  --wine-glow: rgba(139, 26, 50, 0.55);
+  --wine-glow-soft: rgba(139, 26, 50, 0.25);
+  --wine-glow-faint: rgba(139, 26, 50, 0.12);
 
   /* === ADMIN SURFACES === */
   --admin-bg: #060306;
@@ -95,8 +95,8 @@ body::before {
   inset: 0;
   z-index: -2;
   background:
-    radial-gradient(ellipse 60% 50% at 50% -20%, rgba(59, 130, 246, 0.15) 0%, transparent 70%),
-    radial-gradient(ellipse 50% 50% at 80% 40%, rgba(37, 99, 235, 0.05) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 50% -20%, rgba(139, 26, 50, 0.15) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 50% at 80% 40%, rgba(92, 16, 32, 0.05) 0%, transparent 60%),
     var(--background);
   pointer-events: none;
 }
@@ -119,7 +119,7 @@ h1, h2, h3, h4, h5, h6, .font-heading {
   transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1.2);
 }
 .glass-card:hover {
-  box-shadow: var(--shadow-glow), 0 8px 32px rgba(59, 130, 246, 0.35);
+  box-shadow: var(--shadow-glow), 0 8px 32px rgba(139, 26, 50, 0.35);
   border-color: var(--primary-light);
   transform: translateY(-3px);
 }
@@ -135,7 +135,7 @@ h1, h2, h3, h4, h5, h6, .font-heading {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
+  box-shadow: 0 4px 20px rgba(139, 26, 50, 0.4);
   position: relative;
   overflow: hidden;
 }
@@ -148,7 +148,7 @@ h1, h2, h3, h4, h5, h6, .font-heading {
   transition: transform 0.6s ease;
 }
 .btn-primary:hover {
-  box-shadow: 0 8px 35px rgba(59, 130, 246, 0.6), 0 0 50px rgba(96, 165, 250, 0.25);
+  box-shadow: 0 8px 35px rgba(139, 26, 50, 0.6), 0 0 50px rgba(184, 53, 77, 0.25);
   transform: translateY(-3px) scale(1.02);
 }
 .btn-primary:hover::after {
@@ -171,7 +171,7 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 .btn-secondary:hover {
   background: var(--primary);
   color: #fff;
-  box-shadow: 0 8px 35px rgba(59, 130, 246, 0.5);
+  box-shadow: 0 8px 35px rgba(139, 26, 50, 0.5);
   transform: translateY(-3px);
 }
 
@@ -293,8 +293,8 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 
 /* Pulse glow */
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 15px rgba(59, 130, 246, 0.5), 0 0 40px rgba(59, 130, 246, 0.2); }
-  50% { box-shadow: 0 0 30px rgba(96, 165, 250, 0.7), 0 0 60px rgba(96, 165, 250, 0.3); }
+  0%, 100% { box-shadow: 0 0 15px rgba(139, 26, 50, 0.5), 0 0 40px rgba(139, 26, 50, 0.2); }
+  50% { box-shadow: 0 0 30px rgba(184, 53, 77, 0.7), 0 0 60px rgba(184, 53, 77, 0.3); }
 }
 .animate-pulse-glow {
   animation: pulse-glow 2.5s ease-in-out infinite;
@@ -468,7 +468,7 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 /* === BORDER GLOW LINE === */
 
 .border-glow-top {
-  border-top: 1px solid rgba(59, 130, 246, 0.2);
+  border-top: 1px solid rgba(139, 26, 50, 0.25);
   position: relative;
 }
 .border-glow-top::before {
@@ -752,7 +752,7 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 
 .section-divider {
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.4), rgba(37, 99, 235, 0.6), rgba(59, 130, 246, 0.4), transparent);
+  background: linear-gradient(90deg, transparent, rgba(139, 26, 50, 0.4), rgba(184, 53, 77, 0.6), rgba(139, 26, 50, 0.4), transparent);
   border: none;
   margin: 0;
 }
