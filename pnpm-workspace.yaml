@@ -2,7 +2,11 @@ packages:
   - "frontend"
   - "backend/api"
 allowBuilds:
-  '@scarf/scarf': false
-  core-js: true
-  esbuild: true
-  unrs-resolver: true
+  core-js: false
+  esbuild: false
+  unrs-resolver: false
+onlyBuiltDependencies:
+  - "@scarf/scarf"
+  - "core-js"
+  - "esbuild"
+  - "unrs-resolver"
