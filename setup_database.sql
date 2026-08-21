@@ -103,8 +103,6 @@ CREATE POLICY "Instructor ve asistencias de sus talleres"
       WHERE t.id = public.asistencias.taller_id
         AND t.instructor_id = auth.uid()
     )
-    OR public.has_role(auth.uid(), 'instructor')
-    OR public.has_role(auth.uid(), 'admin')
   );
 
 CREATE POLICY "Admin gestiona todas las asistencias"
@@ -120,8 +118,6 @@ CREATE POLICY "Instructor gestiona asistencias de sus talleres"
       WHERE t.id = public.asistencias.taller_id
         AND t.instructor_id = auth.uid()
     )
-    OR public.has_role(auth.uid(), 'instructor')
-    OR public.has_role(auth.uid(), 'admin')
   )
   WITH CHECK (
     EXISTS (
@@ -129,8 +125,6 @@ CREATE POLICY "Instructor gestiona asistencias de sus talleres"
       WHERE t.id = public.asistencias.taller_id
         AND t.instructor_id = auth.uid()
     )
-    OR public.has_role(auth.uid(), 'instructor')
-    OR public.has_role(auth.uid(), 'admin')
   );
 
 
