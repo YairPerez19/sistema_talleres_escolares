@@ -8,6 +8,7 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { EmailModule } from './email/email.module';
 import { TalleresModule } from './talleres/talleres.module';
+import { AiModule } from './ai/ai.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { TalleresModule } from './talleres/talleres.module';
     AuthModule,
     EmailModule,
     TalleresModule,
+    AiModule,
   ],
   controllers: [AppController],
   providers: [
