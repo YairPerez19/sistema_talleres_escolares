@@ -1,6 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import { UnauthorizedException, BadRequestException } from '@nestjs/common';
+import * as jwt from 'jsonwebtoken';
+import * as bcrypt from 'bcryptjs';
 import { AuthService } from './auth.service';
 import { EmailService } from '../email/email.service';
 
@@ -18,10 +20,32 @@ jest.mock('bcryptjs', () => ({
   compare: jest.fn(),
 }));
 
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
+const mockedJwt = jwt as jest.Mocked<typeof jwt>;
+const mockedBcrypt = bcrypt as jest.Mocked<typeof bcrypt>;
 
-let mockSupabaseClient: any;
+type MockSupabaseClient = {
+  auth: {
+    signInWithPassword: jest.Mock;
+    admin: {
+      createUser: jest.Mock;
+      deleteUser: jest.Mock;
+      updateUserById: jest.Mock;
+    };
+  };
+  from: jest.Mock;
+  schema: jest.Mock;
+  select: jest.Mock;
+  eq: jest.Mock;
+  single: jest.Mock;
+  maybeSingle: jest.Mock;
+  insert: jest.Mock;
+  upsert: jest.Mock;
+  update: jest.Mock;
+  order: jest.Mock;
+  limit: jest.Mock;
+};
+
+let mockSupabaseClient: MockSupabaseClient;
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -129,25 +153,25 @@ describe('AuthService', () => {
 
   describe('sendOtp', () => {
     beforeEach(() => {
-      jwt.verify.mockReturnValue({
+      mockedJwt.verify.mockReturnValue({
         user_id: 'user-1',
         email: 'test@example.com',
         role: 'student',
       });
 
-      (mockSupabaseClient.order as jest.Mock).mockReturnThis();
-      (mockSupabaseClient.limit as jest.Mock).mockReturnThis();
+      mockSupabaseClient.order.mockReturnThis();
+      mockSupabaseClient.limit.mockReturnThis();
 
       mockSupabaseClient.maybeSingle.mockResolvedValue({
         data: null,
         error: null,
       });
 
-      bcrypt.hash.mockResolvedValue('hashed-otp');
+      mockedBcrypt.hash.mockResolvedValue('hashed-otp');
     });
 
     it('throws UnauthorizedException when token is invalid', async () => {
-      jwt.verify.mockImplementation(() => {
+      mockedJwt.verify.mockImplementation(() => {
         throw new Error('invalid token');
       });
 
@@ -170,7 +194,7 @@ describe('AuthService', () => {
 
   describe('verifyOtp', () => {
     beforeEach(() => {
-      jwt.verify.mockReturnValue({
+      mockedJwt.verify.mockReturnValue({
         user_id: 'user-1',
         email: 'test@example.com',
         role: 'student',
@@ -178,7 +202,7 @@ describe('AuthService', () => {
     });
 
     it('throws UnauthorizedException when token is expired', async () => {
-      jwt.verify.mockImplementation(() => {
+      mockedJwt.verify.mockImplementation(() => {
         throw new Error('expired');
       });
 
@@ -188,8 +212,8 @@ describe('AuthService', () => {
     });
 
     it('throws BadRequestException when no active code exists', async () => {
-      (mockSupabaseClient.order as jest.Mock).mockReturnThis();
-      (mockSupabaseClient.limit as jest.Mock).mockReturnThis();
+      mockSupabaseClient.order.mockReturnThis();
+      mockSupabaseClient.limit.mockReturnThis();
 
       mockSupabaseClient.select = jest.fn().mockReturnValue({
         eq: jest.fn().mockReturnThis(),

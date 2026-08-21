@@ -14,20 +14,11 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
-import {
-  VerifyIdentitySchema,
-  VerifyIdentityDto,
-} from './dto/verify-identity.dto';
-import { VerifyOtpSchema, VerifyOtpDto } from './dto/verify-otp.dto';
-import { ResendOtpSchema, ResendOtpDto } from './dto/resend-otp.dto';
-import {
-  RegisterStudentSchema,
-  RegisterStudentDto,
-} from './dto/register-student.dto';
-import {
-  RegisterInstructorSchema,
-  RegisterInstructorDto,
-} from './dto/register-instructor.dto';
+import { VerifyIdentitySchema } from './dto/verify-identity.dto';
+import { VerifyOtpSchema } from './dto/verify-otp.dto';
+import { ResendOtpSchema } from './dto/resend-otp.dto';
+import { RegisterStudentSchema } from './dto/register-student.dto';
+import { RegisterInstructorSchema } from './dto/register-instructor.dto';
 import { ZodError } from 'zod';
 import { Roles } from '../common/roles.decorator';
 import { RolesGuard } from '../common/roles.guard';

@@ -8,7 +8,7 @@ import {
   createParamDecorator,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js';
 import { Reflector } from '@nestjs/core';
 import type { Request } from 'express';
 import { ROLES_KEY } from './roles.decorator';
@@ -29,7 +29,7 @@ declare module 'express' {
 @Injectable()
 export class RolesGuard implements CanActivate {
   private readonly logger = new Logger(RolesGuard.name);
-  private supabaseAdmin: SupabaseClient;
+  private supabaseAdmin: ReturnType<typeof createClient>;
 
   constructor(
     private reflector: Reflector,

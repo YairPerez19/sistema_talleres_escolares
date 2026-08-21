@@ -7,7 +7,7 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js';
 import type { CreateTallerDto } from './dto/create-taller.dto';
 import type { UpdateTallerDto } from './dto/update-taller.dto';
 import type { FilterTallerDto } from './dto/filter-taller.dto';
@@ -21,7 +21,7 @@ import type {
 @Injectable()
 export class TalleresService {
   private readonly logger = new Logger(TalleresService.name);
-  private supabase: SupabaseClient;
+  private supabase: ReturnType<typeof createClient>;
 
   constructor(private configService: ConfigService) {
     this.supabase = createClient(
@@ -61,7 +61,7 @@ export class TalleresService {
       .from('talleres')
       .select('*, horarios(id, taller_id, dia, hora_inicio, hora_fin)')
       .eq('id', id)
-      .maybeSingle();
+      .maybeSingle<TallerConHorarios>();
 
     if (error) this.fail(`obtener taller ${id}`, error);
     if (!data) throw new NotFoundException(`Taller ${id} no encontrado.`);
@@ -73,11 +73,11 @@ export class TalleresService {
   async create(dto: CreateTallerDto): Promise<TallerConHorarios> {
     const { horarios, ...tallerFields } = dto;
 
-    const { data, error } = await this.supabase
+    const { data: taller, error } = await this.supabase
       .from('talleres')
       .insert(tallerFields)
       .select('*')
-      .single();
+      .single<Taller>();
 
     if (error) {
       if (this.isUniqueViolation(error)) {
@@ -88,7 +88,9 @@ export class TalleresService {
       this.fail('crear taller', error);
     }
 
-    const taller = data as Taller;
+    if (!taller) {
+      throw new InternalServerErrorException('No se pudo crear el taller.');
+    }
     if (horarios && horarios.length > 0) {
       await this.replaceHorarios(taller.id, horarios);
     }
@@ -161,7 +163,7 @@ export class TalleresService {
       .insert(rows)
       .select('*');
     if (error) this.fail(`insertar horarios de ${tallerId}`, error);
-    return (data ?? []) as Horario[];
+    return data ?? [];
   }
 
   private async countInscritos(
@@ -170,14 +172,13 @@ export class TalleresService {
     const counts = new Map<string, number>();
     if (tallerIds.length === 0) return counts;
 
-    const { data, error } = await this.supabase
-      .from('inscripciones')
-      .select('taller_id')
-      .in('taller_id', tallerIds);
+    const { data, error } = await this.supabase.rpc('count_inscripciones', {
+      taller_ids: tallerIds,
+    });
 
     if (error) this.fail('contar inscritos', error);
-    for (const row of (data ?? []) as { taller_id: string }[]) {
-      counts.set(row.taller_id, (counts.get(row.taller_id) ?? 0) + 1);
+    for (const row of (data ?? []) as { taller_id: string; total: number }[]) {
+      counts.set(row.taller_id, row.total);
     }
     return counts;
   }
