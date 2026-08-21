@@ -7,11 +7,14 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js';
 import * as bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
+import { randomInt } from 'node:crypto';
 import { EmailService } from '../email/email.service';
 import type { VerifyIdentityDto } from './dto/verify-identity.dto';
+import type { RegisterStudentDto } from './dto/register-student.dto';
+import type { RegisterInstructorDto } from './dto/register-instructor.dto';
 
 interface PendingTokenPayload {
   user_id: string;
@@ -21,11 +24,38 @@ interface PendingTokenPayload {
   exp?: number;
 }
 
+interface SupabaseMagicLinkResponse {
+  properties?: {
+    action_link?: string;
+  };
+}
+
+interface ProfileRow {
+  nombre: string;
+  matricula?: string | null;
+}
+
+interface UserAuthRow {
+  id: string;
+}
+
+interface RoleRow {
+  role: string;
+}
+
+interface VerificationCodeRow {
+  id: string;
+  code_hash: string;
+  expires_at: string;
+  attempts: number;
+  used: boolean;
+}
+
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
-  private supabaseAdmin: SupabaseClient;
-  private supabaseAnon: SupabaseClient;
+  private supabaseAdmin: ReturnType<typeof createClient>;
+  private supabaseAnon: ReturnType<typeof createClient>;
   private readonly jwtSecret: string;
 
   constructor(
@@ -89,7 +119,15 @@ export class AuthService {
   private describeAuthError(authError: unknown): string {
     if (!authError) return 'error desconocido';
     if (typeof authError === 'string') return authError;
-    if (typeof authError !== 'object') return String(authError);
+    if (
+      typeof authError === 'number' ||
+      typeof authError === 'boolean' ||
+      typeof authError === 'bigint' ||
+      typeof authError === 'symbol'
+    ) {
+      return String(authError);
+    }
+    if (typeof authError !== 'object') return 'error desconocido';
     const e = authError as {
       message?: string;
       msg?: string;
@@ -159,7 +197,7 @@ export class AuthService {
       .from('user_roles')
       .select('role')
       .eq('user_id', userId)
-      .single();
+      .single<RoleRow>();
 
     if (!roleData || roleData.role !== dto.role) {
       throw new UnauthorizedException('Credenciales inválidas.');
@@ -169,7 +207,7 @@ export class AuthService {
       .from('profiles')
       .select('nombre, matricula')
       .eq('id', userId)
-      .single();
+      .single<ProfileRow>();
 
     if (!profile) {
       throw new UnauthorizedException('Credenciales inválidas.');
@@ -205,7 +243,7 @@ export class AuthService {
       .from('users')
       .select('id')
       .eq('email', email)
-      .single();
+      .single<UserAuthRow>();
 
     if (authUserError || !authUser) {
       throw new UnauthorizedException('Credenciales inválidas.');
@@ -229,9 +267,7 @@ export class AuthService {
     };
   }
 
-  async registerStudent(
-    dto: import('./dto/register-student.dto').RegisterStudentDto,
-  ) {
+  async registerStudent(dto: RegisterStudentDto) {
     const { email, password, nombre, matricula, turno } = dto;
 
     const { data: authData, error: authError } =
@@ -292,9 +328,7 @@ export class AuthService {
     };
   }
 
-  async registerInstructor(
-    dto: import('./dto/register-instructor.dto').RegisterInstructorDto,
-  ) {
+  async registerInstructor(dto: RegisterInstructorDto) {
     const { nombre, email, password, matricula, taller_id } = dto;
 
     const { data: taller, error: tallerError } = await this.supabaseAdmin
@@ -322,7 +356,12 @@ export class AuthService {
         email,
         password,
         email_confirm: true,
-        user_metadata: { nombre, matricula, role: 'instructor', turno: 'matutino' },
+        user_metadata: {
+          nombre,
+          matricula,
+          role: 'instructor',
+          turno: 'matutino',
+        },
       });
 
     if (authError || !authData.user) {
@@ -406,7 +445,7 @@ export class AuthService {
       .eq('used', false)
       .order('created_at', { ascending: false })
       .limit(1)
-      .maybeSingle();
+      .maybeSingle<{ created_at: string }>();
 
     if (lastCode) {
       const elapsed = Date.now() - new Date(lastCode.created_at).getTime();
@@ -418,7 +457,7 @@ export class AuthService {
       }
     }
 
-    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpCode = randomInt(100000, 1000000).toString();
     const codeHash = await bcrypt.hash(otpCode, 10);
 
     await this.supabaseAdmin
@@ -440,7 +479,7 @@ export class AuthService {
       .from('profiles')
       .select('nombre')
       .eq('id', payload.user_id)
-      .single();
+      .single<ProfileRow>();
 
     await this.emailService.sendOtpEmail(
       payload.email,
@@ -480,7 +519,7 @@ export class AuthService {
       );
     }
 
-    const verificationCode = codes[0];
+    const verificationCode = codes[0] as VerificationCodeRow;
 
     if (new Date(verificationCode.expires_at) < new Date()) {
       await this.supabaseAdmin
@@ -529,6 +568,9 @@ export class AuthService {
         'SUPABASE_SERVICE_ROLE_KEY',
       )!;
       const supabaseUrl = this.configService.get<string>('SUPABASE_URL')!;
+      const frontendUrl =
+        this.configService.get<string>('FRONTEND_URL') ||
+        'http://localhost:5173';
 
       const response = await fetch(
         `${supabaseUrl}/auth/v1/admin/generate_link`,
@@ -542,12 +584,12 @@ export class AuthService {
           body: JSON.stringify({
             type: 'magiclink',
             email: payload.email,
-            redirect_to: 'http://localhost:5173/verify-otp',
+            redirect_to: `${frontendUrl}/verify-otp`,
           }),
         },
       );
 
-      const linkData = await response.json();
+      const linkData = (await response.json()) as SupabaseMagicLinkResponse;
 
       if (linkData?.properties?.action_link) {
         const url = new URL(linkData.properties.action_link);
