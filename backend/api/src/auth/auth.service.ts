@@ -7,7 +7,7 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import * as bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
 import { randomInt } from 'node:crypto';
@@ -54,8 +54,8 @@ interface VerificationCodeRow {
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
-  private supabaseAdmin: ReturnType<typeof createClient>;
-  private supabaseAnon: ReturnType<typeof createClient>;
+  private supabaseAdmin: SupabaseClient<any>;
+  private supabaseAnon: SupabaseClient<any>;
   private readonly jwtSecret: string;
 
   constructor(
@@ -69,10 +69,10 @@ export class AuthService {
     const anonKey = this.configService.get<string>('SUPABASE_ANON_KEY')!;
     this.jwtSecret = this.configService.get<string>('JWT_SECRET')!;
 
-    this.supabaseAdmin = createClient(url, serviceKey, {
+    this.supabaseAdmin = createClient<any>(url, serviceKey, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
-    this.supabaseAnon = createClient(url, anonKey, {
+    this.supabaseAnon = createClient<any>(url, anonKey, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
   }

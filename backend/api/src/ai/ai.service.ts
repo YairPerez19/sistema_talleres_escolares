@@ -96,6 +96,7 @@ export class AiService {
     const response = await fetch(url.toString(), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      signal: AbortSignal.timeout(10000),
       body: JSON.stringify({
         contents: [
           {
@@ -119,11 +120,14 @@ export class AiService {
   }
 
   private generateLocalDescription(nombre: string, categoria: string): string {
-    const lowerNombre = nombre.toLowerCase();
+    const normalizedNombre = nombre
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '');
     let selectedCategory = 'default';
 
     for (const [cat, keywords] of Object.entries(TOPICS)) {
-      if (keywords.some((k) => lowerNombre.includes(k))) {
+      if (keywords.some((k) => normalizedNombre.includes(k))) {
         selectedCategory = cat;
         break;
       }

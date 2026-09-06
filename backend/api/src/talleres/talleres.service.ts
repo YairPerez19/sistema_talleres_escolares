@@ -4,10 +4,12 @@ import {
   NotFoundException,
   ConflictException,
   BadRequestException,
+  ForbiddenException,
   InternalServerErrorException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import type { AuthUser } from '../common/roles.guard';
 import type { CreateTallerDto } from './dto/create-taller.dto';
 import type { UpdateTallerDto } from './dto/update-taller.dto';
 import type { FilterTallerDto } from './dto/filter-taller.dto';
@@ -21,10 +23,10 @@ import type {
 @Injectable()
 export class TalleresService {
   private readonly logger = new Logger(TalleresService.name);
-  private supabase: ReturnType<typeof createClient>;
+  private supabase: SupabaseClient<any>;
 
   constructor(private configService: ConfigService) {
-    this.supabase = createClient(
+    this.supabase = createClient<any>(
       this.configService.get<string>('SUPABASE_URL')!,
       this.configService.get<string>('SUPABASE_SERVICE_ROLE_KEY')!,
       { auth: { persistSession: false, autoRefreshToken: false } },
@@ -68,6 +70,66 @@ export class TalleresService {
 
     const counts = await this.countInscritos([id]);
     return this.attachCupo(data, counts.get(id) ?? 0);
+  }
+
+  async getAlumnosInscritos(
+    tallerId: string,
+    currentUser?: AuthUser,
+  ): Promise<
+    {
+      inscripcion_id: string;
+      alumno_id: string;
+      nombre: string;
+      matricula: string;
+      turno: string;
+      inscripcion_fecha: string;
+    }[]
+  > {
+    const taller = await this.findOne(tallerId);
+
+    if (currentUser && currentUser.role === 'instructor') {
+      if (taller.instructor_id !== currentUser.id) {
+        throw new ForbiddenException(
+          'No tienes permisos para ver los alumnos de este taller.',
+        );
+      }
+    }
+
+    interface AlumnoInscritoRow {
+      id: string;
+      alumno_id: string;
+      created_at: string;
+      profiles: {
+        id: string;
+        nombre: string | null;
+        matricula: string | null;
+        turno: string | null;
+      } | null;
+    }
+
+    const { data, error } = (await this.supabase
+      .from('inscripciones')
+      .select(
+        'id, alumno_id, created_at, profiles(id, nombre, matricula, turno)',
+      )
+      .eq('taller_id', tallerId)
+      .order('created_at', { ascending: true })) as {
+      data: AlumnoInscritoRow[] | null;
+      error: { message?: string } | null;
+    };
+
+    if (error) this.fail(`obtener alumnos inscritos de ${tallerId}`, error);
+
+    const rows = data ?? [];
+
+    return rows.map((row) => ({
+      inscripcion_id: row.id,
+      alumno_id: row.alumno_id,
+      nombre: row.profiles?.nombre ?? '',
+      matricula: row.profiles?.matricula ?? '',
+      turno: row.profiles?.turno ?? '',
+      inscripcion_fecha: row.created_at,
+    }));
   }
 
   async create(dto: CreateTallerDto): Promise<TallerConHorarios> {
@@ -158,10 +220,10 @@ export class TalleresService {
     if (horarios.length === 0) return [];
 
     const rows = horarios.map((h) => ({ ...h, taller_id: tallerId }));
-    const { data, error } = await this.supabase
+    const { data, error } = (await this.supabase
       .from('horarios')
       .insert(rows)
-      .select('*');
+      .select('*')) as { data: Horario[] | null; error: unknown };
     if (error) this.fail(`insertar horarios de ${tallerId}`, error);
     return data ?? [];
   }
@@ -172,9 +234,12 @@ export class TalleresService {
     const counts = new Map<string, number>();
     if (tallerIds.length === 0) return counts;
 
-    const { data, error } = await this.supabase.rpc('count_inscripciones', {
+    const { data, error } = (await this.supabase.rpc('count_inscripciones', {
       taller_ids: tallerIds,
-    });
+    })) as {
+      data: { taller_id: string; total: number }[] | null;
+      error: unknown;
+    };
 
     if (error) this.fail('contar inscritos', error);
     for (const row of (data ?? []) as { taller_id: string; total: number }[]) {

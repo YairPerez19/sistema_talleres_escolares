@@ -9,6 +9,13 @@ import { AuthModule } from './auth/auth.module';
 import { EmailModule } from './email/email.module';
 import { TalleresModule } from './talleres/talleres.module';
 import { AiModule } from './ai/ai.module';
+import { AlumnosModule } from './alumnos/alumnos.module';
+import { InstructoresModule } from './instructores/instructores.module';
+import { AdminModule } from './admin/admin.module';
+import { InscripcionesModule } from './inscripciones/inscripciones.module';
+import { AsistenciasModule } from './asistencias/asistencias.module';
+import { AdeudosModule } from './adeudos/adeudos.module';
+import { ReportesModule } from './reportes/reportes.module';
 
 @Module({
   imports: [
@@ -29,6 +36,13 @@ import { AiModule } from './ai/ai.module';
     EmailModule,
     TalleresModule,
     AiModule,
+    AlumnosModule,
+    InstructoresModule,
+    AdminModule,
+    InscripcionesModule,
+    AsistenciasModule,
+    AdeudosModule,
+    ReportesModule,
   ],
   controllers: [AppController],
   providers: [
