@@ -3,8 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import { UnauthorizedException, BadRequestException } from '@nestjs/common';
 import * as jwt from 'jsonwebtoken';
 import * as bcrypt from 'bcryptjs';
-import { AuthService } from './auth.service';
-import { EmailService } from '../email/email.service';
+import { AuthService } from '../../../src/auth/auth.service';
+import { EmailService } from '../../../src/email/email.service';
 
 jest.mock('@supabase/supabase-js', () => ({
   createClient: jest.fn(() => mockSupabaseClient),

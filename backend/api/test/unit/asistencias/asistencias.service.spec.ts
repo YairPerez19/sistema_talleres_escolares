@@ -5,12 +5,12 @@ import {
   BadRequestException,
   ForbiddenException,
 } from '@nestjs/common';
-import { AsistenciasService } from './asistencias.service';
+import { AsistenciasService } from '../../../src/asistencias/asistencias.service';
 import {
   createMockSupabaseClient,
   MockSupabaseClient,
-} from '../../test/mocks/supabase.mock';
-import type { AuthUser } from '../common/roles.guard';
+} from '../../mocks/supabase.mock';
+import type { AuthUser } from '../../../src/common/roles.guard';
 
 let mockSupabaseClient: MockSupabaseClient;
 

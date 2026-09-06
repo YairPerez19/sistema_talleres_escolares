@@ -4,12 +4,12 @@ import {
   NotFoundException,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { AdeudosService } from './adeudos.service';
+import { AdeudosService } from '../../../src/adeudos/adeudos.service';
 import {
   createMockSupabaseClient,
   createMockQueryBuilder,
   MockSupabaseClient,
-} from '../../test/mocks/supabase.mock';
+} from '../../mocks/supabase.mock';
 
 let mockSupabaseClient: MockSupabaseClient;
 

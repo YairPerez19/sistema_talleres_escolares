@@ -6,12 +6,12 @@ import {
   ConflictException,
   ForbiddenException,
 } from '@nestjs/common';
-import { InscripcionesService } from './inscripciones.service';
+import { InscripcionesService } from '../../../src/inscripciones/inscripciones.service';
 import {
   createMockSupabaseClient,
   MockSupabaseClient,
-} from '../../test/mocks/supabase.mock';
-import type { AuthUser } from '../common/roles.guard';
+} from '../../mocks/supabase.mock';
+import type { AuthUser } from '../../../src/common/roles.guard';
 
 let mockSupabaseClient: MockSupabaseClient;
 
