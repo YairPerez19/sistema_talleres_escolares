@@ -74,7 +74,7 @@
       "ts"
     ],
     "rootDir": ".",
-    "testRegex": "test/(?!.*e2e).*\\.spec\\.ts$",
+    "testRegex": "test/unit/.*\\.spec\\.ts$",
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },
