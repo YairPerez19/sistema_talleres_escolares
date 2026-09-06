@@ -5,11 +5,11 @@ import {
   ConflictException,
   BadRequestException,
 } from '@nestjs/common';
-import { AdminService } from '../../../src/admin/admin.service';
+import { AdminService } from '../../src/admin/admin.service';
 import {
   createMockSupabaseClient,
   MockSupabaseClient,
-} from '../../mocks/supabase.mock';
+} from '../mocks/supabase.mock';
 
 let mockSupabaseClient: MockSupabaseClient;
 

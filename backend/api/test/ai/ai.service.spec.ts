@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
-import { AiService } from '../../../src/ai/ai.service';
+import { AiService } from '../../src/ai/ai.service';
 
 describe('AiService', () => {
   let service: AiService;

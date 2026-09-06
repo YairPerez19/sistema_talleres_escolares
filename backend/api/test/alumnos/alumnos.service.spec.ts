@@ -1,11 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import { NotFoundException } from '@nestjs/common';
-import { AlumnosService } from '../../../src/alumnos/alumnos.service';
+import { AlumnosService } from '../../src/alumnos/alumnos.service';
 import {
   createMockSupabaseClient,
   MockSupabaseClient,
-} from '../../mocks/supabase.mock';
+} from '../mocks/supabase.mock';
 
 let mockSupabaseClient: MockSupabaseClient;
 
