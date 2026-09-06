@@ -22,32 +22,16 @@ export function useRole(userId: string | undefined | null): UseRoleResult {
     }
     const uid = userId;
     async function fetchRole() {
-      // 1. Try local storage first (set during login)
-      const cachedRole = localStorage.getItem(`role_${uid}`);
-      if (cachedRole) {
-        setRole(cachedRole as AppRole);
-        setLoading(false);
-        return;
-      }
-
-      // 2. FIX TEMPORAL: Bypassing RLS for known admin fallback
-      if (uid === 'a5332911-97cf-4097-a8f1-8a13ae5de945') {
-        setRole('admin');
-        setLoading(false);
-        return;
-      }
-
-      // 3. Fallback to querying DB (might fail due to RLS)
       const { data, error } = await supabase
         .from('user_roles')
         .select('role')
         .eq('user_id', uid)
         .maybeSingle();
-      
+
       if (error) {
         console.error('Error fetching role:', error);
       }
-      
+
       const roleData = data as { role: string } | null;
       if (roleData?.role) {
         setRole(roleData.role as AppRole);

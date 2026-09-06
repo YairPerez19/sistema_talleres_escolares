@@ -10,12 +10,17 @@ async function bootstrap() {
     ? process.env.ALLOWED_ORIGINS.split(',').map((o) => o.trim())
     : ['http://localhost:5173', 'http://localhost:3000'];
 
+  const supabaseUrl = process.env.SUPABASE_URL ?? '';
+
   app.enableCors({
-    origin: (origin, callback) => {
+    origin: (
+      origin: string | undefined,
+      callback: (err: Error | null, allow?: boolean) => void,
+    ) => {
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
-        callback(new Error(`CORS blocked: origin ${origin} not allowed`));
+        callback(null, false);
       }
     },
     credentials: true,
@@ -28,17 +33,11 @@ async function bootstrap() {
           'default-src': ["'self'"],
           'script-src': ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
           'style-src': ["'self'", "'unsafe-inline'"],
-          'img-src': [
-            "'self'",
-            'data:',
-            'https://taarmixrsznxeltawztq.supabase.co',
-          ],
+          'img-src': ["'self'", 'data:', supabaseUrl].filter(Boolean),
           'font-src': ["'self'"],
-          'connect-src': [
-            "'self'",
-            'https://taarmixrsznxeltawztq.supabase.co',
-            ...allowedOrigins,
-          ],
+          'connect-src': ["'self'", supabaseUrl, ...allowedOrigins].filter(
+            Boolean,
+          ),
         },
       },
       crossOriginResourcePolicy: { policy: 'cross-origin' },
@@ -66,4 +65,4 @@ async function bootstrap() {
   console.log(`Backend corriendo en puerto ${port}`);
   console.log(`Swagger docs: http://localhost:${port}/api/docs`);
 }
-bootstrap();
+void bootstrap();

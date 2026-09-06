@@ -85,15 +85,14 @@ function LoginPage() {
           matricula: form.matricula, turno: form.turno,
         })
 
-        navigate({ to: '/verify-otp', state: {
-          pendingToken: result.pending_token,
-          emailMasked: result.email_masked,
-          nombre: result.nombre,
-          role: 'student' as Role,
-          email: form.email,
-          password: form.password,
-          isRegistration: true,
-        } as any})
+      navigate({ to: '/verify-otp', state: {
+        pendingToken: result.pending_token,
+        emailMasked: result.email_masked,
+        nombre: result.nombre,
+        role: 'student' as Role,
+        email: form.email,
+        isRegistration: true,
+      } as any})
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : 'Error al crear la cuenta.'
         toast.error(message)
@@ -117,12 +116,6 @@ function LoginPage() {
           access_token: result.access_token,
           refresh_token: result.refresh_token,
         })
-        
-        // Save role in local storage for useRole hook to bypass RLS issues
-        const { data: sessionData } = await supabase.auth.getSession();
-        if (sessionData.session?.user?.id) {
-          localStorage.setItem(`role_${sessionData.session.user.id}`, result.role);
-        }
 
         toast.success(`¡Bienvenido${result.nombre ? ', ' + result.nombre : ''}!`)
         navigate({ to: getRedirectPath(result.role) })
@@ -135,7 +128,6 @@ function LoginPage() {
         nombre: result.nombre,
         role: nav.role,
         email: form.email,
-        password: form.password,
         isRegistration: false,
       } as any})
     } catch (err: unknown) {

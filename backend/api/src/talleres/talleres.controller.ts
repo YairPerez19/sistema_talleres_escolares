@@ -24,7 +24,8 @@ import { CreateTallerSchema } from './dto/create-taller.dto';
 import { UpdateTallerSchema } from './dto/update-taller.dto';
 import { FilterTallerSchema } from './dto/filter-taller.dto';
 import { Roles } from '../common/roles.decorator';
-import { RolesGuard } from '../common/roles.guard';
+import { RolesGuard, CurrentUser } from '../common/roles.guard';
+import type { AuthUser } from '../common/roles.guard';
 import { UseGuards } from '@nestjs/common';
 
 @ApiTags('talleres')
@@ -48,6 +49,21 @@ export class TalleresController {
     );
   }
 
+  @Get('public')
+  @ApiOperation({
+    summary: 'Catálogo público de talleres (sin autenticación requerida)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de talleres con cupo calculado para catálogo público',
+  })
+  async findPublic(@Query() query: Record<string, string>) {
+    return this.parse(
+      () => FilterTallerSchema.parse(query),
+      (dto) => this.service.findAll(dto),
+    );
+  }
+
   @Get(':id')
   @UseGuards(RolesGuard)
   @Roles('admin', 'instructor', 'student')
@@ -56,6 +72,26 @@ export class TalleresController {
   @ApiResponse({ status: 404, description: 'Taller no encontrado' })
   findOne(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.service.findOne(id);
+  }
+
+  @Get(':id/alumnos')
+  @UseGuards(RolesGuard)
+  @Roles('admin', 'instructor')
+  @ApiOperation({
+    summary:
+      'Listar alumnos inscritos en un taller (admin o instructor asignado)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de alumnos inscritos en el taller',
+  })
+  @ApiResponse({ status: 403, description: 'Sin permisos sobre este taller' })
+  @ApiResponse({ status: 404, description: 'Taller no encontrado' })
+  async getAlumnosInscritos(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @CurrentUser() user: AuthUser,
+  ) {
+    return this.service.getAlumnosInscritos(id, user);
   }
 
   @Post()

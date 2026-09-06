@@ -3,6 +3,15 @@ import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
 import type { Transporter } from 'nodemailer';
 
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 @Injectable()
 export class EmailService {
   private readonly logger = new Logger(EmailService.name);
@@ -45,7 +54,7 @@ export class EmailService {
     }
 
     try {
-      const info = await this.transporter.sendMail({
+      const info = (await this.transporter.sendMail({
         from: this.from,
         to,
         subject: 'Tu codigo de verificacion - SITE CBTis 61',
@@ -55,17 +64,17 @@ export class EmailService {
               <h1 style="font-size: 20px; font-weight: 800; letter-spacing: 2px; color: #c13b5c;">SITE</h1>
               <p style="color: rgba(255,255,255,0.5); font-size: 12px; text-transform: uppercase; letter-spacing: 4px;">CBTis No. 61</p>
             </div>
-            <p style="font-size: 15px; margin-bottom: 20px;">Hola <strong>${nombre}</strong>,</p>
+            <p style="font-size: 15px; margin-bottom: 20px;">Hola <strong>${escapeHtml(nombre)}</strong>,</p>
             <p style="font-size: 14px; color: rgba(255,255,255,0.7); margin-bottom: 24px;">Usa el siguiente codigo para verificar tu cuenta:</p>
             <div style="text-align: center; margin-bottom: 24px;">
               <span style="font-size: 40px; font-weight: 900; letter-spacing: 12px; color: #c13b5c; background: rgba(193,59,92,0.1); padding: 16px 24px; border-radius: 12px; display: inline-block;">
-                ${otpCode}
+                ${escapeHtml(otpCode)}
               </span>
             </div>
             <p style="font-size: 12px; color: rgba(255,255,255,0.4);">Este codigo expira en 10 minutos. Si no solicitaste este codigo, ignora este correo.</p>
           </div>
         `,
-      });
+      })) as { messageId?: string };
 
       this.logger.log(`Correo enviado a ${to} | Message ID: ${info.messageId}`);
     } catch (error) {

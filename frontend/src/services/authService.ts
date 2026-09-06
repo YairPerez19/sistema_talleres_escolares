@@ -41,7 +41,6 @@ interface VerifyOtpResponse {
   verified: boolean;
   access_token?: string;
   refresh_token?: string;
-  login_token?: string;
   user: { id: string; email: string };
   role: Role;
 }
@@ -143,15 +142,6 @@ export async function verifyOtp(pendingToken: string, code: string): Promise<Ver
     body: JSON.stringify({ pending_token: pendingToken, code }),
   });
   return handleResponse<VerifyOtpResponse>(res);
-}
-
-export async function finalizeSession(
-  email: string,
-  password: string,
-) {
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) throw new AuthServiceError('Error al iniciar sesión');
-  return data;
 }
 
 export function getRedirectPath(role: Role): string {

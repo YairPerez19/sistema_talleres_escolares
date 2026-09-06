@@ -29,13 +29,13 @@ declare module 'express' {
 @Injectable()
 export class RolesGuard implements CanActivate {
   private readonly logger = new Logger(RolesGuard.name);
-  private supabaseAdmin: SupabaseClient;
+  private supabaseAdmin: SupabaseClient<any>;
 
   constructor(
     private reflector: Reflector,
     private configService: ConfigService,
   ) {
-    this.supabaseAdmin = createClient(
+    this.supabaseAdmin = createClient<any>(
       this.configService.get<string>('SUPABASE_URL')!,
       this.configService.get<string>('SUPABASE_SERVICE_ROLE_KEY')!,
       { auth: { persistSession: false, autoRefreshToken: false } },

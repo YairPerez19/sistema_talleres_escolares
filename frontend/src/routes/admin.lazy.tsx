@@ -28,7 +28,7 @@ import type { AdminStats } from '../hooks/useAsistencias'
 import { EstadoBadge } from '../components/asistencia/EstadoBadge'
 import { ESTADO_CONFIG, type FiltroAsistencia, type TallerConInstructor, type Horario } from '../lib/types'
 import { useRole } from '../hooks/useRole'
-import { generateWorkshopDescription } from '../lib/ai'
+import { generateWorkshopDescription } from '../services/aiService'
 import { registerInstructor } from '../services/authService'
 
 export const Route = createLazyFileRoute('/admin')({
