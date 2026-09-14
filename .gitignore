@@ -36,3 +36,16 @@ out/
 .env.development.local
 .env.test.local
 .env.production.local
+.env*.local
+
+# NestJS
+backend/api/dist/
+
+# Coverage y tests
+coverage/
+*.lcov
+
+# Cache
+.cache/
+.parcel-cache/
+.turbo/

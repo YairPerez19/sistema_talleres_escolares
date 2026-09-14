@@ -18,6 +18,16 @@ const AuthContext = React.createContext<AuthContextType>({
 });
 
 const signOut = async () => {
+  const keysToRemove: string[] = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key?.startsWith('role_') || key?.startsWith('pending_auth_')) {
+      keysToRemove.push(key);
+    }
+  }
+  for (const key of keysToRemove) {
+    localStorage.removeItem(key);
+  }
   await supabase.auth.signOut();
 };
 

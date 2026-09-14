@@ -22,16 +22,24 @@ export function useRole(userId: string | undefined | null): UseRoleResult {
     }
     const uid = userId;
     async function fetchRole() {
+      // 1. Try local storage first (set during login)
+      const cachedRole = localStorage.getItem(`role_${uid}`);
+      if (cachedRole) {
+        setRole(cachedRole as AppRole);
+        setLoading(false);
+        return;
+      }
+
       const { data, error } = await supabase
         .from('user_roles')
         .select('role')
         .eq('user_id', uid)
         .maybeSingle();
-
+      
       if (error) {
         console.error('Error fetching role:', error);
       }
-
+      
       const roleData = data as { role: string } | null;
       if (roleData?.role) {
         setRole(roleData.role as AppRole);

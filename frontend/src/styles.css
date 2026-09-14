@@ -761,16 +761,18 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 
 .download-btn {
   background-color: transparent;
-  border: 2px solid #722F37;
+  border: 1.5px solid #722F37;
   display: flex;
   align-items: center;
   border-radius: 50px;
-  width: 175px;
+  width: 138px;
+  height: 36px;
   cursor: pointer;
   transition: all 0.4s ease;
-  padding: 5px;
+  padding: 3px;
   position: relative;
   user-select: none;
+  box-sizing: border-box;
 }
 
 .download-btn::before {
@@ -781,8 +783,8 @@ h1, h2, h3, h4, h5, h6, .font-heading {
   left: 0;
   right: 0;
   background-color: #fff;
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   transition: all 0.4s ease;
   border-radius: 100%;
   margin: auto;
@@ -795,16 +797,19 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 }
 
 .download-btn .btn-title {
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 700;
   color: #fff;
   transition: all 0.4s ease;
   position: absolute;
-  right: 18px;
-  bottom: 14px;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
   text-align: center;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.03em;
   text-transform: uppercase;
+  margin: 0;
+  line-height: 1;
 }
 
 .download-btn .btn-title:last-child {
@@ -813,8 +818,8 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 }
 
 .download-btn .circle {
-  height: 45px;
-  width: 45px;
+  height: 28px;
+  width: 28px;
   border-radius: 50%;
   background-color: #722F37;
   display: flex;
@@ -824,11 +829,13 @@ h1, h2, h3, h4, h5, h6, .font-heading {
   position: relative;
   box-shadow: 0 0 0 0 rgba(114, 47, 55, 0.7);
   overflow: hidden;
+  flex-shrink: 0;
 }
 
 .download-btn .circle .download-icon {
   color: #fff;
-  width: 24px;
+  width: 15px;
+  height: 15px;
   position: absolute;
   top: 50%;
   left: 50%;
@@ -838,7 +845,7 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 
 .download-btn .circle .check-square {
   aspect-ratio: 1;
-  width: 15px;
+  width: 10px;
   border-radius: 2px;
   background-color: #fff;
   opacity: 0;
@@ -862,7 +869,7 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 }
 
 .download-btn:has(.checkbox-input:checked) {
-  width: 57px;
+  width: 36px;
   animation: download-installed 0.4s ease 3.5s forwards;
 }
 
@@ -907,7 +914,7 @@ h1, h2, h3, h4, h5, h6, .font-heading {
   }
   70% {
     scale: 1;
-    box-shadow: 0 0 0 16px rgba(114, 47, 55, 0);
+    box-shadow: 0 0 0 10px rgba(114, 47, 55, 0);
   }
   100% {
     scale: 0.95;
@@ -926,12 +933,12 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 
 @keyframes download-rotate {
   0% {
-    transform: rotate(-90deg) translate(27px) rotate(0);
+    transform: rotate(-90deg) translate(17px) rotate(0);
     opacity: 1;
     visibility: visible;
   }
   99% {
-    transform: rotate(270deg) translate(27px) rotate(270deg);
+    transform: rotate(270deg) translate(17px) rotate(270deg);
     opacity: 1;
     visibility: visible;
   }
@@ -943,7 +950,7 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 
 @keyframes download-installed {
   100% {
-    width: 160px;
+    width: 130px;
     border-color: #23ae23;
   }
 }
@@ -959,6 +966,6 @@ h1, h2, h3, h4, h5, h6, .font-heading {
   100% {
     opacity: 1;
     visibility: visible;
-    right: 56px;
+    right: 44px;
   }
 }

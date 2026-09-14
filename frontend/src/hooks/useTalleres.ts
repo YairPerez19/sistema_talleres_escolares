@@ -22,7 +22,7 @@ export function useTalleres() {
       ]);
 
       if (talleresRes.error || horariosRes.error) {
-        console.error('Error fetching talleres/horarios', talleresRes.error, horariosRes.error);
+        // errors handled silently
       } else {
         const talleresData = (talleresRes.data ?? []) as TallerRow[];
         const horariosData = (horariosRes.data ?? []) as HorarioRow[];
@@ -88,8 +88,7 @@ export function useProfile(userId: string | undefined | null) {
     }
     const uid = userId;
     async function fetchProfile() {
-      const { data, error } = await supabase.from('profiles').select('*').eq('id', uid).single();
-      console.log('[useProfile] data:', data, 'error:', error);
+      const { data } = await supabase.from('profiles').select('*').eq('id', uid).single();
       if (data) {
         setProfile(data as ProfileRow);
       }

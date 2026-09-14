@@ -5,13 +5,26 @@ import { supabase } from '../integrations/supabase/client'
 import { Loader2, ShieldCheck, Clock, RefreshCw, Mail } from '@/components/AnimatedIcons'
 import { sendOtp, verifyOtp, getRedirectPath } from '../services/authService'
 import { toast } from 'sonner'
-
 import { cn } from '../lib/utils'
 import { usePageMeta } from '../hooks/usePageMeta'
 
 export const Route = createFileRoute('/verify-otp')({
   component: VerifyOtpPage,
 })
+
+const PENDING_KEYS = [
+  'pending_auth_token',
+  'pending_auth_email',
+  'pending_auth_nombre',
+  'pending_auth_role',
+  'pending_auth_is_registration',
+] as const
+
+function clearPendingAuth() {
+  for (const key of PENDING_KEYS) {
+    localStorage.removeItem(key)
+  }
+}
 
 function VerifyOtpPage() {
   usePageMeta({
@@ -24,7 +37,7 @@ function VerifyOtpPage() {
 
   const [session, setSession] = useState({
     pendingToken: null as string | null, emailMasked: '', nombre: '',
-    email: '', isRegistration: false, role: '',
+    isRegistration: false, role: '',
   })
   const [code, setCode] = useState(['', '', '', '', '', ''])
   const inputRefs = useRef<(HTMLInputElement | null)[]>([])
@@ -38,23 +51,23 @@ function VerifyOtpPage() {
   })
 
   useEffect(() => {
-    const state = window.history.state as {
-      pendingToken?: string; emailMasked?: string; nombre?: string;
-      role?: string; email?: string; isRegistration?: boolean;
-    } | null
+    const token = localStorage.getItem('pending_auth_token')
+    const emailDisplay = localStorage.getItem('pending_auth_email')
+    const nombre = localStorage.getItem('pending_auth_nombre')
+    const role = localStorage.getItem('pending_auth_role')
+    const isRegistration = localStorage.getItem('pending_auth_is_registration')
 
-    if (!state?.pendingToken || !state?.emailMasked || !state?.role || !state?.email) {
+    if (!token || !emailDisplay || !role) {
       navigate({ to: '/auth' })
       return
     }
 
     setSession({
-      pendingToken: state.pendingToken,
-      emailMasked: state.emailMasked,
-      nombre: state.nombre || '',
-      email: state.email,
-      isRegistration: state.isRegistration ?? false,
-      role: state.role,
+      pendingToken: token,
+      emailMasked: emailDisplay,
+      nombre: nombre || '',
+      isRegistration: isRegistration === 'true',
+      role,
     })
   }, [navigate])
 
@@ -148,13 +161,23 @@ function VerifyOtpPage() {
       const result = await verifyOtp(session.pendingToken, fullCode)
 
       if (!result.access_token || !result.refresh_token) {
-        throw new Error('No se pudo establecer la sesión. Inicia sesión nuevamente.')
+        clearPendingAuth()
+        toast.error('Error de autenticación. Inicia sesión nuevamente.')
+        navigate({ to: '/auth' })
+        return
       }
 
       await supabase.auth.setSession({
         access_token: result.access_token,
         refresh_token: result.refresh_token,
       })
+
+      const { data: sessionData } = await supabase.auth.getSession()
+      if (sessionData.session?.user?.id) {
+        localStorage.setItem(`role_${sessionData.session.user.id}`, result.role || session.role)
+      }
+
+      clearPendingAuth()
 
       toast.success(`¡Bienvenido${session.nombre ? ', ' + session.nombre : ''}!`)
       navigate({ to: getRedirectPath(result.role || session.role) })

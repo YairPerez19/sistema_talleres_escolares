@@ -15,6 +15,7 @@ interface TallerCardProps {
   onBaja?: () => void;
   colisionaCon?: string | null;
   loading?: boolean;
+  onClick?: () => void;
 }
 
 const categoriaConfig: Record<string, { accent: string; gradient: string; emoji: string; label: string }> = {
@@ -33,7 +34,7 @@ const tallerEmojis: Record<string, string> = {
   handball: '🤾', atletismo: '🏃', taekwondo: '🥋', baile: '🕺',
 };
 
-export function TallerCard({ taller, inscrito, onInscribir, onBaja, colisionaCon, loading }: TallerCardProps) {
+export function TallerCard({ taller, inscrito, onInscribir, onBaja, colisionaCon, loading, onClick }: TallerCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
@@ -84,7 +85,8 @@ export function TallerCard({ taller, inscrito, onInscribir, onBaja, colisionaCon
   return (
     <div
       ref={cardRef}
-      className="group relative rounded-[2rem] bg-white/[0.02] border border-white/[0.04] overflow-hidden flex flex-col transition-colors duration-500 hover:border-white/[0.08]"
+      onClick={onClick}
+      className="group relative rounded-[2rem] bg-white/[0.02] border border-white/[0.04] overflow-hidden flex flex-col transition-colors duration-500 hover:border-white/[0.08] cursor-pointer"
       style={{ boxShadow: '0 10px 30px -10px rgba(0,0,0,0.5)' }}
     >
       <div ref={imageRef} className="relative h-72 overflow-hidden will-change-transform">
@@ -184,7 +186,7 @@ export function TallerCard({ taller, inscrito, onInscribir, onBaja, colisionaCon
           {inscrito ? (
             <button
               type="button"
-              onClick={onBaja}
+              onClick={(e) => { e.stopPropagation(); onBaja?.(); }}
               disabled={loading}
               className="w-full py-3.5 rounded-2xl font-semibold text-[13px] bg-transparent border border-white/[0.08] text-white/50 hover:text-red-400 hover:border-red-500/30 hover:bg-red-500/[0.06] transition-all duration-300 disabled:opacity-40 group/btn"
             >
@@ -194,7 +196,7 @@ export function TallerCard({ taller, inscrito, onInscribir, onBaja, colisionaCon
           ) : (
             <button
               type="button"
-              onClick={onInscribir}
+              onClick={(e) => { e.stopPropagation(); onInscribir?.(); }}
               disabled={isBlocked || loading}
               className={cn(
                 "w-full py-3.5 rounded-2xl font-bold text-[13px] transition-all duration-300 flex items-center justify-center gap-2 overflow-hidden relative group/btn",

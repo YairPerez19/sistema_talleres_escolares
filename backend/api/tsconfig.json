@@ -21,13 +21,7 @@
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
-    "types": [
-      "node",
-      "jest"
-    ]
-  },
-  "include": [
-    "src/**/*",
-    "test/**/*"
-  ]
+    "types": ["node", "jest"],
+    "include": ["src/**/*", "test/**/*"]
+  }
 }

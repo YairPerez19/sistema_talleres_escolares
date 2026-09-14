@@ -39,8 +39,8 @@ interface SendOtpResponse {
 
 interface VerifyOtpResponse {
   verified: boolean;
-  access_token?: string;
-  refresh_token?: string;
+  access_token: string;
+  refresh_token: string;
   user: { id: string; email: string };
   role: Role;
 }

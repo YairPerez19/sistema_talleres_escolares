@@ -1,7 +1,8 @@
 import * as React from 'react';
 import { supabase } from '../integrations/supabase/client';
 import type { Database } from '../integrations/supabase/types';
-import type { TallerConInstructor, Horario } from '../lib/types';
+import type { TallerConInstructor } from '../lib/types';
+import type { Horario } from '../lib/talleres';
 
 type TallerRow = Database['public']['Tables']['talleres']['Row'];
 
@@ -22,7 +23,6 @@ export function useInstructorTalleres(instructorId: string | undefined | null) {
     const uid = instructorId;
     async function fetchTalleres() {
       setLoading(true);
-      console.log('[useInstructorTalleres] Buscando talleres para:', uid);
       
       const [talleresRes, horariosRes] = await Promise.all([
         supabase
@@ -33,13 +33,11 @@ export function useInstructorTalleres(instructorId: string | undefined | null) {
       ]);
 
       if (talleresRes.error) {
-        console.error('[useInstructorTalleres] Error:', talleresRes.error);
         setLoading(false);
         return;
       }
 
       const talleresList = talleresRes.data ?? [];
-      console.log('[useInstructorTalleres] Encontrados:', talleresList.length);
       
       const horariosList = (horariosRes.data ?? []) as Horario[];
 
@@ -106,6 +104,7 @@ export function useAllTalleresAdmin() {
 
       const joined = talleresList.map((t: TallerRow) => ({
         ...t,
+        cupo: t.cupo ?? 0,
         horarios: horariosList.filter(h => h.taller_id === t.id),
         alumnos_count: conteoMap.get(t.id) ?? 0,
       }));

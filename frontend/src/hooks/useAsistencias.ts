@@ -39,23 +39,18 @@ export function useAsistencias(tallerId: string | undefined, fecha: string) {
 
   const fetchAlumnos = React.useCallback(async () => {
     if (!tallerId) { 
-      console.log('[useAsistencias] No hay tallerId seleccionado');
       setAlumnos([]); 
       setLoading(false); 
       return; 
     }
 
     setLoading(true);
-    console.log('[useAsistencias] Llamando RPC get_asistencia_taller para:', tallerId, 'fecha:', fecha);
     
-    const { data, error } = await (supabase
-      .rpc('get_asistencia_taller', { p_taller_id: tallerId, p_fecha: fecha }) as ReturnType<typeof supabase.rpc>);
+    const { data, error } = await (supabase.rpc as any)('get_asistencia_taller', { p_taller_id: tallerId, p_fecha: fecha });
 
     if (error) {
-      console.error('[useAsistencias] Error en RPC:', error);
       toast.error('Error al cargar alumnos: ' + error.message);
     } else {
-      console.log('[useAsistencias] Alumnos recibidos:', (data as unknown[])?.length);
       setAlumnos((data ?? []) as unknown as AlumnoConAsistencia[]);
     }
     setLoading(false);
@@ -79,7 +74,6 @@ export function useAsistencias(tallerId: string | undefined, fecha: string) {
           filter: `taller_id=eq.${tallerId}`,
         },
         () => {
-          console.log('[useAsistencias] Cambio detectado en realtime, recargando...');
           fetchAlumnos();
         }
       )
@@ -104,8 +98,7 @@ export function useAsistencias(tallerId: string | undefined, fecha: string) {
 
     const { data: { user } } = await supabase.auth.getUser();
 
-    const { error } = await (supabase
-      .from('asistencias')
+    const { error } = await ((supabase.from('asistencias') as any)
       .upsert(
         {
           alumno_id: alumnoId,
@@ -126,7 +119,6 @@ export function useAsistencias(tallerId: string | undefined, fecha: string) {
     });
 
     if (error) {
-      console.error('[useAsistencias] Error al guardar:', error);
       toast.error('Error al guardar asistencia: ' + error.message);
       fetchAlumnos();
     } else {
@@ -574,7 +566,7 @@ export async function exportarPDFInstructor(
     formatTurno(a.turno),
   ]);
 
-  (autoTable as (opts: unknown) => void)(doc, {
+  (autoTable as (doc: unknown, opts: unknown) => void)(doc, {
     startY: 62,
     head: [headers],
     body,

@@ -1,0 +1,196 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="800" y2="600" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1a0a10"/>
+      <stop offset="1" stop-color="#0d0d10"/>
+    </linearGradient>
+    <linearGradient id="phoneBody" x1="320" y1="60" x2="480" y2="540" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2a2a30"/>
+      <stop offset="1" stop-color="#1a1a20"/>
+    </linearGradient>
+    <linearGradient id="phoneScreen" x1="330" y1="100" x2="470" y2="500" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0f0f14"/>
+      <stop offset="1" stop-color="#12121a"/>
+    </linearGradient>
+    <linearGradient id="wineBtn" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#a85563"/>
+      <stop offset="1" stop-color="#722F37"/>
+    </linearGradient>
+    <linearGradient id="notifGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#722F37" stop-opacity="0.4"/>
+      <stop offset="1" stop-color="#722F37" stop-opacity="0.05"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-10%" width="140%" height="130%">
+      <feDropShadow dx="0" dy="10" stdDeviation="20" flood-color="#000" flood-opacity="0.5"/>
+    </filter>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="25" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <clipPath id="screenClip">
+      <rect x="332" y="102" width="136" height="400" rx="16"/>
+    </clipPath>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="600" fill="url(#bg)"/>
+
+  <!-- Ambient glow -->
+  <ellipse cx="400" cy="300" rx="200" ry="250" fill="#722F37" opacity="0.04" filter="url(#glow)"/>
+
+  <!-- Background shelves (library feel) -->
+  <rect x="0" y="0" width="200" height="600" fill="#151010" opacity="0.3"/>
+  <rect x="600" y="0" width="200" height="600" fill="#151010" opacity="0.3"/>
+
+  <!-- Left shelf -->
+  <line x1="30" y1="100" x2="180" y2="100" stroke="#2a2020" stroke-width="2"/>
+  <line x1="30" y1="250" x2="180" y2="250" stroke="#2a2020" stroke-width="2"/>
+  <line x1="30" y1="400" x2="180" y2="400" stroke="#2a2020" stroke-width="2"/>
+
+  <!-- Books on left shelf -->
+  <rect x="40" y="60" width="18" height="38" rx="2" fill="#722F37" opacity="0.25"/>
+  <rect x="62" y="68" width="14" height="30" rx="2" fill="#a85563" opacity="0.2"/>
+  <rect x="80" y="55" width="16" height="43" rx="2" fill="#722F37" opacity="0.15"/>
+  <rect x="100" y="70" width="12" height="28" rx="2" fill="#a85563" opacity="0.18"/>
+  <rect x="116" y="62" width="20" height="36" rx="2" fill="#722F37" opacity="0.12"/>
+  <rect x="140" y="65" width="14" height="33" rx="2" fill="#a85563" opacity="0.15"/>
+
+  <rect x="45" y="210" width="22" height="38" rx="2" fill="#a85563" opacity="0.2"/>
+  <rect x="72" y="218" width="16" height="30" rx="2" fill="#722F37" opacity="0.18"/>
+  <rect x="92" y="205" width="18" height="43" rx="2" fill="#a85563" opacity="0.15"/>
+  <rect x="115" y="215" width="14" height="33" rx="2" fill="#722F37" opacity="0.2"/>
+  <rect x="133" y="212" width="20" height="36" rx="2" fill="#a85563" opacity="0.12"/>
+
+  <rect x="50" y="360" width="20" height="38" rx="2" fill="#722F37" opacity="0.18"/>
+  <rect x="75" y="370" width="15" height="28" rx="2" fill="#a85563" opacity="0.15"/>
+  <rect x="95" y="358" width="18" height="40" rx="2" fill="#722F37" opacity="0.22"/>
+  <rect x="118" y="365" width="16" height="33" rx="2" fill="#a85563" opacity="0.12"/>
+  <rect x="138" y="362" width="22" height="36" rx="2" fill="#722F37" opacity="0.15"/>
+
+  <!-- Right shelf -->
+  <line x1="620" y1="120" x2="770" y2="120" stroke="#2a2020" stroke-width="2"/>
+  <line x1="620" y1="280" x2="770" y2="280" stroke="#2a2020" stroke-width="2"/>
+  <line x1="620" y1="440" x2="770" y2="440" stroke="#2a2020" stroke-width="2"/>
+
+  <rect x="630" y="80" width="20" height="38" rx="2" fill="#a85563" opacity="0.2"/>
+  <rect x="655" y="88" width="16" height="30" rx="2" fill="#722F37" opacity="0.18"/>
+  <rect x="676" y="75" width="18" height="43" rx="2" fill="#a85563" opacity="0.15"/>
+  <rect x="700" y="85" width="14" height="33" rx="2" fill="#722F37" opacity="0.22"/>
+  <rect x="720" y="82" width="22" height="36" rx="2" fill="#a85563" opacity="0.12"/>
+
+  <rect x="640" y="240" width="18" height="38" rx="2" fill="#722F37" opacity="0.2"/>
+  <rect x="662" y="248" width="20" height="30" rx="2" fill="#a85563" opacity="0.18"/>
+  <rect x="687" y="235" width="16" height="43" rx="2" fill="#722F37" opacity="0.15"/>
+  <rect x="708" y="245" width="22" height="33" rx="2" fill="#a85563" opacity="0.12"/>
+  <rect x="735" y="242" width="14" height="36" rx="2" fill="#722F37" opacity="0.2"/>
+
+  <!-- Phone body -->
+  <rect x="315" y="55" width="170" height="490" rx="28" fill="url(#phoneBody)" stroke="#3a3a42" stroke-width="1.5" filter="url(#shadow)"/>
+
+  <!-- Phone bezel highlight -->
+  <rect x="317" y="57" width="166" height="486" rx="26" fill="none" stroke="#ffffff" stroke-width="0.3" opacity="0.04"/>
+
+  <!-- Dynamic island -->
+  <rect x="370" y="65" width="60" height="16" rx="8" fill="#0a0a0e"/>
+
+  <!-- Screen -->
+  <g clip-path="url(#screenClip)">
+    <rect x="332" y="102" width="136" height="400" fill="#0f0f14"/>
+
+    <!-- Status bar -->
+    <text x="345" y="120" fill="#fff" font-family="system-ui" font-size="7" font-weight="600">9:41</text>
+    <g opacity="0.5">
+      <rect x="440" y="113" width="6" height="8" rx="1" fill="#fff"/>
+      <rect x="448" y="115" width="3" height="6" rx="0.5" fill="#fff"/>
+      <rect x="453" y="114" width="8" height="5" rx="1.5" fill="none" stroke="#fff" stroke-width="0.5"/>
+    </g>
+
+    <!-- App header -->
+    <rect x="332" y="126" width="136" height="40" fill="#12121a"/>
+    <text x="345" y="148" fill="#fff" font-family="system-ui" font-weight="700" font-size="11">SITE</text>
+    <text x="380" y="148" fill="#fff" font-family="system-ui" font-size="8" opacity="0.4">Mi Taller</text>
+    <circle cx="455" cy="146" r="8" fill="#722F37" opacity="0.4"/>
+    <circle cx="455" cy="143" r="3" fill="#a85563" opacity="0.6"/>
+
+    <!-- Notification card -->
+    <rect x="342" y="175" width="116" height="48" rx="10" fill="url(#notifGrad)" stroke="#722F37" stroke-opacity="0.15" stroke-width="0.5"/>
+    <circle cx="356" cy="192" r="8" fill="#722F37" opacity="0.3"/>
+    <text x="353" y="196" fill="#a85563" font-family="system-ui" font-size="10"></text>
+    <text x="370" y="190" fill="#fff" font-family="system-ui" font-size="6" font-weight="600">Asistencia marcada</text>
+    <text x="370" y="200" fill="#fff" font-family="system-ui" font-size="5" opacity="0.4">Fútbol - Hace 2min</text>
+    <circle cx="450" cy="180" r="4" fill="#a85563" opacity="0.6"/>
+    <text x="448" y="183" fill="#fff" font-family="system-ui" font-size="5" font-weight="700">1</text>
+
+    <!-- Section title -->
+    <text x="345" y="242" fill="#fff" font-family="system-ui" font-size="8" font-weight="600">Mis Talleres</text>
+    <text x="430" y="242" fill="#a85563" font-family="system-ui" font-size="6">Ver más</text>
+
+    <!-- Workshop card 1 -->
+    <rect x="342" y="252" width="116" height="65" rx="10" fill="#16161e" stroke="#ffffff" stroke-opacity="0.05" stroke-width="0.5"/>
+    <rect x="350" y="260" width="28" height="28" rx="8" fill="#722F37" opacity="0.2"/>
+    <text x="357" y="278" font-family="system-ui" font-size="14"></text>
+    <text x="385" y="270" fill="#fff" font-family="system-ui" font-size="7" font-weight="600">Fútbol Varonil</text>
+    <text x="385" y="280" fill="#fff" font-family="system-ui" font-size="5" opacity="0.4">Prof. García · Mar/Jue</text>
+    <rect x="385" y="286" width="50" height="12" rx="6" fill="#722F37" opacity="0.2"/>
+    <text x="391" y="295" fill="#a85563" font-family="system-ui" font-size="5">Activo</text>
+    <text x="438" y="278" fill="#fff" font-family="system-ui" font-size="8" font-weight="700">96%</text>
+    <text x="435" y="286" fill="#4ade80" font-family="system-ui" font-size="4">+3%</text>
+
+    <!-- Workshop card 2 -->
+    <rect x="342" y="324" width="116" height="65" rx="10" fill="#16161e" stroke="#ffffff" stroke-opacity="0.05" stroke-width="0.5"/>
+    <rect x="350" y="332" width="28" height="28" rx="8" fill="#a85563" opacity="0.15"/>
+    <text x="357" y="350" font-family="system-ui" font-size="14">🎭</text>
+    <text x="385" y="342" fill="#fff" font-family="system-ui" font-size="7" font-weight="600">Teatro</text>
+    <text x="385" y="352" fill="#fff" font-family="system-ui" font-size="5" opacity="0.4">Profa. Luna · Lun/Mié</text>
+    <rect x="385" y="358" width="50" height="12" rx="6" fill="#722F37" opacity="0.2"/>
+    <text x="391" y="367" fill="#a85563" font-family="system-ui" font-size="5">Activo</text>
+    <text x="438" y="350" fill="#fff" font-family="system-ui" font-size="8" font-weight="700">92%</text>
+    <text x="435" y="358" fill="#4ade80" font-family="system-ui" font-size="4">+1%</text>
+
+    <!-- Quick actions -->
+    <text x="345" y="410" fill="#fff" font-family="system-ui" font-size="8" font-weight="600">Acciones Rápidas</text>
+
+    <rect x="342" y="418" width="54" height="36" rx="8" fill="#16161e" stroke="#ffffff" stroke-opacity="0.05" stroke-width="0.5"/>
+    <text x="359" y="435" font-family="system-ui" font-size="12">📊</text>
+    <text x="348" y="450" fill="#fff" font-family="system-ui" font-size="5" opacity="0.5">Reportes</text>
+
+    <rect x="402" y="418" width="54" height="36" rx="8" fill="#16161e" stroke="#ffffff" stroke-opacity="0.05" stroke-width="0.5"/>
+    <text x="419" y="435" font-family="system-ui" font-size="12">📅</text>
+    <text x="408" y="450" fill="#fff" font-family="system-ui" font-size="5" opacity="0.5">Horarios</text>
+
+    <!-- Bottom nav bar -->
+    <rect x="332" y="462" width="136" height="40" fill="#12121a"/>
+    <line x1="332" y1="462" x2="468" y2="462" stroke="#ffffff" stroke-opacity="0.05" stroke-width="1"/>
+
+    <!-- Nav items -->
+    <circle cx="365" cy="478" r="6" fill="#722F37" opacity="0.3"/>
+    <text x="362" y="481" font-family="system-ui" font-size="8">🏠</text>
+    <rect x="359" y="488" width="12" height="2" rx="1" fill="#a85563"/>
+
+    <circle cx="400" cy="478" r="6" fill="#ffffff" fill-opacity="0.03"/>
+    <text x="397" y="481" font-family="system-ui" font-size="8" opacity="0.3"></text>
+
+    <circle cx="435" cy="478" r="6" fill="#ffffff" fill-opacity="0.03"/>
+    <text x="432" y="481" font-family="system-ui" font-size="8" opacity="0.3"></text>
+
+    <!-- Home indicator -->
+    <rect x="380" y="496" width="40" height="3" rx="1.5" fill="#ffffff" opacity="0.2"/>
+  </g>
+
+  <!-- Phone side buttons -->
+  <rect x="312" y="180" width="3" height="20" rx="1.5" fill="#2a2a30"/>
+  <rect x="312" y="220" width="3" height="30" rx="1.5" fill="#2a2a30"/>
+  <rect x="312" y="260" width="3" height="30" rx="1.5" fill="#2a2a30"/>
+  <rect x="485" y="210" width="3" height="35" rx="1.5" fill="#2a2a30"/>
+
+  <!-- Phone reflection -->
+  <path d="M340 108 L390 108" stroke="#fff" stroke-width="0.5" opacity="0.04"/>
+
+  <!-- Floating particles -->
+  <circle cx="250" cy="150" r="3" fill="#a85563" opacity="0.15"/>
+  <circle cx="550" cy="200" r="2" fill="#a85563" opacity="0.1"/>
+  <circle cx="200" cy="400" r="1.5" fill="#722F37" opacity="0.15"/>
+  <circle cx="600" cy="450" r="2.5" fill="#722F37" opacity="0.1"/>
+  <circle cx="150" cy="300" r="1" fill="#a85563" opacity="0.1"/>
+  <circle cx="650" cy="100" r="1.5" fill="#a85563" opacity="0.12"/>
+</svg>

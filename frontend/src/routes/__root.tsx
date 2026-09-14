@@ -1,5 +1,6 @@
 import { createRootRoute, Outlet, ScrollRestoration, useNavigate, useLocation } from '@tanstack/react-router';
 import { AuthProvider, useAuth } from '../hooks/useAuth';
+import { ErrorBoundary } from '../components/ErrorBoundary';
 import { Toaster } from 'sonner';
 import { useEffect, useRef } from 'react';
 import { Loader2 } from '@/components/AnimatedIcons';
@@ -68,6 +69,7 @@ function RootComponent() {
 
   return (
     <AuthProvider>
+      <ErrorBoundary>
       <AuthGuard>
         <StructuredData type="Organization" />
         <StructuredData type="WebSite" />
@@ -89,6 +91,7 @@ function RootComponent() {
           <Toaster theme="dark" toastOptions={{ className: 'glass text-white border-primary/20 bg-background/90' }} position="bottom-right" />
         </div>
       </AuthGuard>
+      </ErrorBoundary>
     </AuthProvider>
   );
 }

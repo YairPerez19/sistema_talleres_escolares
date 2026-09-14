@@ -2,7 +2,7 @@ import { createLazyFileRoute, useNavigate } from '@tanstack/react-router'
 import { useAuth } from '../hooks/useAuth'
 import { Header } from '../components/Header'
 import { supabase } from '../integrations/supabase/client'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { toast } from 'sonner'
 import { usePageMeta } from '../hooks/usePageMeta'
@@ -14,12 +14,14 @@ import {
   Activity, LayoutGrid, type LucideIcon,
   ArrowUp, ArrowDown, Minus, RefreshCw, Clock, AlertTriangle,
   CheckCircle2, XCircle, Timer, FileText, Layers,
-  UserPlus, User, KeyRound, Mail, GraduationCap, Hash,
+  UserPlus, User, KeyRound, Mail, Hash,
+  Search, RotateCcw, AlertCircle,
 } from '@/components/icons'
 import { cn } from '../lib/utils'
 import { Button } from '@/components/ui/button'
 import {
   Dialog, DialogContent, DialogTitle, DialogDescription,
+  DialogFooter,
 } from '@/components/ui/dialog'
 import { useTalleres } from '../hooks/useTalleres'
 import type { Taller } from '../lib/talleres'
@@ -31,17 +33,29 @@ import { useRole } from '../hooks/useRole'
 import { generateWorkshopDescription } from '../services/aiService'
 import { registerInstructor } from '../services/authService'
 
+async function logAudit(action: string, entityType: string, entityId?: string, metadata?: Record<string, unknown>) {
+  const { data: { user } } = await supabase.auth.getUser()
+  await (supabase.from('audit_log') as any).insert({
+    user_id: user?.id ?? null,
+    action,
+    entity_type: entityType,
+    entity_id: entityId ?? null,
+    metadata: metadata ?? null,
+  })
+}
+
 export const Route = createLazyFileRoute('/admin')({
   component: AdminPanel,
 })
 
-type TabId = 'monitoreo' | 'metricas' | 'talleres' | 'instructores'
+type TabId = 'monitoreo' | 'metricas' | 'talleres' | 'instructores' | 'alumnos'
 
 const TABS: { id: TabId; label: string; icon: LucideIcon; hint: string }[] = [
   { id: 'monitoreo', label: 'Asistencia RT', icon: Wifi, hint: 'Monitoreo en vivo' },
   { id: 'metricas', label: 'Dashboard', icon: BarChart3, hint: 'Indicadores' },
   { id: 'talleres', label: 'Talleres', icon: LayoutGrid, hint: 'Catálogo' },
   { id: 'instructores', label: 'Instructores', icon: UserPlus, hint: 'Alta de cuentas' },
+  { id: 'alumnos', label: 'Alumnos', icon: Users, hint: 'Gestión escolar' },
 ]
 
 function AdminPanel() {
@@ -169,7 +183,7 @@ function AdminPanel() {
                 </label>
                 <CustomSelect
                   options={[{ id: '', nombre: 'Todos los talleres' }, ...talleres]}
-                  value={filtro.taller_id}
+                  value={filtro.taller_id ?? ''}
                   onChange={(val) => setFiltro({...filtro, taller_id: val})}
                   placeholder="Seleccionar taller"
                 />
@@ -187,7 +201,7 @@ function AdminPanel() {
                     { id: 'retardo', nombre: 'Retardo' },
                     { id: 'justificado', nombre: 'Justificado' },
                   ]}
-                  value={filtro.estado}
+                  value={filtro.estado ?? ''}
                   onChange={(val) => setFiltro({...filtro, estado: val as any})}
                   placeholder="Filtrar estado"
                 />
@@ -287,6 +301,7 @@ function AdminPanel() {
             talleres={talleres}
             onEdit={(t: TallerConInstructor & { horarios: Horario[] }) => { setEditingTaller(t); setShowModal(true); }}
             onNew={() => { setEditingTaller(null); setShowModal(true); }}
+            refreshTalleres={refreshTalleres}
           />
         )}
         {activeTab === 'instructores' && (
@@ -294,6 +309,9 @@ function AdminPanel() {
             talleres={talleres}
             onSuccess={refreshTalleres}
           />
+        )}
+        {activeTab === 'alumnos' && (
+          <AlumnosView />
         )}
       </div>
 
@@ -319,14 +337,189 @@ function AdminPanel() {
   )
 }
 
+function TalleresView({ talleres, onEdit, onNew, refreshTalleres }: { talleres: (Taller & { horarios: Horario[] })[], onEdit: (t: TallerConInstructor & { horarios: Horario[] }) => void, onNew: () => void, refreshTalleres: () => void }) {
+  const [deletingTaller, setDeletingTaller] = useState<(Taller & { horarios: Horario[] }) | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDelete = async () => {
+    if (!deletingTaller) return;
+    setDeleting(true);
+    const { error } = await supabase.from('talleres').delete().eq('id', deletingTaller.id);
+    if (error) {
+      toast.error('No se pudo eliminar el taller');
+    } else {
+      toast.success('Taller eliminado');
+      await logAudit('delete', 'taller', deletingTaller.id, { nombre: deletingTaller.nombre });
+      await refreshTalleres();
+    }
+    setDeleting(false);
+    setDeletingTaller(null);
+  };
+
+  return (
+    <>
+      <div className="admin-card p-6 md:p-8 admin-fade-in">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div>
+            <h2 className="text-lg font-bold text-white">Gestión de Talleres</h2>
+            <p className="text-white/40 text-xs font-bold uppercase tracking-widest mt-1">
+              {talleres.length} talleres registrados
+            </p>
+          </div>
+          <Button
+            onClick={onNew}
+            className="btn-wine-glow h-10 px-5 text-sm"
+          >
+            <Plus data-icon="inline-start" />
+            Nuevo Taller
+          </Button>
+        </div>
+
+        {talleres.length === 0 ? (
+          <div className="py-16 text-center">
+            <div className="inline-flex flex-col items-center gap-3">
+              <div className="size-14 rounded-full bg-[#721422]/10 border border-[#721422]/20 flex items-center justify-center">
+                <LayoutGrid className="size-6 text-[#721422]" />
+              </div>
+              <p className="text-white/40 text-sm">No hay talleres registrados aún</p>
+              <Button onClick={onNew} className="btn-wine-glow mt-2 h-9 px-4 text-xs">
+                <Plus data-icon="inline-start" />
+                Crear el primero
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {talleres.map((t) => (
+              <div
+                key={t.id}
+                className="admin-card group overflow-hidden"
+              >
+                <div className="p-5 flex flex-col">
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="size-12 rounded-2xl bg-white/5 flex items-center justify-center overflow-hidden border border-white/10 group-hover:border-[#721422]/40 transition-colors">
+                      {t.imagen_url ? (
+                        <img src={t.imagen_url} className="w-full h-full object-cover" alt={t.nombre} />
+                      ) : (
+                        <ImageIcon className="size-5 text-white/20" />
+                      )}
+                    </div>
+                    <div className="flex gap-1.5">
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        onClick={() => onEdit(t as TallerConInstructor & { horarios: Horario[] })}
+                        className="text-white/40 hover:text-white hover:bg-white/5"
+                      >
+                        <Edit />
+                        <span className="sr-only">Editar</span>
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        onClick={() => setDeletingTaller(t)}
+                        className="text-white/40 hover:text-red-400 hover:bg-red-500/10"
+                      >
+                        <Trash2 />
+                        <span className="sr-only">Eliminar</span>
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <span className="admin-pill bg-[#721422]/10 text-[#d24a6b] border border-[#721422]/25">
+                      {t.categoria}
+                    </span>
+                    <p className="text-white font-bold text-lg leading-tight group-hover:text-[#d24a6b] transition-colors">
+                      {t.nombre}
+                    </p>
+                    <p className="text-[11px] text-white/40 font-medium">
+                      {t.instructor || 'Sin instructor asignado'}
+                    </p>
+                  </div>
+
+                  <div className="mt-5 pt-4 border-t border-white/5 flex items-center justify-between">
+                    <div className="flex items-center gap-1.5 text-white/50">
+                      <Users className="size-3" />
+                      <span className="text-[10px] font-bold">
+                        {t.cupo} <span className="opacity-50">cupo</span>
+                      </span>
+                    </div>
+                    <div className="flex -space-x-1.5">
+                      {t.horarios?.map((h, idx) => (
+                        <div
+                          key={idx}
+                          className="size-6 rounded-full bg-white/10 border border-[#0a0205] flex items-center justify-center text-[8px] font-bold text-white uppercase"
+                          title={`${h.dia}: ${h.hora_inicio}`}
+                        >
+                          {h.dia.charAt(0)}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <Dialog open={!!deletingTaller} onOpenChange={(open) => { if (!open) setDeletingTaller(null); }}>
+        <DialogContent
+          className="max-w-sm border border-white/10 bg-[#0a0205]"
+          overlayClassName="bg-black/70 backdrop-blur-md"
+        >
+          <div className="flex flex-col items-center text-center gap-4 py-2">
+            <div className="size-14 rounded-full bg-red-500/15 border border-red-500/30 flex items-center justify-center">
+              <AlertCircle className="size-7 text-red-400" />
+            </div>
+            <div>
+              <DialogTitle className="text-xl font-extrabold text-white">
+                Eliminar Taller
+              </DialogTitle>
+              <DialogDescription className="text-white/50 text-sm mt-2">
+                ¿Estás seguro de que deseas eliminar <span className="text-white font-semibold">{deletingTaller?.nombre}</span>? Esta acción no se puede deshacer.
+              </DialogDescription>
+            </div>
+          </div>
+          <DialogFooter className="sm:justify-stretch gap-3">
+            <Button
+              variant="outline"
+              onClick={() => setDeletingTaller(null)}
+              disabled={deleting}
+              className="flex-1 h-11 border-white/10 bg-transparent hover:bg-white/5 text-white/70 hover:text-white"
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleDelete}
+              disabled={deleting}
+              className="flex-1 h-11 bg-red-600 hover:bg-red-700 text-white text-sm"
+            >
+              {deleting ? (
+                <Loader2 data-icon="inline-start" className="animate-spin" />
+              ) : (
+                <Trash2 data-icon="inline-start" />
+              )}
+              Eliminar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  )
+}
+
 function TallerModal({ taller, onClose, onSuccess }: { taller: TallerConInstructor | null, onClose: () => void, onSuccess: () => void }) {
   const [loading, setLoading] = useState(false);
   const [generatingAI, setGeneratingAI] = useState(false);
+  const [instructores, setInstructores] = useState<{ id: string; nombre: string }[]>([]);
   const [formData, setFormData] = useState({
     nombre: taller?.nombre || '',
     categoria: taller?.categoria || 'DIFUSIÓN CULTURAL',
     lugar: taller?.lugar || '',
     instructor: taller?.instructor || '',
+    instructor_id: taller?.instructor_id || '',
     cupo: taller?.cupo || 30,
     descripcion: taller?.descripcion || '',
     imagen_url: taller?.imagen_url || ''
@@ -334,6 +527,17 @@ function TallerModal({ taller, onClose, onSuccess }: { taller: TallerConInstruct
   const [horarios, setHorarios] = useState<Partial<Horario>[]>(taller?.horarios || []);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>(taller?.imagen_url || '');
+
+  useEffect(() => {
+    async function fetchInstructores() {
+      const { data: roles } = await supabase.from('user_roles').select('user_id').eq('role', 'instructor');
+      if (!roles || roles.length === 0) return;
+      const ids = (roles as { user_id: string }[]).map(r => r.user_id);
+      const { data: profiles } = await supabase.from('profiles').select('id, nombre').in('id', ids).order('nombre');
+      if (profiles) setInstructores(profiles as { id: string; nombre: string }[]);
+    }
+    fetchInstructores();
+  }, []);
 
   const addHorario = () => {
     setHorarios([...horarios, { dia: 'lunes', hora_inicio: '15:00', hora_fin: '16:00' }]);
@@ -375,6 +579,16 @@ function TallerModal({ taller, onClose, onSuccess }: { taller: TallerConInstruct
     }
   };
 
+  const handleInstructorSelect = (instructorId: string) => {
+    setFormData(prev => {
+      if (!instructorId) {
+        return { ...prev, instructor_id: '', instructor: '' };
+      }
+      const inst = instructores.find(i => i.id === instructorId);
+      return { ...prev, instructor_id: instructorId, instructor: inst?.nombre ?? prev.instructor };
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -401,33 +615,39 @@ function TallerModal({ taller, onClose, onSuccess }: { taller: TallerConInstruct
       }
 
       const workshopData = {
-        ...formData,
+        nombre: formData.nombre,
+        categoria: formData.categoria,
+        lugar: formData.lugar,
+        instructor: formData.instructor,
+        instructor_id: formData.instructor_id || null,
+        cupo: formData.cupo,
+        descripcion: formData.descripcion,
         imagen_url: finalImageUrl
-      };
+      } as any;
 
-      let tallerId = taller?.id;
+      let tallerId: string | undefined = taller?.id;
 
       if (tallerId) {
-        const { error } = await supabase
-          .from('talleres')
+        const { error } = await (supabase.from('talleres') as any)
           .update(workshopData)
           .eq('id', tallerId);
         if (error) throw error;
+        await logAudit('update', 'taller', tallerId, { nombre: formData.nombre });
       } else {
-        const { data, error } = await supabase
-          .from('talleres')
+        const { data, error } = await (supabase.from('talleres') as any)
           .insert([workshopData])
           .select()
           .single();
         if (error) throw error;
-        tallerId = data.id;
+        tallerId = (data as any).id;
+        await logAudit('create', 'taller', tallerId!, { nombre: formData.nombre });
       }
 
-      await supabase.from('horarios').delete().eq('taller_id', tallerId);
+      await supabase.from('horarios').delete().eq('taller_id', tallerId!);
       if (horarios.length > 0) {
-        const { error: hError } = await supabase.from('horarios').insert(
+        const { error: hError } = await (supabase.from('horarios') as any).insert(
           horarios.map(h => ({
-            taller_id: tallerId,
+            taller_id: tallerId!,
             dia: h.dia,
             hora_inicio: h.hora_inicio,
             hora_fin: h.hora_fin
@@ -528,14 +748,23 @@ function TallerModal({ taller, onClose, onSuccess }: { taller: TallerConInstruct
             <label className="text-[10px] uppercase font-bold text-white/30 ml-1 tracking-widest">
               Instructor
             </label>
-            <input
-              required
-              type="text"
-              value={formData.instructor}
-              onChange={e => setFormData({...formData, instructor: e.target.value})}
-              className="admin-input"
-              placeholder="Nombre completo"
-            />
+            <select
+              value={formData.instructor_id}
+              onChange={e => handleInstructorSelect(e.target.value)}
+              className="admin-input [color-scheme:dark] appearance-none cursor-pointer"
+              style={{
+                backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.3)' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E\")",
+                backgroundRepeat: 'no-repeat',
+                backgroundPosition: 'right 0.75rem center',
+                backgroundSize: '1rem',
+                paddingRight: '2.5rem',
+              }}
+            >
+              <option value="">Sin asignar</option>
+              {instructores.map(i => (
+                <option key={i.id} value={i.id}>{i.nombre}</option>
+              ))}
+            </select>
           </div>
           <div className="space-y-2">
             <label className="text-[10px] uppercase font-bold text-white/30 ml-1 tracking-widest">
@@ -719,6 +948,474 @@ function TallerModal({ taller, onClose, onSuccess }: { taller: TallerConInstruct
           </Button>
         </div>
       </form>
+    </div>
+  );
+}
+
+function AlumnosView() {
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [resetting, setResetting] = useState<string | null>(null);
+  const [alumnos, setAlumnos] = useState<{
+    id: string;
+    nombre: string;
+    matricula: string;
+    turno: string;
+    cambios_restantes: number;
+    talleres: string[];
+    deuda: number;
+  }[]>([]);
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [rolesRes, inscRes, deudaRes] = await Promise.all([
+        supabase.from('user_roles').select('user_id').eq('role', 'student'),
+        supabase.from('inscripciones').select('alumno_id, taller_id, talleres(name:nombre)'),
+        supabase.from('deuda_alumnos').select('alumno_id, deuda_total'),
+      ]);
+
+      const roles = rolesRes.data as { user_id: string }[] | null;
+      const inscripciones = inscRes.data as { alumno_id: string; talleres: { nombre: string } | null }[] | null;
+      const deudas = deudaRes.data as { alumno_id: string | null; deuda_total: number | null }[] | null;
+
+      const studentIds = (roles ?? []).map(r => r.user_id);
+      if (studentIds.length === 0) {
+        setAlumnos([]);
+        setLoading(false);
+        return;
+      }
+
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('*')
+        .in('id', studentIds)
+        .order('nombre');
+
+      const inscByAlumno = new Map<string, string[]>();
+      for (const insc of (inscripciones ?? [])) {
+        const tallerNombre = insc.talleres?.nombre ?? '';
+        if (!inscByAlumno.has(insc.alumno_id)) {
+          inscByAlumno.set(insc.alumno_id, []);
+        }
+        inscByAlumno.get(insc.alumno_id)!.push(tallerNombre);
+      }
+
+      const deudaByAlumno = new Map<string, number>();
+      for (const d of (deudas ?? [])) {
+        if (d.alumno_id) {
+          deudaByAlumno.set(d.alumno_id, d.deuda_total ?? 0);
+        }
+      }
+
+      const combined = (profiles ?? []).map((p: any) => ({
+        id: p.id,
+        nombre: p.nombre,
+        matricula: p.matricula,
+        turno: p.turno,
+        cambios_restantes: p.cambios_restantes ?? 3,
+        talleres: inscByAlumno.get(p.id) ?? [],
+        deuda: deudaByAlumno.get(p.id) ?? 0,
+      }));
+
+      setAlumnos(combined);
+    } catch (err) {
+      console.error('Error fetching alumnos', err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  const handleReset = async (alumnoId: string, alumnoNombre: string) => {
+    setResetting(alumnoId);
+    const { error } = await (supabase.from('profiles') as any)
+      .update({ cambios_restantes: 3 })
+      .eq('id', alumnoId);
+    if (error) {
+      toast.error('No se pudo resetear los cambios');
+    } else {
+      toast.success(`Cambios reseteados para ${alumnoNombre}`);
+      await logAudit('reset_cambios', 'alumno', alumnoId, { nombre: alumnoNombre });
+      await fetchData();
+    }
+    setResetting(null);
+  };
+
+  const filtered = alumnos.filter(a => {
+    const q = search.toLowerCase();
+    return a.nombre.toLowerCase().includes(q) || a.matricula.toLowerCase().includes(q);
+  });
+
+  return (
+    <div className="admin-card p-6 md:p-8 admin-fade-in">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <div>
+          <h2 className="text-lg font-bold text-white">Gestión de Alumnos</h2>
+          <p className="text-white/40 text-xs font-bold uppercase tracking-widest mt-1">
+            {alumnos.length} alumnos registrados
+          </p>
+        </div>
+        <div className="relative w-full sm:w-72">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-white/30 pointer-events-none" />
+          <input
+            type="text"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Buscar por nombre o matrícula..."
+            className="admin-input pl-10 h-[42px]"
+          />
+        </div>
+      </div>
+
+      {loading ? (
+        <div className="py-20 text-center">
+          <Loader2 className="animate-spin mx-auto text-[#721422]" />
+        </div>
+      ) : alumnos.length === 0 ? (
+        <div className="py-16 text-center">
+          <div className="inline-flex flex-col items-center gap-3">
+            <div className="size-14 rounded-full bg-white/[0.03] border border-white/10 flex items-center justify-center">
+              <Users className="size-6 text-white/15" />
+            </div>
+            <p className="text-white/40 text-sm">No hay alumnos registrados</p>
+          </div>
+        </div>
+      ) : (
+        <div className="overflow-x-auto -mx-2 px-2">
+          <table className="w-full text-left border-separate border-spacing-y-1">
+            <thead>
+              <tr className="text-white/30 text-[10px] uppercase tracking-widest font-bold">
+                <th className="pb-3 px-3">Alumno</th>
+                <th className="pb-3 px-3">Turno</th>
+                <th className="pb-3 px-3">Talleres</th>
+                <th className="pb-3 px-3 text-center">Cambios</th>
+                <th className="pb-3 px-3 text-right">Deuda</th>
+                <th className="pb-3 px-3 text-center">Acción</th>
+              </tr>
+            </thead>
+            <tbody className="text-sm">
+              {filtered.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="py-16 text-center">
+                    <div className="inline-flex flex-col items-center gap-2">
+                      <Search className="size-5 text-white/15" />
+                      <p className="text-white/25 text-xs font-bold uppercase tracking-widest">Sin resultados</p>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                filtered.map((a) => (
+                  <tr key={a.id} className="admin-row group">
+                    <td className="py-4 px-3 first:rounded-l-xl last:rounded-r-xl bg-white/[0.02] group-hover:bg-white/[0.04]">
+                      <p className="font-semibold text-white">{a.nombre}</p>
+                      <p className="text-[10px] text-white/30 font-mono tracking-wider">{a.matricula}</p>
+                    </td>
+                    <td className="py-4 px-3 bg-white/[0.02] group-hover:bg-white/[0.04]">
+                      <span className="admin-pill bg-white/5 text-white/50 border border-white/10 text-[10px]">
+                        {a.turno === 'matutino' ? 'Matutino' : 'Vespertino'}
+                      </span>
+                    </td>
+                    <td className="py-4 px-3 bg-white/[0.02] group-hover:bg-white/[0.04]">
+                      {a.talleres.length === 0 ? (
+                        <span className="text-white/20 text-xs italic">Sin talleres</span>
+                      ) : (
+                        <div className="flex flex-wrap gap-1">
+                          {a.talleres.map((t, idx) => (
+                            <span key={idx} className="admin-pill bg-[#721422]/10 text-[#d24a6b] border border-[#721422]/20 text-[9px]">
+                              {t}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </td>
+                    <td className="py-4 px-3 bg-white/[0.02] group-hover:bg-white/[0.04] text-center">
+                      <span className={cn(
+                        "inline-flex items-center justify-center size-8 rounded-lg text-sm font-bold border",
+                        a.cambios_restantes > 1
+                          ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/20"
+                          : a.cambios_restantes === 1
+                            ? "text-amber-400 bg-amber-500/10 border-amber-500/20"
+                            : "text-red-400 bg-red-500/10 border-red-500/20"
+                      )}>
+                        {a.cambios_restantes}
+                      </span>
+                    </td>
+                    <td className="py-4 px-3 bg-white/[0.02] group-hover:bg-white/[0.04] text-right">
+                      <span className={cn(
+                        "text-sm font-bold font-mono",
+                        a.deuda > 0 ? "text-red-400" : "text-white/30"
+                      )}>
+                        {a.deuda > 0 ? `$${a.deuda}` : '—'}
+                      </span>
+                    </td>
+                    <td className="py-4 px-3 first:rounded-l-xl last:rounded-r-xl bg-white/[0.02] group-hover:bg-white/[0.04] text-center">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleReset(a.id, a.nombre)}
+                        disabled={resetting === a.id || a.cambios_restantes >= 3}
+                        className={cn(
+                          "h-8 px-3 text-[10px] font-bold uppercase tracking-widest",
+                          a.cambios_restantes >= 3
+                            ? "text-white/15 cursor-not-allowed"
+                            : "text-[#721422] hover:bg-[#721422]/10 hover:text-[#a82a3e]"
+                        )}
+                      >
+                        {resetting === a.id ? (
+                          <Loader2 data-icon="inline-start" className="animate-spin" />
+                        ) : (
+                          <RotateCcw data-icon="inline-start" />
+                        )}
+                        Resetear
+                      </Button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function InstructoresView({ talleres, onSuccess }: { talleres: (Taller & { horarios: Horario[] })[], onSuccess: () => void }) {
+  const [loading, setLoading] = useState(false);
+  const [lastCreated, setLastCreated] = useState<{ nombre: string; email: string; taller: string } | null>(null);
+  const initialTallerId = talleres[0]?.id ?? '';
+  const [formData, setFormData] = useState({
+    nombre: '',
+    email: '',
+    password: '',
+    matricula: '',
+    taller_id: initialTallerId,
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.taller_id) {
+      toast.error('Selecciona un taller');
+      return;
+    }
+    setLoading(true);
+    try {
+      const result = await registerInstructor(formData);
+      const tallerAsignado = talleres.find(t => t.id === formData.taller_id);
+      toast.success('Instructor creado y asignado al taller');
+      setLastCreated({
+        nombre: formData.nombre,
+        email: formData.email,
+        taller: tallerAsignado?.nombre ?? '—',
+      });
+      await logAudit('create', 'instructor', result.user_id, {
+        nombre: formData.nombre,
+        email: formData.email,
+        taller: formData.taller_id,
+      });
+      setFormData({
+        nombre: '',
+        email: '',
+        password: '',
+        matricula: '',
+        taller_id: talleres.find(t => t.id !== formData.taller_id)?.id ?? '',
+      });
+      onSuccess();
+    } catch (err: any) {
+      toast.error(err?.message ?? 'Error al crear el instructor');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const talleresSinAsignar = talleres;
+
+  return (
+    <div className="space-y-6 admin-fade-in">
+      <div className="admin-card admin-card-elevated p-5 md:p-7 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <span className="inline-flex items-center gap-2 text-[10px] uppercase font-bold tracking-[0.25em] text-[#d24a6b] mb-3">
+            <span className="size-1.5 rounded-full bg-[#d24a6b] admin-pulse" />
+            SITE — Alta de instructores
+          </span>
+          <h2 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">
+            Cuentas de <span className="text-wine-glow">Instructores</span>
+          </h2>
+          <p className="text-white/40 text-sm mt-2 max-w-xl">
+            Da de alta las cuentas de los instructores del CBTis No. 61 y asígnalas a un taller.
+            Solo el administrador tiene acceso a este módulo.
+          </p>
+        </div>
+        <div className="flex flex-col items-start md:items-end gap-2">
+          <span className="admin-pill bg-[#721422]/10 text-[#d24a6b] border border-[#721422]/25">
+            <UserPlus className="size-3" />
+            {talleresSinAsignar.length} taller{talleresSinAsignar.length !== 1 ? 'es' : ''} sin instructor
+          </span>
+        </div>
+      </div>
+
+      {lastCreated && (
+        <div className="admin-card p-5 border-emerald-500/30 bg-emerald-500/[0.04]">
+          <div className="flex items-start gap-4">
+            <div className="size-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center shrink-0">
+              <CheckCircle2 className="size-5 text-emerald-400" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-bold text-white">Instructor creado</p>
+              <p className="text-xs text-white/50 mt-0.5">
+                <span className="text-white/80 font-semibold">{lastCreated.nombre}</span>
+                {' · '}
+                <span className="font-mono">{lastCreated.email}</span>
+                {' · '}
+                <span className="text-white/70">{lastCreated.taller}</span>
+              </p>
+            </div>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              onClick={() => setLastCreated(null)}
+              className="text-white/40 hover:text-white"
+            >
+              <X />
+              <span className="sr-only">Cerrar</span>
+            </Button>
+          </div>
+        </div>
+      )}
+
+      <div className="admin-card p-6 md:p-8">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="space-y-2">
+              <label className="text-[10px] uppercase font-bold text-white/30 ml-1 tracking-widest">
+                Nombre completo
+              </label>
+              <div className="relative">
+                <User className="size-4 text-white/30 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  required
+                  minLength={3}
+                  type="text"
+                  value={formData.nombre}
+                  onChange={e => setFormData({ ...formData, nombre: e.target.value })}
+                  className="admin-input pl-10"
+                  placeholder="Ej. Juan Pérez"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[10px] uppercase font-bold text-white/30 ml-1 tracking-widest">
+                Matrícula
+              </label>
+              <div className="relative">
+                <Hash className="size-4 text-white/30 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  required
+                  minLength={4}
+                  type="text"
+                  value={formData.matricula}
+                  onChange={e => setFormData({ ...formData, matricula: e.target.value })}
+                  className="admin-input pl-10"
+                  placeholder="Matrícula del instructor"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-[10px] uppercase font-bold text-white/30 ml-1 tracking-widest">
+              Correo electrónico
+            </label>
+            <div className="relative">
+              <Mail className="size-4 text-white/30 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <input
+                required
+                type="email"
+                value={formData.email}
+                onChange={e => setFormData({ ...formData, email: e.target.value })}
+                className="admin-input pl-10"
+                placeholder="instructor@cbtis61.edu.mx"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-[10px] uppercase font-bold text-white/30 ml-1 tracking-widest">
+              Contraseña inicial
+            </label>
+            <div className="relative">
+              <KeyRound className="size-4 text-white/30 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <input
+                required
+                minLength={6}
+                type="text"
+                value={formData.password}
+                onChange={e => setFormData({ ...formData, password: e.target.value })}
+                className="admin-input pl-10 font-mono"
+                placeholder="Mínimo 6 caracteres"
+              />
+            </div>
+            <p className="text-[10px] text-white/30 ml-1">
+              Compártela con el instructor de forma segura. Podrá cambiarla al iniciar sesión.
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-[10px] uppercase font-bold text-white/30 ml-1 tracking-widest">
+              Asignar a taller
+            </label>
+            {talleresSinAsignar.length === 0 ? (
+              <div className="bg-white/[0.02] border border-dashed border-white/10 rounded-2xl p-5 text-center">
+                <p className="text-white/30 text-xs font-bold uppercase tracking-widest">
+                  Todos los talleres ya tienen instructor
+                </p>
+              </div>
+            ) : (
+              <div className="relative">
+                <LayoutGrid className="size-4 text-white/30 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <select
+                  required
+                  value={formData.taller_id}
+                  onChange={e => setFormData({ ...formData, taller_id: e.target.value })}
+                  className="admin-input pl-10 [color-scheme:dark] appearance-none cursor-pointer"
+                  style={{
+                    backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.3)' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E\")",
+                    backgroundRepeat: 'no-repeat',
+                    backgroundPosition: 'right 0.75rem center',
+                    backgroundSize: '1rem',
+                    paddingRight: '2.5rem',
+                  }}
+                >
+                  {talleresSinAsignar.map(t => (
+                    <option key={t.id} value={t.id}>{t.nombre} — {t.categoria}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+          </div>
+
+          <div className="pt-2 flex flex-col sm:flex-row gap-3 border-t border-white/5">
+            <Button
+              type="submit"
+              disabled={loading || talleresSinAsignar.length === 0}
+              className="btn-wine-glow h-11 text-sm w-full sm:w-auto sm:px-8"
+            >
+              {loading ? (
+                <Loader2 data-icon="inline-start" className="animate-spin" />
+              ) : (
+                <UserPlus data-icon="inline-start" />
+              )}
+              Crear Instructor
+            </Button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }
@@ -1462,356 +2159,6 @@ function CategoryBars({ items }: { items: AdminStats['categorias'] }) {
           </div>
         );
       })}
-    </div>
-  );
-}
-
-function TalleresView({ talleres, onEdit, onNew }: { talleres: (TallerConInstructor & { horarios: Horario[] })[], onEdit: (t: TallerConInstructor & { horarios: Horario[] }) => void, onNew: () => void }) {
-  return (
-    <div className="admin-card p-6 md:p-8 admin-fade-in">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-        <div>
-          <h2 className="text-lg font-bold text-white">Gestión de Talleres</h2>
-          <p className="text-white/40 text-xs font-bold uppercase tracking-widest mt-1">
-            {talleres.length} talleres registrados
-          </p>
-        </div>
-        <Button
-          onClick={onNew}
-          className="btn-wine-glow h-10 px-5 text-sm"
-        >
-          <Plus data-icon="inline-start" />
-          Nuevo Taller
-        </Button>
-      </div>
-
-      {talleres.length === 0 ? (
-        <div className="py-16 text-center">
-          <div className="inline-flex flex-col items-center gap-3">
-            <div className="size-14 rounded-full bg-[#721422]/10 border border-[#721422]/20 flex items-center justify-center">
-              <LayoutGrid className="size-6 text-[#721422]" />
-            </div>
-            <p className="text-white/40 text-sm">No hay talleres registrados aún</p>
-            <Button onClick={onNew} className="btn-wine-glow mt-2 h-9 px-4 text-xs">
-              <Plus data-icon="inline-start" />
-              Crear el primero
-            </Button>
-          </div>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {talleres.map((t) => (
-            <div
-              key={t.id}
-              className="admin-card group overflow-hidden"
-            >
-              <div className="p-5 flex flex-col">
-                <div className="flex justify-between items-start mb-4">
-                  <div className="size-12 rounded-2xl bg-white/5 flex items-center justify-center overflow-hidden border border-white/10 group-hover:border-[#721422]/40 transition-colors">
-                    {t.imagen_url ? (
-                      <img src={t.imagen_url} className="w-full h-full object-cover" alt={t.nombre} />
-                    ) : (
-                      <ImageIcon className="size-5 text-white/20" />
-                    )}
-                  </div>
-                  <div className="flex gap-1.5">
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      onClick={() => onEdit(t)}
-                      className="text-white/40 hover:text-white hover:bg-white/5"
-                    >
-                      <Edit />
-                      <span className="sr-only">Editar</span>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      onClick={async () => {
-                        if (confirm(`¿Eliminar taller ${t.nombre}?`)) {
-                          const { error } = await supabase.from('talleres').delete().eq('id', t.id);
-                          if (error) toast.error('No se pudo eliminar el taller');
-                          else {
-                            toast.success('Taller eliminado');
-                            window.location.reload();
-                          }
-                        }
-                      }}
-                      className="text-white/40 hover:text-red-400 hover:bg-red-500/10"
-                    >
-                      <Trash2 />
-                      <span className="sr-only">Eliminar</span>
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="space-y-1.5">
-                  <span className="admin-pill bg-[#721422]/10 text-[#d24a6b] border border-[#721422]/25">
-                    {t.categoria}
-                  </span>
-                  <p className="text-white font-bold text-lg leading-tight group-hover:text-[#d24a6b] transition-colors">
-                    {t.nombre}
-                  </p>
-                  <p className="text-[11px] text-white/40 font-medium">
-                    {t.instructor}
-                  </p>
-                </div>
-
-                <div className="mt-5 pt-4 border-t border-white/5 flex items-center justify-between">
-                  <div className="flex items-center gap-1.5 text-white/50">
-                    <Users className="size-3" />
-                    <span className="text-[10px] font-bold">
-                      {t.cupo} <span className="opacity-50">cupo</span>
-                    </span>
-                  </div>
-                  <div className="flex -space-x-1.5">
-                    {t.horarios?.map((h, idx) => (
-                      <div
-                        key={idx}
-                        className="size-6 rounded-full bg-white/10 border border-[#0a0205] flex items-center justify-center text-[8px] font-bold text-white uppercase"
-                        title={`${h.dia}: ${h.hora_inicio}`}
-                      >
-                        {h.dia.charAt(0)}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  )
-}
-
-function InstructoresView({ talleres, onSuccess }: { talleres: (Taller & { horarios: Horario[] })[], onSuccess: () => void }) {
-  const [loading, setLoading] = useState(false);
-  const [lastCreated, setLastCreated] = useState<{ nombre: string; email: string; taller: string } | null>(null);
-  const initialTallerId = talleres[0]?.id ?? '';
-  const [formData, setFormData] = useState({
-    nombre: '',
-    email: '',
-    password: '',
-    matricula: '',
-    taller_id: initialTallerId,
-  });
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.taller_id) {
-      toast.error('Selecciona un taller');
-      return;
-    }
-    setLoading(true);
-    try {
-      await registerInstructor(formData);
-      const tallerAsignado = talleres.find(t => t.id === formData.taller_id);
-      toast.success('Instructor creado y asignado al taller');
-      setLastCreated({
-        nombre: formData.nombre,
-        email: formData.email,
-        taller: tallerAsignado?.nombre ?? '—',
-      });
-      setFormData({
-        nombre: '',
-        email: '',
-        password: '',
-        matricula: '',
-        taller_id: talleres.find(t => t.id !== formData.taller_id)?.id ?? '',
-      });
-      onSuccess();
-    } catch (err: any) {
-      toast.error(err?.message ?? 'Error al crear el instructor');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const talleresSinAsignar = talleres;
-
-  return (
-    <div className="space-y-6 admin-fade-in">
-      <div className="admin-card admin-card-elevated p-5 md:p-7 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <span className="inline-flex items-center gap-2 text-[10px] uppercase font-bold tracking-[0.25em] text-[#d24a6b] mb-3">
-            <span className="size-1.5 rounded-full bg-[#d24a6b] admin-pulse" />
-            SITE — Alta de instructores
-          </span>
-          <h2 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">
-            Cuentas de <span className="text-wine-glow">Instructores</span>
-          </h2>
-          <p className="text-white/40 text-sm mt-2 max-w-xl">
-            Da de alta las cuentas de los instructores del CBTis No. 61 y asígnalas a un taller.
-            Solo el administrador tiene acceso a este módulo.
-          </p>
-        </div>
-        <div className="flex flex-col items-start md:items-end gap-2">
-          <span className="admin-pill bg-[#721422]/10 text-[#d24a6b] border border-[#721422]/25">
-            <UserPlus className="size-3" />
-            {talleresSinAsignar.length} taller{talleresSinAsignar.length !== 1 ? 'es' : ''} sin instructor
-          </span>
-        </div>
-      </div>
-
-      {lastCreated && (
-        <div className="admin-card p-5 border-emerald-500/30 bg-emerald-500/[0.04]">
-          <div className="flex items-start gap-4">
-            <div className="size-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center shrink-0">
-              <CheckCircle2 className="size-5 text-emerald-400" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold text-white">Instructor creado</p>
-              <p className="text-xs text-white/50 mt-0.5">
-                <span className="text-white/80 font-semibold">{lastCreated.nombre}</span>
-                {' · '}
-                <span className="font-mono">{lastCreated.email}</span>
-                {' · '}
-                <span className="text-white/70">{lastCreated.taller}</span>
-              </p>
-            </div>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-sm"
-              onClick={() => setLastCreated(null)}
-              className="text-white/40 hover:text-white"
-            >
-              <X />
-              <span className="sr-only">Cerrar</span>
-            </Button>
-          </div>
-        </div>
-      )}
-
-      <div className="admin-card p-6 md:p-8">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <div className="space-y-2">
-              <label className="text-[10px] uppercase font-bold text-white/30 ml-1 tracking-widest">
-                Nombre completo
-              </label>
-              <div className="relative">
-                <User className="size-4 text-white/30 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                <input
-                  required
-                  minLength={3}
-                  type="text"
-                  value={formData.nombre}
-                  onChange={e => setFormData({ ...formData, nombre: e.target.value })}
-                  className="admin-input pl-10"
-                  placeholder="Ej. Juan Pérez"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-[10px] uppercase font-bold text-white/30 ml-1 tracking-widest">
-                Matrícula
-              </label>
-              <div className="relative">
-                <Hash className="size-4 text-white/30 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                <input
-                  required
-                  minLength={4}
-                  type="text"
-                  value={formData.matricula}
-                  onChange={e => setFormData({ ...formData, matricula: e.target.value })}
-                  className="admin-input pl-10"
-                  placeholder="Matrícula del instructor"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-[10px] uppercase font-bold text-white/30 ml-1 tracking-widest">
-              Correo electrónico
-            </label>
-            <div className="relative">
-              <Mail className="size-4 text-white/30 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-              <input
-                required
-                type="email"
-                value={formData.email}
-                onChange={e => setFormData({ ...formData, email: e.target.value })}
-                className="admin-input pl-10"
-                placeholder="instructor@cbtis61.edu.mx"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-[10px] uppercase font-bold text-white/30 ml-1 tracking-widest">
-              Contraseña inicial
-            </label>
-            <div className="relative">
-              <KeyRound className="size-4 text-white/30 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-              <input
-                required
-                minLength={6}
-                type="text"
-                value={formData.password}
-                onChange={e => setFormData({ ...formData, password: e.target.value })}
-                className="admin-input pl-10 font-mono"
-                placeholder="Mínimo 6 caracteres"
-              />
-            </div>
-            <p className="text-[10px] text-white/30 ml-1">
-              Compártela con el instructor de forma segura. Podrá cambiarla al iniciar sesión.
-            </p>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-[10px] uppercase font-bold text-white/30 ml-1 tracking-widest">
-              Asignar a taller
-            </label>
-            {talleresSinAsignar.length === 0 ? (
-              <div className="bg-white/[0.02] border border-dashed border-white/10 rounded-2xl p-5 text-center">
-                <p className="text-white/30 text-xs font-bold uppercase tracking-widest">
-                  Todos los talleres ya tienen instructor
-                </p>
-              </div>
-            ) : (
-              <div className="relative">
-                <LayoutGrid className="size-4 text-white/30 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                <select
-                  required
-                  value={formData.taller_id}
-                  onChange={e => setFormData({ ...formData, taller_id: e.target.value })}
-                  className="admin-input pl-10 [color-scheme:dark] appearance-none cursor-pointer"
-                  style={{
-                    backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.3)' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E\")",
-                    backgroundRepeat: 'no-repeat',
-                    backgroundPosition: 'right 0.75rem center',
-                    backgroundSize: '1rem',
-                    paddingRight: '2.5rem',
-                  }}
-                >
-                  {talleresSinAsignar.map(t => (
-                    <option key={t.id} value={t.id}>{t.nombre} — {t.categoria}</option>
-                  ))}
-                </select>
-              </div>
-            )}
-          </div>
-
-          <div className="pt-2 flex flex-col sm:flex-row gap-3 border-t border-white/5">
-            <Button
-              type="submit"
-              disabled={loading || talleresSinAsignar.length === 0}
-              className="btn-wine-glow h-11 text-sm w-full sm:w-auto sm:px-8"
-            >
-              {loading ? (
-                <Loader2 data-icon="inline-start" className="animate-spin" />
-              ) : (
-                <UserPlus data-icon="inline-start" />
-              )}
-              Crear Instructor
-            </Button>
-          </div>
-        </form>
-      </div>
     </div>
   );
 }

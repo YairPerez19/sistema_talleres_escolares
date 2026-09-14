@@ -4,7 +4,7 @@ import { AlumnoRow } from './AlumnoRow';
 import { useAsistencias, exportarPDFInstructor } from '../../hooks/useAsistencias';
 import { cn } from '../../lib/utils';
 import { CheckSquare, Save, Clock, RefreshCw } from '@/components/AnimatedIcons';
-import { Users, Zap, Check, X, FileText } from '@/components/icons';
+import { Users, Zap, X, FileText } from '@/components/icons';
 import { DownloadAttendanceButton } from './DownloadAttendanceButton';
 import { toast } from 'sonner';
 

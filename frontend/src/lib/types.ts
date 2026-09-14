@@ -4,6 +4,9 @@
 
 import { Check, X, Clock, FileText, Minus } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import type { Taller, Horario } from './talleres';
+
+export type { Horario };
 
 export type AppRole = 'admin' | 'instructor' | 'student';
 
@@ -32,26 +35,10 @@ export interface AlumnoConAsistencia {
   asistencia_id: string | null;
 }
 
-export interface TallerConInstructor {
-  id: string;
-  nombre: string;
-  categoria: string;
-  lugar: string;
-  instructor: string;
+export interface TallerConInstructor extends Taller {
   instructor_id: string | null;
-  descripcion: string | null;
-  cupo: number | null;
-  imagen_url: string | null;
   horarios?: Horario[];
   alumnos_count?: number;
-}
-
-export interface Horario {
-  id: string;
-  taller_id: string;
-  dia: string;
-  hora_inicio: string;
-  hora_fin: string;
 }
 
 export interface EstadisticasAsistencia {

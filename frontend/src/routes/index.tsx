@@ -281,7 +281,7 @@ function LandingPage() {
           </div>
 
           <div className="lg:w-[60%] bg-[#0f0f11] rounded-[1.5rem] sm:rounded-[2rem] border border-white/5 overflow-hidden h-[250px] sm:h-[350px] md:h-[500px]">
-            <img src="/platform_tablet.png" alt="Tablet showing education apps" className="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity duration-500" />
+            <img src="/platform_tablet.svg" alt="Panel de control SITE mostrando métricas de talleres" className="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity duration-500" />
           </div>
         </div>
       </section>
@@ -354,22 +354,25 @@ function LandingPage() {
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-3 sm:mb-4">
             Lo que dicen <span className="text-wine-glow">de nosotros</span>
           </h2>
-          <p className="text-white/60 text-sm sm:text-base px-2">La satisfacción de quienes ya gestionan sus talleres con SITE.</p>
+          <p className="text-white/60 text-sm sm:text-base px-2">La satisfacci&oacute;n de quienes ya gestionan sus talleres con SITE.</p>
         </div>
 
-        <div className="relative flex flex-col gap-4 sm:gap-6">
-          <div className="relative overflow-hidden">
-            <div className="flex gap-4 sm:gap-6 animate-scroll-left">
+        <div className="testimonials-3d-scene">
+          <div className="relative overflow-hidden py-6">
+            <div className="flex gap-5 sm:gap-7 animate-scroll-left-3d">
               {[...testimonials, ...testimonials].map((t, i) => (
-                <div key={i} className="flex-shrink-0 w-[280px] sm:w-[350px] bg-[#0f0f11] rounded-[1.5rem] sm:rounded-[2rem] p-5 sm:p-6 flex flex-col justify-between border border-white/5 h-[160px] sm:h-[180px]">
-                  <p className="text-white/80 font-medium leading-relaxed text-xs sm:text-sm">"{t.quote}"</p>
-                  <div className="flex items-center gap-2 sm:gap-3 mt-3 sm:mt-4">
-                    <div className="w-8 sm:w-10 h-8 sm:h-10 rounded-full bg-gradient-to-br from-[#722F37] to-[#a85563] flex items-center justify-center text-white font-bold text-xs sm:text-sm">
-                      {t.name.charAt(0)}
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-xs sm:text-sm font-bold text-white">{t.name}</span>
-                      <span className="text-[10px] sm:text-xs text-white/50">{t.role}</span>
+                <div key={`a-${i}`} className="testimonial-3d-card flex-shrink-0 w-[290px] sm:w-[360px]">
+                  <div className="testimonial-3d-inner">
+                    <div className="testimonial-3d-reflection" />
+                    <p className="text-white/80 font-medium leading-relaxed text-xs sm:text-sm relative z-10">&ldquo;{t.quote}&rdquo;</p>
+                    <div className="flex items-center gap-3 mt-4 relative z-10">
+                      <div className="testimonial-3d-avatar">
+                        <img src={t.image} alt={t.name} className="w-full h-full object-cover" />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-xs sm:text-sm font-bold text-white">{t.name}</span>
+                        <span className="text-[10px] sm:text-xs text-white/40 font-medium">{t.role}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -377,18 +380,21 @@ function LandingPage() {
             </div>
           </div>
 
-          <div className="relative overflow-hidden">
-            <div className="flex gap-4 sm:gap-6 animate-scroll-right">
-              {[...testimonials.reverse(), ...testimonials.reverse()].map((t, i) => (
-                <div key={i} className="flex-shrink-0 w-[280px] sm:w-[350px] bg-[#0f0f11] rounded-[1.5rem] sm:rounded-[2rem] p-5 sm:p-6 flex flex-col justify-between border border-white/5 h-[160px] sm:h-[180px]">
-                  <p className="text-white/80 font-medium leading-relaxed text-xs sm:text-sm">"{t.quote}"</p>
-                  <div className="flex items-center gap-2 sm:gap-3 mt-3 sm:mt-4">
-                    <div className="w-8 sm:w-10 h-8 sm:h-10 rounded-full bg-gradient-to-br from-[#722F37] to-[#a85563] flex items-center justify-center text-white font-bold text-xs sm:text-sm">
-                      {t.name.charAt(0)}
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-xs sm:text-sm font-bold text-white">{t.name}</span>
-                      <span className="text-[10px] sm:text-xs text-white/50">{t.role}</span>
+          <div className="relative overflow-hidden py-6">
+            <div className="flex gap-5 sm:gap-7 animate-scroll-right-3d">
+              {[...testimonials.slice().reverse(), ...testimonials.slice().reverse()].map((t, i) => (
+                <div key={`b-${i}`} className="testimonial-3d-card flex-shrink-0 w-[290px] sm:w-[360px]">
+                  <div className="testimonial-3d-inner">
+                    <div className="testimonial-3d-reflection" />
+                    <p className="text-white/80 font-medium leading-relaxed text-xs sm:text-sm relative z-10">&ldquo;{t.quote}&rdquo;</p>
+                    <div className="flex items-center gap-3 mt-4 relative z-10">
+                      <div className="testimonial-3d-avatar">
+                        <img src={t.image} alt={t.name} className="w-full h-full object-cover" />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-xs sm:text-sm font-bold text-white">{t.name}</span>
+                        <span className="text-[10px] sm:text-xs text-white/40 font-medium">{t.role}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -499,12 +505,139 @@ function LandingPage() {
         .animate-scroll-right:hover {
           animation-play-state: paused;
         }
-        @media (max-width: 640px) {
-          .animate-scroll-left {
-            animation-duration: 30s;
+
+        .testimonials-3d-scene {
+          perspective: 1200px;
+          perspective-origin: 50% 50%;
+        }
+
+        .testimonial-3d-card {
+          transform-style: preserve-3d;
+          transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .testimonial-3d-card:hover {
+          transform: translateZ(30px) rotateY(-4deg) rotateX(2deg) scale(1.03);
+          z-index: 10;
+        }
+
+        .testimonial-3d-inner {
+          position: relative;
+          padding: 1.5rem;
+          min-height: 180px;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          border-radius: 1.5rem;
+          background: linear-gradient(145deg, rgba(20, 12, 16, 0.9) 0%, rgba(10, 5, 8, 0.95) 100%);
+          border: 1px solid rgba(255, 255, 255, 0.06);
+          box-shadow:
+            0 4px 24px rgba(0, 0, 0, 0.4),
+            0 12px 48px rgba(0, 0, 0, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.04);
+          transform-style: preserve-3d;
+          overflow: hidden;
+          transition: box-shadow 0.6s cubic-bezier(0.23, 1, 0.32, 1), border-color 0.4s ease;
+        }
+
+        .testimonial-3d-card:hover .testimonial-3d-inner {
+          border-color: rgba(139, 26, 50, 0.25);
+          box-shadow:
+            0 8px 32px rgba(0, 0, 0, 0.5),
+            0 24px 64px rgba(0, 0, 0, 0.4),
+            0 0 40px rgba(139, 26, 50, 0.08),
+            inset 0 1px 0 rgba(255, 255, 255, 0.06);
+        }
+
+        .testimonial-3d-reflection {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 50%;
+          background: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, transparent 100%);
+          border-radius: 1.5rem 1.5rem 0 0;
+          pointer-events: none;
+          transition: opacity 0.4s ease;
+        }
+
+        .testimonial-3d-card:hover .testimonial-3d-reflection {
+          opacity: 0.6;
+        }
+
+        .testimonial-3d-avatar {
+          width: 44px;
+          height: 44px;
+          border-radius: 14px;
+          overflow: hidden;
+          flex-shrink: 0;
+          border: 2px solid rgba(139, 26, 50, 0.3);
+          box-shadow:
+            0 4px 12px rgba(0, 0, 0, 0.4),
+            0 0 0 1px rgba(255, 255, 255, 0.05);
+          transform: translateZ(15px);
+          transition: transform 0.4s ease, border-color 0.4s ease;
+        }
+
+        .testimonial-3d-card:hover .testimonial-3d-avatar {
+          transform: translateZ(25px);
+          border-color: rgba(139, 26, 50, 0.5);
+        }
+
+        @keyframes scroll-left-3d {
+          0% { transform: translate3d(0, 0, 0); }
+          100% { transform: translate3d(-50%, 0, 0); }
+        }
+        @keyframes scroll-right-3d {
+          0% { transform: translate3d(-50%, 0, 0); }
+          100% { transform: translate3d(0, 0, 0); }
+        }
+        .animate-scroll-left-3d {
+          animation: scroll-left-3d 45s linear infinite;
+        }
+        .animate-scroll-right-3d {
+          animation: scroll-right-3d 45s linear infinite;
+        }
+        .animate-scroll-left-3d:hover,
+        .animate-scroll-right-3d:hover {
+          animation-play-state: paused;
+        }
+
+        @media (min-width: 640px) {
+          .testimonial-3d-inner {
+            padding: 1.75rem;
+            min-height: 200px;
+            border-radius: 2rem;
           }
-          .animate-scroll-right {
-            animation-duration: 30s;
+          .testimonial-3d-reflection {
+            border-radius: 2rem 2rem 0 0;
+          }
+          .testimonial-3d-avatar {
+            width: 52px;
+            height: 52px;
+            border-radius: 16px;
+          }
+        }
+
+        @media (max-width: 640px) {
+          .animate-scroll-left-3d {
+            animation-duration: 35s;
+          }
+          .animate-scroll-right-3d {
+            animation-duration: 35s;
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .animate-scroll-left-3d,
+          .animate-scroll-right-3d {
+            animation-duration: 120s;
+          }
+          .testimonial-3d-card {
+            transition: none;
+          }
+          .testimonial-3d-card:hover {
+            transform: none;
           }
         }
       `}</style>

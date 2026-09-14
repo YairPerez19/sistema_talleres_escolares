@@ -4,7 +4,9 @@ import { GraduationCap } from '@/components/icons'
 import { ShieldCheck, UserCheck } from '@/components/AnimatedIcons'
 import type { Role } from '../services/authService'
 
-const roles: { id: Role; label: string; icon: typeof GraduationCap; desc: string; gradient: string }[] = [
+import { type ComponentType } from 'react'
+
+const roles: { id: Role; label: string; icon: ComponentType<any>; desc: string; gradient: string }[] = [
   { id: 'student', label: 'Alumno', icon: GraduationCap, desc: 'Acceso a catálogo, horario y asistencias', gradient: 'from-emerald-500/20 to-green-600/10' },
   { id: 'instructor', label: 'Instructor', icon: UserCheck, desc: 'Gestión de asistencias de tus talleres', gradient: 'from-amber-500/20 to-orange-600/10' },
   { id: 'admin', label: 'Administrador', icon: ShieldCheck, desc: 'Panel de control y administración', gradient: 'from-[#8B1A32]/20 to-[#5C1020]/10' },

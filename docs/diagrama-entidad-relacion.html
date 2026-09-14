@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diagrama Entidad-Relación - SITE CBTis No. 61</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #0a0205 0%, #1a0a0f 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .header h1 {
+      color: #fff;
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+    }
+    .header h1 span {
+      color: #8B1A32;
+    }
+    .header p {
+      color: rgba(255,255,255,0.5);
+      font-size: 0.9rem;
+    }
+    .diagram-container {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 1.5rem;
+      padding: 2rem;
+      max-width: 1400px;
+      width: 100%;
+      overflow-x: auto;
+    }
+    .mermaid {
+      display: flex;
+      justify-content: center;
+    }
+    .legend {
+      margin-top: 2rem;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      max-width: 800px;
+      width: 100%;
+    }
+    .legend h3 {
+      color: #fff;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      font-weight: 700;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.5rem;
+      color: rgba(255,255,255,0.6);
+      font-size: 0.85rem;
+    }
+    .legend-symbol {
+      font-family: monospace;
+      color: #8B1A32;
+      font-weight: bold;
+      min-width: 80px;
+    }
+    .footer {
+      margin-top: 2rem;
+      color: rgba(255,255,255,0.3);
+      font-size: 0.8rem;
+      text-align: center;
+    }
+    .notes {
+      margin-top: 1.5rem;
+      background: rgba(139,26,50,0.1);
+      border: 1px solid rgba(139,26,50,0.2);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      max-width: 800px;
+      width: 100%;
+    }
+    .notes h3 {
+      color: #B8354D;
+      font-size: 1rem;
+      margin-bottom: 0.75rem;
+      font-weight: 700;
+    }
+    .notes ul {
+      list-style: none;
+      padding: 0;
+    }
+    .notes li {
+      color: rgba(255,255,255,0.5);
+      font-size: 0.85rem;
+      padding: 0.25rem 0;
+      padding-left: 1.25rem;
+      position: relative;
+    }
+    .notes li::before {
+      content: "→";
+      position: absolute;
+      left: 0;
+      color: #8B1A32;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Sistema Integral de Talleres Escolares <span>CBTis No. 61</span></h1>
+    <p>Diagrama Entidad-Relación</p>
+  </div>
+
+  <div class="diagram-container">
+    <div class="mermaid">
+%%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#8B1A32', 'primaryTextColor': '#fff', 'primaryBorderColor': '#B8354D', 'lineColor': '#666', 'tertiaryColor': '#1a0a0f'}}}%%
+erDiagram
+    auth_users {
+        uuid id PK "Identificador único (Supabase Auth)"
+        email email "Correo institucional"
+        created_at timestamp "Fecha de creación"
+    }
+
+    profiles {
+        uuid id PK,FK "Referencia a auth.users.id"
+        text nombre "Nombre completo del usuario"
+        text matricula "Matrícula escolar"
+        text turno "matutino | vespertino"
+        int cambios_restantes "Límite de cambios de taller (default 3)"
+        timestamptz inscripcion_limite "Fecha límite para inscripciones"
+        timestamptz created_at "Fecha de registro"
+    }
+
+    user_roles {
+        uuid user_id PK,FK "Referencia a auth.users.id"
+        enum role PK "admin | student | instructor"
+    }
+
+    talleres {
+        uuid id PK "Identificador del taller"
+        text nombre "Nombre del taller"
+        text categoria "Categoría (Cultural, Cívica, Deportiva)"
+        text lugar "Ubicación física"
+        text instructor "Nombre del instructor"
+        uuid instructor_id FK "Referencia a auth.users.id"
+        text descripcion "Descripción del taller"
+        int cupo "Capacidad máxima (default 30)"
+        text imagen_url "URL de imagen de portada"
+    }
+
+    horarios {
+        uuid id PK "Identificador del horario"
+        uuid taller_id FK "Referencia a talleres.id"
+        text dia "Día de la semana"
+        time hora_inicio "Hora de inicio"
+        time hora_fin "Hora de fin"
+    }
+
+    inscripciones {
+        uuid id PK "Identificador de inscripción"
+        uuid alumno_id FK "Referencia a auth.users.id"
+        uuid taller_id FK "Referencia a talleres.id"
+        timestamptz created_at "Fecha de inscripción"
+    }
+
+    asistencias {
+        uuid id PK "Identificador de asistencia"
+        uuid alumno_id FK "Referencia a auth.users.id"
+        uuid taller_id FK "Referencia a talleres.id"
+        uuid instructor_id FK "Referencia a auth.users.id"
+        date fecha "Fecha del registro"
+        time hora "Hora del registro"
+        text estado "presente | ausente | retardo | justificado"
+        text observaciones "Notas adicionales"
+        timestamptz created_at "Fecha de creación"
+    }
+
+    settings {
+        text key PK "Clave de configuración"
+        text value "Valor de la configuración"
+        timestamptz updated_at "Última actualización"
+    }
+
+    audit_log {
+        uuid id PK "Identificador del registro"
+        uuid user_id FK "Usuario que realizó la acción"
+        text action "Tipo de acción (create, update, delete)"
+        text entity_type "Tipo de entidad afectada"
+        uuid entity_id "ID de la entidad afectada"
+        jsonb metadata "Datos adicionales en JSON"
+        timestamptz created_at "Fecha de la acción"
+    }
+
+    verification_codes {
+        uuid id PK "Identificador del código"
+        uuid user_id FK "Referencia a auth.users.id"
+        text code_hash "Hash del código OTP"
+        text email "Correo al que se envió"
+        timestamptz expires_at "Fecha de expiración"
+        int attempts "Intentos realizados"
+        boolean used "Si ya fue utilizado"
+        timestamptz created_at "Fecha de creación"
+    }
+
+    deuda_alumnos {
+        uuid alumno_id "Referencia a auth.users.id"
+        int sesiones_asistidas "Total de sesiones asistidas"
+        int faltas_injustificadas "Total de faltas"
+        int deuda_total "Monto total de deuda"
+    }
+
+    auth_users ||--o{ profiles : "tiene perfil"
+    auth_users ||--o{ user_roles : "tiene roles"
+    auth_users ||--o{ inscripciones : "se inscribe como"
+    auth_users ||--o{ asistencias : "registra asistencia como"
+    auth_users ||--o{ talleres : "es instructor de"
+    auth_users ||--o{ verification_codes : "recibe códigos"
+    auth_users ||--o{ audit_log : "genera registros"
+    
+    profiles ||--o{ user_roles : "tiene asignado"
+    
+    talleres ||--o{ horarios : "tiene horarios"
+    talleres ||--o{ inscripciones : "recibe inscripciones"
+    talleres ||--o{ asistencias : "registra asistencias"
+    
+    inscripciones }o--|| talleres : "pertenecen a"
+    
+    asistencias }o--|| talleres : "registradas en"
+    asistencias }o--|| auth_users : "registradas por instructor"
+    </div>
+  </div>
+
+  <div class="legend">
+    <h3>Simbología de Relaciones</h3>
+    <div class="legend-item">
+      <span class="legend-symbol">||--||</span>
+      <span>Relación uno a uno (obligatoria)</span>
+    </div>
+    <div class="legend-item">
+      <span class="legend-symbol">||--o{</span>
+      <span>Relación uno a muchos (opcional del lado izquierdo)</span>
+    </div>
+    <div class="legend-item">
+      <span class="legend-symbol">}o--||</span>
+      <span>Relación muchos a uno (obligatoria del lado derecho)</span>
+    </div>
+    <div class="legend-item">
+      <span class="legend-symbol">PK</span>
+      <span>Clave primaria (Primary Key)</span>
+    </div>
+    <div class="legend-item">
+      <span class="legend-symbol">FK</span>
+      <span>Clave foránea (Foreign Key)</span>
+    </div>
+  </div>
+
+  <div class="notes">
+    <h3>Notas Importantes</h3>
+    <ul>
+      <li><strong>auth.users</strong> es la tabla de autenticación de Supabase (externa al esquema public)</li>
+      <li><strong>user_roles</strong> es una tabla compuesta (PK: user_id + role) con ENUM: admin, student, instructor</li>
+      <li><strong>inscripciones</strong> tiene restricción UNIQUE(alumno_id, taller_id) para evitar duplicados</li>
+      <li><strong>asistencias</strong> tiene restricción UNIQUE(alumno_id, taller_id, fecha) para un registro por día</li>
+      <li><strong>deuda_alumnos</strong> es una VISTA que calcula deuda basado en asistencias y costo_por_sesion</li>
+      <li><strong>settings</strong> almacena configuración global del sistema (ej: costo_por_sesion = 25)</li>
+      <li><strong>audit_log</strong> registra todas las acciones de administración para trazabilidad</li>
+      <li>El campo <strong>turno</strong> en profiles acepta: matutino | vespertino</li>
+      <li>El campo <strong>estado</strong> en asistencias acepta: presente | ausente | retardo | justificado</li>
+      <li><strong>cambios_restantes</strong> controla el límite de 3 cambios de taller por ciclo escolar</li>
+    </ul>
+  </div>
+
+  <div class="footer">
+    <p>Sistema Integral de Talleres Escolares - CBTis No. 61 | Diagrama generado con Mermaid.js</p>
+  </div>
+
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'dark',
+      securityLevel: 'loose'
+    });
+  </script>
+</body>
+</html>
