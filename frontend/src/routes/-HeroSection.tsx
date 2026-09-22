@@ -56,7 +56,7 @@ const tallerThemes: Record<string, TallerTheme> = {
     label: 'Deportivo'
   },
   'Basquetbol': {
-    icon: '',
+    icon: '🏀',
     accentColor: '#fb923c',
     accentBg: 'rgba(251, 146, 60, 0.12)',
     pattern: 'radial-gradient(circle at 70% 30%, rgba(251,146,60,0.2) 0%, transparent 50%)',
@@ -72,7 +72,7 @@ const tallerThemes: Record<string, TallerTheme> = {
     label: 'Deportivo'
   },
   'Taekwondo': {
-    icon: '',
+    icon: '🥋',
     accentColor: '#f87171',
     accentBg: 'rgba(248, 113, 113, 0.12)',
     pattern: 'repeating-linear-gradient(45deg, transparent, transparent 20px, rgba(248,113,113,0.03) 20px, rgba(248,113,113,0.03) 22px), repeating-linear-gradient(-45deg, transparent, transparent 20px, rgba(248,113,113,0.03) 20px, rgba(248,113,113,0.03) 22px)',
@@ -124,9 +124,18 @@ export function HeroSection({ heroRef }: { heroRef: React.RefObject<HTMLDivEleme
   const prevSlide = () => goToSlide((currentIndex - 1 + tallerImages.length) % tallerImages.length)
 
   useEffect(() => {
-    const interval = setInterval(nextSlide, 5000)
-    return () => clearInterval(interval)
-  }, [currentIndex])
+    let resetAnimation: number | undefined
+    const interval = window.setInterval(() => {
+      setIsAnimating(true)
+      setCurrentIndex(index => (index + 1) % tallerImages.length)
+      resetAnimation = window.setTimeout(() => setIsAnimating(false), 600)
+    }, 5000)
+
+    return () => {
+      window.clearInterval(interval)
+      if (resetAnimation) window.clearTimeout(resetAnimation)
+    }
+  }, [])
 
   const current = tallerImages[currentIndex]
   const theme = tallerThemes[current.title] || tallerThemes['Teatro']
@@ -153,9 +162,12 @@ export function HeroSection({ heroRef }: { heroRef: React.RefObject<HTMLDivEleme
           <Link to="/auth" className="btn-wine-glow w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 text-[14px] sm:text-[15px] text-center">
             Inicio de sesión
           </Link>
-          <button className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 rounded-full text-white/80 hover:text-white font-semibold text-[14px] sm:text-[15px] hover:bg-white/5 transition-all duration-300">
-            Ver manual de usuario
-          </button>
+          <a
+            href="#funciones"
+            className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 rounded-full text-white/80 hover:text-white font-semibold text-[14px] sm:text-[15px] hover:bg-white/5 transition-all duration-300 text-center"
+          >
+            Explorar funciones
+          </a>
         </div>
       </div>
 
@@ -184,6 +196,7 @@ export function HeroSection({ heroRef }: { heroRef: React.RefObject<HTMLDivEleme
           {/* Botón anterior */}
           <button
             onClick={prevSlide}
+            aria-label="Taller anterior"
             className="absolute left-0 sm:left-4 z-30 w-12 h-12 rounded-full bg-black/60 backdrop-blur-md border border-white/10 flex items-center justify-center hover:bg-[#722F37]/70 transition-all duration-300 group"
           >
             <ChevronLeft className="w-6 h-6 text-white group-hover:scale-110 transition-transform" />
@@ -336,6 +349,7 @@ export function HeroSection({ heroRef }: { heroRef: React.RefObject<HTMLDivEleme
           {/* Botón siguiente */}
           <button
             onClick={nextSlide}
+            aria-label="Siguiente taller"
             className="absolute right-0 sm:right-4 z-30 w-12 h-12 rounded-full bg-black/60 backdrop-blur-md border border-white/10 flex items-center justify-center hover:bg-[#722F37]/70 transition-all duration-300 group"
           >
             <ChevronRight className="w-6 h-6 text-white group-hover:scale-110 transition-transform" />

@@ -13,14 +13,14 @@ export function Filters({ category, setCategory, search, setSearch }: FiltersPro
   return (
     <div className="flex flex-col lg:flex-row gap-4 items-center w-full">
       <div className="relative w-full lg:max-w-md group">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/15 group-focus-within:text-[#8B1A32]/60 transition-colors duration-300" size={16} />
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#9b7881] group-focus-within:text-[#8B1A32] transition-colors duration-300" size={16} />
         <input 
           type="text" 
           value={search}
           onChange={e => setSearch(e.target.value)}
           placeholder="Buscar taller..."
           aria-label="Buscar taller"
-          className="w-full bg-white/[0.03] border border-white/[0.05] rounded-2xl h-11 pl-11 pr-4 text-sm text-white focus:outline-none focus:border-[#8B1A32]/20 focus:bg-white/[0.05] transition-all duration-200 placeholder:text-white/15"
+          className="w-full bg-white border border-[#721422]/12 rounded-2xl h-11 pl-11 pr-4 text-sm text-[#351019] shadow-[0_8px_25px_rgba(73,19,31,0.05)] focus:outline-none focus:border-[#8B1A32]/40 focus:bg-[#fffdfd] transition-all duration-200 placeholder:text-[#a98b93]"
         />
       </div>
 
@@ -31,8 +31,8 @@ export function Filters({ category, setCategory, search, setSearch }: FiltersPro
           className={cn(
             "px-4 py-2 rounded-xl text-[12px] font-semibold transition-all duration-200 border",
             category === '' 
-              ? "bg-white/[0.06] text-white border-white/[0.08]" 
-              : "bg-transparent border-transparent text-white/35 hover:bg-white/[0.03] hover:text-white/70"
+              ? "bg-[#721422] text-white border-[#721422] shadow-[0_8px_18px_rgba(114,20,34,0.18)]"
+              : "bg-transparent border-transparent text-[#8f727b] hover:bg-[#f8eaee] hover:text-[#721422]"
           )}
         >
           Todos
@@ -45,8 +45,8 @@ export function Filters({ category, setCategory, search, setSearch }: FiltersPro
             className={cn(
               "px-4 py-2 rounded-xl text-[12px] font-semibold transition-all duration-200 border",
               category === val 
-                ? "bg-white/[0.06] text-white border-white/[0.08]" 
-                : "bg-transparent border-transparent text-white/35 hover:bg-white/[0.03] hover:text-white/70"
+              ? "bg-[#721422] text-white border-[#721422] shadow-[0_8px_18px_rgba(114,20,34,0.18)]"
+              : "bg-transparent border-transparent text-[#8f727b] hover:bg-[#f8eaee] hover:text-[#721422]"
             )}
           >
             {label}

@@ -88,7 +88,7 @@ function RootComponent() {
           </div>
           
           <ScrollRestoration />
-          <Toaster theme="dark" toastOptions={{ className: 'glass text-white border-primary/20 bg-background/90' }} position="bottom-right" />
+          <Toaster theme="light" toastOptions={{ className: 'glass text-foreground border-primary/20 bg-white/95 shadow-lg' }} position="bottom-right" />
         </div>
       </AuthGuard>
       </ErrorBoundary>

@@ -15,35 +15,35 @@
   --color-glass-bg: var(--glass-bg);
   --color-glass-border: var(--glass-border);
 
-  --font-sans: 'Inter', 'Open Sans', sans-serif;
-  --font-heading: 'Poppins', sans-serif;
+  --font-sans: 'Geist Variable', 'Inter', 'Open Sans', sans-serif;
+  --font-heading: 'Geist Variable', 'Inter', sans-serif;
 }
 
 :root {
-  --background: #000000;
-  --surface: #0a0a0a;
-  --foreground: #FFFFFF;
-  --foreground-muted: #A1A1AA;
+  --background: #fffafc;
+  --surface: #ffffff;
+  --foreground: #351019;
+  --foreground-muted: #765c64;
   --primary: #8B1A32;
   --primary-glow: #B8354D;
   --primary-light: #D24A6B;
   --secondary: #5C1020;
   --secondary-deep: #3A0813;
-  --glass-bg: rgba(10, 2, 5, 0.75);
-  --glass-border: rgba(139, 26, 50, 0.25);
-  --shadow-premium: 0 15px 40px -10px rgba(0, 0, 0, 0.8);
-  --shadow-glow: 0 0 25px rgba(139, 26, 50, 0.4);
+  --glass-bg: rgba(255, 255, 255, 0.86);
+  --glass-border: rgba(114, 20, 34, 0.14);
+  --shadow-premium: 0 18px 45px -18px rgba(73, 19, 31, 0.26);
+  --shadow-glow: 0 0 25px rgba(139, 26, 50, 0.18);
   --shadow-glow-light: 0 0 40px rgba(184, 53, 77, 0.25);
-  --card: #0a0a0a;
-  --card-foreground: #FFFFFF;
-  --popover: #0a0a0a;
-  --popover-foreground: #FFFFFF;
+  --card: #ffffff;
+  --card-foreground: #351019;
+  --popover: #ffffff;
+  --popover-foreground: #351019;
   --primary-foreground: #FFFFFF;
   --secondary-foreground: #FFFFFF;
-  --muted: #171717;
-  --muted-foreground: #A1A1AA;
-  --accent: #4D0E18;
-  --accent-foreground: #FFFFFF;
+  --muted: #f7eef1;
+  --muted-foreground: #765c64;
+  --accent: #f7e5e9;
+  --accent-foreground: #721422;
   --destructive: #ef4444;
   --border: rgba(139, 26, 50, 0.25);
   --input: rgba(139, 26, 50, 0.15);
@@ -95,8 +95,8 @@ body::before {
   inset: 0;
   z-index: -2;
   background:
-    radial-gradient(ellipse 60% 50% at 50% -20%, rgba(139, 26, 50, 0.15) 0%, transparent 70%),
-    radial-gradient(ellipse 50% 50% at 80% 40%, rgba(92, 16, 32, 0.05) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 50% -20%, rgba(139, 26, 50, 0.10) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 50% at 80% 40%, rgba(184, 53, 77, 0.06) 0%, transparent 60%),
     var(--background);
   pointer-events: none;
 }
@@ -122,6 +122,24 @@ h1, h2, h3, h4, h5, h6, .font-heading {
   box-shadow: var(--shadow-glow), 0 8px 32px rgba(139, 26, 50, 0.35);
   border-color: var(--primary-light);
   transform: translateY(-3px);
+}
+
+/* Shared light surface used by the student-facing screens. The admin workspace
+   keeps its darker dashboard treatment for dense data tables. */
+.surface-page {
+  color: var(--foreground);
+}
+
+.surface-panel {
+  background: rgba(255, 255, 255, 0.86);
+  border: 1px solid rgba(114, 20, 34, 0.10);
+  box-shadow: 0 16px 40px -24px rgba(73, 19, 31, 0.35);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.surface-panel:hover {
+  border-color: rgba(114, 20, 34, 0.20);
 }
 
 .btn-primary {
@@ -225,6 +243,18 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--primary);
+}
+
+/* Motion should enhance orientation, never block it. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 /* === WORKSHOP-THEMED ANIMATIONS === */

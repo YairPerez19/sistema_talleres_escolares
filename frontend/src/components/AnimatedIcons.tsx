@@ -1,31 +1,24 @@
-import { withAnimation } from './withAnimation';
-import loading from 'react-useanimations/lib/loading';
-import mail from 'react-useanimations/lib/mail';
-import lock from 'react-useanimations/lib/lock';
-import checkmark from 'react-useanimations/lib/checkmark';
-import plusToX from 'react-useanimations/lib/plusToX';
-import searchToX from 'react-useanimations/lib/searchToX';
-import explore from 'react-useanimations/lib/explore';
-import arrowRightCircle from 'react-useanimations/lib/arrowRightCircle';
-import alertCircle from 'react-useanimations/lib/alertCircle';
-import notification from 'react-useanimations/lib/notification';
-import userPlus from 'react-useanimations/lib/userPlus';
-import checkBox from 'react-useanimations/lib/checkBox';
-import download from 'react-useanimations/lib/download';
-import calendar from 'react-useanimations/lib/calendar';
-
-export const Loader2 = withAnimation(loading, null);
-export const Mail = withAnimation(mail, null);
-export const Lock = withAnimation(lock, null);
-export const UserCheck = withAnimation(checkmark, null);
-export const Plus = withAnimation(plusToX, null);
-export const Search = withAnimation(searchToX, null);
-export const LayoutDashboard = withAnimation(explore, null);
-export const LogOut = withAnimation(arrowRightCircle, null);
-export const ShieldCheck = withAnimation(alertCircle, null);
-export const MessageSquare = withAnimation(notification, null);
-export const LogIn = withAnimation(userPlus, null);
-export const CheckSquare = withAnimation(checkBox, null);
-export const Save = withAnimation(download, null);
-export const RefreshCw = withAnimation(loading, null);
-export const Clock = withAnimation(calendar, null);
+/**
+ * Shared icon vocabulary for the app.
+ *
+ * These used to be backed by react-useanimations/Lottie. Lucide keeps the
+ * same named API while rendering lightweight, accessible inline SVGs that
+ * work in the browser and in the jsdom test environment.
+ */
+export {
+  LoaderCircle as Loader2,
+  Mail,
+  LockKeyhole as Lock,
+  CircleCheck as UserCheck,
+  Plus,
+  Search,
+  LayoutDashboard,
+  LogOut,
+  ShieldCheck,
+  MessageSquare,
+  UserPlus as LogIn,
+  SquareCheck as CheckSquare,
+  Download as Save,
+  RefreshCw,
+  CalendarClock as Clock,
+} from 'lucide-react';

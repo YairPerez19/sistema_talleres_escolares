@@ -152,7 +152,7 @@ function Dashboard() {
 
   const asistenciaSummary = useMemo(() => {
     const total = asistencia.length;
-    const presentes = asistencia.filter(a => a.estado === 'presente').length;
+    const presentes = asistencia.filter(a => ['presente', 'retardo'].includes(a.estado)).length;
     const ausentes = asistencia.filter(a => a.estado === 'ausente').length;
     const porcentaje = total > 0 ? Math.round((presentes / total) * 100) : 0;
     return { total, presentes, ausentes, porcentaje };
@@ -167,70 +167,70 @@ function Dashboard() {
   }
 
   return (
-    <div className="flex flex-col pt-4 pb-20 w-full">
-      <div className="bg-[#0a0205]/60 backdrop-blur-[24px] border border-white/[0.04] mb-10 p-4 md:p-6 rounded-[2rem] w-full max-w-[1400px] mx-auto shadow-lg shadow-black/20">
+    <div className="surface-page flex flex-col pt-4 pb-20 w-full">
+      <div className="bg-white/90 backdrop-blur-[24px] border border-[#721422]/10 mb-10 p-4 md:p-6 rounded-[2rem] w-full max-w-[1400px] mx-auto shadow-[0_16px_40px_-24px_rgba(73,19,31,0.40)]">
         <Header />
         <div className="pt-6">
-          <span className="text-[10px] uppercase font-black tracking-[0.2em] text-[#8B1A32]/70 mb-2 block">Mi Dashboard</span>
-          <h1 className="text-3xl md:text-4xl font-extrabold text-white">Mi Horario Escolar</h1>
+          <span className="text-[10px] uppercase font-black tracking-[0.2em] text-[#8B1A32] mb-2 block">Mi Dashboard</span>
+          <h1 className="text-3xl md:text-4xl font-extrabold text-[#4d0e18]">Mi Horario Escolar</h1>
         </div>
       </div>
 
       <div className="mt-8 mb-16 max-w-[1400px] mx-auto w-full grid grid-cols-1 lg:grid-cols-4 gap-8">
         <div ref={sidebarRef} className="lg:col-span-1 space-y-6">
-          <div className="sidebar-card glass-card p-6 rounded-3xl relative overflow-hidden">
+          <div className="sidebar-card surface-panel p-6 rounded-3xl relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-[#8B1A32]/5 to-transparent pointer-events-none" />
             <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#8B1A32]/20 to-[#5C1020]/10 border border-[#8B1A32]/15 flex items-center justify-center text-[#8B1A32] mb-4">
               <DollarSign size={22} />
             </div>
-            <h3 className="text-lg font-bold text-white mb-3">Estado de Cuenta</h3>
-            <div className="bg-black/60 rounded-2xl p-5 border border-white/[0.04]">
-              <p className="text-[10px] uppercase tracking-widest text-white/30 font-bold mb-1">Total a Pagar</p>
-              <p className="text-3xl md:text-4xl font-extrabold text-white">${deuda.toFixed(2)}</p>
-              <div className="mt-3 pt-3 border-t border-white/[0.06] flex items-center gap-2">
-                <span className="text-[10px] uppercase tracking-widest text-white/20 font-bold">Costo por sesión</span>
+            <h3 className="text-lg font-bold text-[#4d0e18] mb-3">Estado de Cuenta</h3>
+            <div className="bg-[#fff7f8] rounded-2xl p-5 border border-[#721422]/10">
+              <p className="text-[10px] uppercase tracking-widest text-[#9b7881] font-bold mb-1">Total a Pagar</p>
+              <p className="text-3xl md:text-4xl font-extrabold text-[#351019]">${deuda.toFixed(2)}</p>
+              <div className="mt-3 pt-3 border-t border-[#721422]/10 flex items-center gap-2">
+                <span className="text-[10px] uppercase tracking-widest text-[#9b7881] font-bold">Costo por sesión</span>
                 <span className="text-xs font-bold text-[#8B1A32]">${costoPorSesion}</span>
               </div>
             </div>
           </div>
 
-          <div className="sidebar-card glass-card p-6 rounded-3xl relative overflow-hidden">
+          <div className="sidebar-card surface-panel p-6 rounded-3xl relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-[#8B1A32]/5 to-transparent pointer-events-none" />
             <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#8B1A32]/20 to-[#5C1020]/10 border border-[#8B1A32]/15 flex items-center justify-center text-[#8B1A32] mb-4">
               <RefreshCw size={22} />
             </div>
-            <h3 className="text-lg font-bold text-white mb-2">Cambios Disponibles</h3>
-            <p className="text-[10px] text-white/30 uppercase tracking-widest font-bold mb-4">Límite de 3 por ciclo</p>
+            <h3 className="text-lg font-bold text-[#4d0e18] mb-2">Cambios Disponibles</h3>
+            <p className="text-[10px] text-[#9b7881] uppercase tracking-widest font-bold mb-4">Límite de 3 por ciclo</p>
             
             {!profile ? (
               <div className="flex gap-2 mb-6 animate-pulse">
-                {[1, 2, 3].map(i => <div key={i} className="flex-1 h-2 rounded-full bg-white/5" />)}
+                {[1, 2, 3].map(i => <div key={i} className="flex-1 h-2 rounded-full bg-[#ead9dd]" />)}
               </div>
             ) : (
               <div className="flex gap-2 mb-6">
                 {[1, 2, 3].map((i) => (
                   <div 
                     key={i} 
-                    className={`flex-1 h-2 rounded-full transition-all duration-500 ${i <= (profile?.cambios_restantes ?? 0) ? 'bg-gradient-to-r from-[#8B1A32] to-[#B8354D] shadow-[0_0_10px_rgba(139,26,50,0.3)]' : 'bg-white/[0.06]'}`} 
+                    className={`flex-1 h-2 rounded-full transition-all duration-500 ${i <= (profile?.cambios_restantes ?? 0) ? 'bg-gradient-to-r from-[#8B1A32] to-[#B8354D] shadow-[0_0_10px_rgba(139,26,50,0.3)]' : 'bg-[#ead9dd]'}`}
                   />
                 ))}
               </div>
             )}
 
-            <div className="flex items-center gap-3 text-white/60">
+            <div className="flex items-center gap-3 text-[#765c64]">
               <Clock size={16} className={cn("text-[#8B1A32]", !profile && "animate-pulse")} />
               <div>
-                <p className="text-xs font-bold text-white/70">
+                <p className="text-xs font-bold text-[#4d2630]">
                   {!profile ? 'Calculando...' : `${diasRestantes} días restantes`}
                 </p>
-                <p className="text-[10px] text-white/30">Para realizar cambios</p>
+                <p className="text-[10px] text-[#9b7881]">Para realizar cambios</p>
               </div>
             </div>
           </div>
         </div>
 
         <div className="lg:col-span-3">
-          <h2 className="text-2xl font-extrabold text-white mb-8">Mis Talleres Inscritos</h2>
+          <h2 className="text-2xl font-extrabold text-[#4d0e18] mb-8">Mis Talleres Inscritos</h2>
           {misTalleres.length === 0 && !talleresLoading ? (
             <div className="bg-white/[0.01] border border-white/[0.04] border-dashed p-12 rounded-[2.5rem] text-center">
               <div className="w-16 h-16 rounded-2xl bg-white/[0.02] border border-white/[0.04] flex items-center justify-center mx-auto mb-4">

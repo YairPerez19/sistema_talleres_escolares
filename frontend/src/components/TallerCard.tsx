@@ -83,11 +83,11 @@ export function TallerCard({ taller, inscrito, onInscribir, onBaja, colisionaCon
   const isBlocked = !!colisionaCon && !inscrito;
 
   return (
-    <div
+    <article
       ref={cardRef}
       onClick={onClick}
-      className="group relative rounded-[2rem] bg-white/[0.02] border border-white/[0.04] overflow-hidden flex flex-col transition-colors duration-500 hover:border-white/[0.08] cursor-pointer"
-      style={{ boxShadow: '0 10px 30px -10px rgba(0,0,0,0.5)' }}
+      className="group relative rounded-[1.75rem] bg-white border border-[#721422]/10 overflow-hidden flex flex-col transition-colors duration-500 hover:border-[#721422]/30 cursor-pointer shadow-[0_14px_35px_-20px_rgba(73,19,31,0.35)]"
+      style={{ boxShadow: '0 14px 35px -20px rgba(73,19,31,0.35)' }}
     >
       <div ref={imageRef} className="relative h-72 overflow-hidden will-change-transform">
         <img
@@ -125,15 +125,15 @@ export function TallerCard({ taller, inscrito, onInscribir, onBaja, colisionaCon
           <h3 className="text-2xl font-extrabold text-white leading-tight drop-shadow-xl tracking-tight">
             {taller.nombre}
           </h3>
-          <p className="text-white/50 text-[11px] font-medium mt-1 line-clamp-2">
+          <p className="text-white/75 text-[11px] font-medium mt-1 line-clamp-2">
             {taller.descripcion || 'Descubre y desarrolla tu talento en este taller.'}
           </p>
         </div>
 
         <div className="absolute bottom-5 right-5">
           <div className="flex items-center gap-1.5 bg-black/40 backdrop-blur-sm rounded-full px-3 py-1.5 border border-white/10">
-            <Users size={12} className="text-white/50" />
-            <span className="text-[11px] font-semibold text-white/70">{taller.cupo} lugares</span>
+            <Users size={12} className="text-white/75" />
+            <span className="text-[11px] font-semibold text-white">{taller.cupo} lugares</span>
           </div>
         </div>
       </div>
@@ -145,8 +145,8 @@ export function TallerCard({ taller, inscrito, onInscribir, onBaja, colisionaCon
               <UserIcon size={13} style={{ color: cat.accent }} />
             </div>
             <div className="min-w-0">
-              <p className="text-[10px] text-white/30 font-semibold uppercase tracking-wider">Instructor</p>
-              <p className="text-[13px] text-white/70 font-medium truncate">{taller.instructor}</p>
+              <p className="text-[10px] text-[#9b7881] font-semibold uppercase tracking-wider">Instructor</p>
+              <p className="text-[13px] text-[#4d2630] font-medium truncate">{taller.instructor}</p>
             </div>
           </div>
           <div className="flex items-center gap-3 group/info">
@@ -154,8 +154,8 @@ export function TallerCard({ taller, inscrito, onInscribir, onBaja, colisionaCon
               <MapPin size={13} style={{ color: cat.accent }} />
             </div>
             <div className="min-w-0">
-              <p className="text-[10px] text-white/30 font-semibold uppercase tracking-wider">Lugar</p>
-              <p className="text-[13px] text-white/70 font-medium truncate">{taller.lugar}</p>
+              <p className="text-[10px] text-[#9b7881] font-semibold uppercase tracking-wider">Lugar</p>
+              <p className="text-[13px] text-[#4d2630] font-medium truncate">{taller.lugar}</p>
             </div>
           </div>
           <div className="flex items-start gap-3">
@@ -163,17 +163,17 @@ export function TallerCard({ taller, inscrito, onInscribir, onBaja, colisionaCon
               <Clock size={13} style={{ color: cat.accent }} />
             </div>
             <div className="min-w-0">
-              <p className="text-[10px] text-white/30 font-semibold uppercase tracking-wider mb-1.5">Horarios</p>
+              <p className="text-[10px] text-[#9b7881] font-semibold uppercase tracking-wider mb-1.5">Horarios</p>
               <div className="flex flex-wrap gap-1.5">
                 {taller.horarios.slice(0, 3).map(h => (
-                  <span key={h.id} className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-semibold bg-white/[0.03] border border-white/[0.05] text-white/50">
+                  <span key={h.id} className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-semibold bg-[#fff7f8] border border-[#721422]/10 text-[#765c64]">
                     <span className="capitalize">{h.dia.slice(0, 3)}</span>
-                    <span className="text-white/20">·</span>
+                    <span className="text-[#c9abb3]">·</span>
                     {fmtHora(h.hora_inicio)}-{fmtHora(h.hora_fin)}
                   </span>
                 ))}
                 {taller.horarios.length > 3 && (
-                  <span className="px-2 py-1 rounded-lg text-[10px] font-semibold text-white/30 bg-white/[0.02]">
+                    <span className="px-2 py-1 rounded-lg text-[10px] font-semibold text-[#9b7881] bg-[#fbf0f3]">
                     +{taller.horarios.length - 3} más
                   </span>
                 )}
@@ -188,7 +188,7 @@ export function TallerCard({ taller, inscrito, onInscribir, onBaja, colisionaCon
               type="button"
               onClick={(e) => { e.stopPropagation(); onBaja?.(); }}
               disabled={loading}
-              className="w-full py-3.5 rounded-2xl font-semibold text-[13px] bg-transparent border border-white/[0.08] text-white/50 hover:text-red-400 hover:border-red-500/30 hover:bg-red-500/[0.06] transition-all duration-300 disabled:opacity-40 group/btn"
+              className="w-full py-3.5 rounded-2xl font-semibold text-[13px] bg-white border border-[#721422]/15 text-[#765c64] hover:text-red-700 hover:border-red-500/30 hover:bg-red-50 transition-all duration-300 disabled:opacity-40 group/btn"
             >
               <span className="group-hover/btn:hidden">Darse de baja</span>
               <span className="hidden group-hover/btn:inline">Confirmar baja</span>
@@ -217,6 +217,6 @@ export function TallerCard({ taller, inscrito, onInscribir, onBaja, colisionaCon
           )}
         </div>
       </div>
-    </div>
+    </article>
   );
 }

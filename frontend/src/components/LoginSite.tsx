@@ -13,7 +13,8 @@ import {
   UserCheck,
   ArrowLeft,
 } from "lucide-react";
-import Iridescence from "@/components/Iridescence";
+import officialLogo from "@/assets/cbtis61-official.png";
+import { BrandLogo } from "@/components/BrandLogo";
 import type { Role } from "@/services/authService";
 import type { TallerOption } from "@/routes/auth";
 import type { AuthFormState } from "@/routes/-AuthForm";
@@ -49,27 +50,29 @@ export default function LoginSite({
   const canRegister = role === "student";
 
   return (
-    <div className="relative flex min-h-screen w-full flex-col overflow-hidden font-sans text-white">
+    <div className="auth-page relative flex min-h-screen w-full flex-col overflow-hidden font-sans text-white">
       <BackgroundAmbience />
 
-      <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-6xl flex-col items-center justify-center px-4 py-10 sm:px-6">
-        <BrandHeader />
+      <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-6xl flex-col items-center justify-start px-4 py-7 sm:px-6 lg:py-10">
+        <div className="flex w-full flex-col items-center">
+          <BrandHeader />
 
-        <ModePill
-          mode={authMode}
-          canRegister={canRegister}
-          onChange={setAuthMode}
-        />
+          <ModePill
+            mode={authMode}
+            canRegister={canRegister}
+            onChange={setAuthMode}
+          />
 
-        <RolePill role={role} onBack={onBack} />
+          <RolePill role={role} onBack={onBack} />
+        </div>
 
-        <div className="relative mt-6 w-full">
-          <div className="relative grid overflow-hidden rounded-[32px] border border-white/[0.08] bg-white/[0.04] shadow-[0_30px_80px_-20px_rgba(0,0,0,0.6)] backdrop-blur-2xl md:grid-cols-2">
-            <div className="pointer-events-none absolute inset-0 rounded-[32px] ring-1 ring-inset ring-white/[0.06]" />
+        <div className="relative mt-5 w-full max-w-5xl">
+          <div className="relative grid overflow-hidden rounded-[24px] border border-[#d47b91]/20 bg-[#4b1027]/72 shadow-[0_22px_60px_-28px_rgba(0,0,0,0.75)] backdrop-blur-md md:grid-cols-2">
+            <div className="pointer-events-none absolute inset-0 rounded-[28px] ring-1 ring-inset ring-white/[0.08]" />
 
             {/* Form column */}
             <div
-              className={`relative flex flex-col justify-center px-7 py-10 sm:px-12 sm:py-14 ${
+              className={`relative flex flex-col justify-center bg-gradient-to-br from-[#52132b]/40 via-[#3f0c22]/25 to-[#290817]/20 px-7 py-9 sm:px-12 sm:py-12 ${
                 isRegister ? "md:order-2" : "md:order-1"
               }`}
             >
@@ -97,7 +100,7 @@ export default function LoginSite({
 
             {/* Eagle column */}
             <div
-              className={`relative m-2 hidden overflow-hidden rounded-[24px] md:block ${
+              className={`relative m-2 hidden min-h-[500px] overflow-hidden rounded-[20px] border border-white/[0.07] md:block ${
                 isRegister ? "md:order-1" : "md:order-2"
               }`}
             >
@@ -115,6 +118,16 @@ export default function LoginSite({
           100% { opacity: 1; transform: translateY(0); }
         }
         .form-fade-in { animation: formFadeIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        @keyframes authWaveDrift {
+          0%, 100% { transform: rotate(34deg) translate3d(0, 0, 0) scale(1); }
+          50% { transform: rotate(36deg) translate3d(2%, -1%, 0) scale(1.03); }
+        }
+        .auth-wave-one { animation: authWaveDrift 16s ease-in-out infinite; }
+        @keyframes authWaveDriftReverse {
+          0%, 100% { transform: rotate(-29deg) translate3d(0, 0, 0); }
+          50% { transform: rotate(-27deg) translate3d(-2%, 1%, 0); }
+        }
+        .auth-wave-two { animation: authWaveDriftReverse 20s ease-in-out infinite; }
       `}</style>
     </div>
   );
@@ -124,22 +137,7 @@ export default function LoginSite({
 
 function BrandHeader() {
   return (
-    <div className="mb-7 flex items-center gap-3">
-      <div className="relative">
-        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-[#8B1A32]/30 to-[#5C1020]/30 border border-[#8B1A32]/30">
-          <GraduationCap className="h-5 w-5 text-[#f4d78e]" strokeWidth={2.4} />
-        </div>
-        <div className="absolute -bottom-1 -right-1 h-3.5 w-3.5 rounded-full bg-gradient-to-br from-[#f4d78e] to-[#e0a94a] ring-2 ring-[#0C0810]" />
-      </div>
-      <div className="flex flex-col leading-none">
-        <span className="text-2xl font-black tracking-tight text-white">
-          SITE
-        </span>
-        <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#f4d78e]">
-          CBTis No. 61
-        </span>
-      </div>
-    </div>
+    <BrandLogo mode="dark" className="mb-6" markClassName="h-11 w-11 rounded-2xl" />
   );
 }
 
@@ -155,7 +153,7 @@ function ModePill({
   return (
     <div
       role="tablist"
-      className="relative mb-4 inline-flex rounded-full border border-white/[0.08] bg-white/[0.04] p-1 shadow-sm backdrop-blur-md"
+      className="relative mb-3 inline-flex rounded-full border border-[#d47b91]/20 bg-[#5b1632]/45 p-1 shadow-[0_6px_18px_rgba(0,0,0,0.16)] backdrop-blur-md"
     >
       <div
         className="absolute top-1 bottom-1 rounded-full bg-gradient-to-r from-[#8B1A32] to-[#B8354D] shadow-md shadow-[#8B1A32]/40 transition-all duration-500 ease-out"
@@ -200,7 +198,7 @@ function ModeTab({
       role="tab"
       aria-selected={active}
       onClick={onClick}
-      className={`relative z-10 rounded-full px-6 py-2 text-sm font-semibold transition-colors duration-300 ${
+        className={`relative z-10 rounded-full px-6 py-2 text-[13px] font-semibold transition-colors duration-300 ${
         active ? "text-white" : "text-white/50 hover:text-white/80"
       }`}
     >
@@ -219,17 +217,17 @@ function RolePill({ role, onBack }: { role: Role; onBack: () => void }) {
   const Icon = config.icon;
 
   return (
-    <div className="mb-6 flex w-full max-w-md items-center justify-between gap-3">
+    <div className="mb-5 flex w-full max-w-md items-center justify-between gap-3">
       <button
         type="button"
         onClick={onBack}
         aria-label="Volver a selección de rol"
-        className="group flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1.5 text-xs font-semibold text-white/70 backdrop-blur-md transition hover:bg-white/[0.08] hover:text-white"
+        className="group flex items-center gap-2 rounded-full border border-[#d47b91]/20 bg-[#5b1632]/35 px-3 py-1.5 text-[11px] font-semibold text-white/70 backdrop-blur-md transition hover:bg-[#741c3d]/60 hover:text-white"
       >
         <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5" />
         Cambiar rol
       </button>
-      <div className="flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.04] px-3 py-1.5 backdrop-blur-md">
+      <div className="flex items-center gap-2 rounded-full border border-[#d47b91]/20 bg-[#5b1632]/35 px-3 py-1.5 backdrop-blur-md">
         <Icon className="h-3.5 w-3.5 text-[#f4d78e]" strokeWidth={2.4} />
         <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-white">
           {config.label}
@@ -241,7 +239,7 @@ function RolePill({ role, onBack }: { role: Role; onBack: () => void }) {
 
 function Footer() {
   return (
-    <p className="mt-8 text-center text-xs font-medium text-white/40">
+    <p className="mt-6 text-center text-[11px] font-medium text-white/35">
       © {new Date().getFullYear()} Sistema Integral de Talleres Escolares — CBTis
       No. 61
     </p>
@@ -252,12 +250,10 @@ function Footer() {
 
 function BackgroundAmbience() {
   return (
-    <div className="absolute inset-0 -z-10 bg-[#0C0810]">
-      <div className="absolute inset-0 opacity-50">
-        <Iridescence color={[0.5, 0.0, 0.13]} speed={0.6} amplitude={0} mouseReact={false} />
-      </div>
-      <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-[#8B1A32]/5 blur-[180px] rounded-full pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-[#5C1020]/15 blur-[180px] rounded-full pointer-events-none" />
+    <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden bg-[#350019]">
+      <div className="absolute inset-0 bg-[linear-gradient(135deg,#420020_0%,#260013_55%,#350019_100%)]" />
+      <div className="auth-wave auth-wave-one absolute -left-[20%] -top-[30%] h-[150%] w-[78%] rotate-[34deg] rounded-[42%] bg-[#6c0030]/25" />
+      <div className="auth-wave auth-wave-two absolute -right-[24%] -top-[20%] h-[145%] w-[72%] rotate-[-29deg] rounded-[45%] border border-[#91033e]/18 bg-[#4c0025]/20" />
     </div>
   );
 }
@@ -302,13 +298,13 @@ function LoginForm({
         <Field
           label={role === "admin" ? "Correo" : "Correo o matrícula"}
           icon={<Mail className="h-4 w-4" />}
-          type="email"
+          type={role === "admin" ? "email" : "text"}
           value={form.email}
           onChange={(v) => setField("email", v)}
           placeholder={
             role === "admin"
               ? "admin@cbtis61.edu.mx"
-              : "nombre@cbtis61.edu.mx"
+              : "correo o matrícula"
           }
           required
         />
@@ -348,7 +344,7 @@ function LoginForm({
             <button
               type="button"
               onClick={() => setField("showPassword", !form.showPassword)}
-              className="flex h-7 w-7 items-center justify-center rounded-md text-white/40 transition hover:bg-white/[0.08] hover:text-white"
+              className="flex h-7 w-7 items-center justify-center rounded-md text-white/40 transition hover:bg-white/[0.08] hover:text-[#f4d78e]"
               aria-label={
                 form.showPassword ? "Ocultar contraseña" : "Mostrar contraseña"
               }
@@ -446,7 +442,7 @@ function RegisterForm({
             <button
               type="button"
               onClick={() => setField("showPassword", !form.showPassword)}
-              className="flex h-7 w-7 items-center justify-center rounded-md text-white/40 transition hover:bg-white/[0.08] hover:text-white"
+              className="flex h-7 w-7 items-center justify-center rounded-md text-white/40 transition hover:bg-white/[0.08] hover:text-[#f4d78e]"
               aria-label="Mostrar u ocultar contraseña"
             >
               {form.showPassword ? (
@@ -493,7 +489,7 @@ function Field({
 }) {
   return (
     <div>
-      <label className="mb-1.5 block text-xs font-semibold tracking-wide text-white/60">
+      <label className="mb-1.5 block text-[11px] font-semibold tracking-wide text-white/65">
         {label}
       </label>
       <div className="group relative">
@@ -507,7 +503,7 @@ function Field({
           placeholder={placeholder}
           required={required}
           minLength={minLength}
-          className="w-full rounded-xl border border-white/[0.08] bg-white/[0.04] py-3 pl-10 pr-12 text-sm text-white placeholder:text-white/25 outline-none transition focus:border-[#8B1A32]/60 focus:bg-white/[0.07] focus:ring-2 focus:ring-[#8B1A32]/20 backdrop-blur-sm"
+          className="w-full rounded-xl border border-[#d47b91]/18 bg-[#260716]/35 py-3 pl-10 pr-12 text-sm text-white placeholder:text-white/28 outline-none transition focus:border-[#f4d78e]/55 focus:bg-[#3c0d20]/55 focus:ring-2 focus:ring-[#f4d78e]/12 backdrop-blur-sm"
         />
         {rightSlot && (
           <div className="absolute right-2 top-1/2 -translate-y-1/2">
@@ -528,7 +524,7 @@ function TurnoSelect({
 }) {
   return (
     <div>
-      <label className="mb-1.5 block text-xs font-semibold tracking-wide text-white/60">
+      <label className="mb-1.5 block text-[11px] font-semibold tracking-wide text-white/65">
         Turno
       </label>
       <div className="grid grid-cols-2 gap-2">
@@ -571,7 +567,7 @@ function TurnoOption({
       className={`flex items-center justify-center gap-2 rounded-xl border py-2.5 text-xs font-semibold transition backdrop-blur-sm ${
         active
           ? "border-[#8B1A32]/60 bg-gradient-to-br from-[#8B1A32] to-[#B8354D] text-white shadow-md shadow-[#8B1A32]/30"
-          : "border-white/[0.08] bg-white/[0.04] text-white/60 hover:bg-white/[0.08] hover:text-white"
+          : "border-[#d47b91]/18 bg-[#260716]/35 text-white/60 hover:bg-[#3c0d20]/55 hover:text-white"
       }`}
     >
       {icon}
@@ -603,11 +599,11 @@ function TallerSelect({
 }) {
   return (
     <div>
-      <label className="mb-1.5 block text-xs font-semibold tracking-wide text-white/60">
+      <label className="mb-1.5 block text-[11px] font-semibold tracking-wide text-white/65">
         Taller asignado
       </label>
       {loading ? (
-        <div className="flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-3 text-sm text-white/50 backdrop-blur-sm">
+        <div className="flex items-center gap-2 rounded-xl border border-[#d47b91]/18 bg-[#260716]/35 px-4 py-3 text-sm text-white/50 backdrop-blur-sm">
           <Loader2 className="h-4 w-4 animate-spin text-[#f4d78e]" />
           Cargando talleres...
         </div>
@@ -617,7 +613,7 @@ function TallerSelect({
             value={value}
             onChange={(e) => onChange(e.target.value)}
             required={required}
-            className="w-full appearance-none rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-3 pr-10 text-sm text-white outline-none transition focus:border-[#8B1A32]/60 focus:bg-white/[0.07] focus:ring-2 focus:ring-[#8B1A32]/20 backdrop-blur-sm"
+            className="w-full appearance-none rounded-xl border border-[#d47b91]/18 bg-[#260716]/35 px-4 py-3 pr-10 text-sm text-white outline-none transition focus:border-[#f4d78e]/55 focus:bg-[#3c0d20]/55 focus:ring-2 focus:ring-[#f4d78e]/12 backdrop-blur-sm"
           >
             <option value="" className="bg-[#0C0810]">
               Seleccionar taller
@@ -730,7 +726,7 @@ function EaglePanel({
       />
 
       <div className="absolute inset-0 flex items-center justify-center">
-        <OrbitalAnimation />
+        <EagleLogo />
       </div>
 
       <div className="absolute bottom-0 left-0 right-0 p-7 text-white">
@@ -800,7 +796,7 @@ function Stars() {
   );
 }
 
-/* ---------- Orbital Animation ---------- */
+/* ---------- Eagle animation ---------- */
 
 function OrbitalAnimation() {
   return (
@@ -994,6 +990,23 @@ function OrbitalAnimation() {
             }
           />
         ))}
+      </div>
+    </div>
+  );
+}
+
+void OrbitalAnimation;
+
+function EagleLogo() {
+  return (
+    <div className="relative flex h-[76%] w-[86%] items-center justify-center pb-20">
+      <div className="absolute left-1/2 top-1/2 h-60 w-60 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(244,215,142,0.24)_0%,rgba(184,53,77,0.16)_42%,transparent_72%)] blur-2xl" />
+      <div className="relative flex h-full w-full items-center justify-center">
+        <img
+          alt="Logotipo oficial CBTIS 61"
+          className="relative z-10 h-auto w-[72%] max-w-[330px] rounded-[28px] bg-white p-3 object-contain drop-shadow-[0_22px_22px_rgba(20,0,10,0.38)]"
+          src={officialLogo}
+        />
       </div>
     </div>
   );

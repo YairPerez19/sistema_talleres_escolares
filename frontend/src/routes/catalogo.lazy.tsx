@@ -15,7 +15,7 @@ import { useGSAP } from '@gsap/react'
 import { useTalleres as useTalleresHook, useInscripciones as useInscripcionesHook, useProfile } from '../hooks/useTalleres'
 import { BajaDialog } from '../components/BajaDialog'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog'
-import { MapPin, User as UserIcon, Users, Clock } from 'lucide-react'
+import { MapPin, User as UserIcon, Users, Clock, Search } from 'lucide-react'
 import { imagenDeTaller } from '../lib/tallerImages'
 
 const ITEMS_PER_PAGE = 9
@@ -51,7 +51,7 @@ function TallerDetalleModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl p-0 gap-0 overflow-hidden bg-[#0F0A0D] border-white/[0.06]">
+      <DialogContent className="sm:max-w-2xl p-0 gap-0 overflow-hidden bg-white border-[#721422]/15 shadow-[0_24px_80px_rgba(73,19,31,0.25)]">
         <DialogHeader className="sr-only">
           <DialogTitle>{taller.nombre}</DialogTitle>
         </DialogHeader>
@@ -62,35 +62,35 @@ function TallerDetalleModal({
             alt={taller.nombre}
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0F0A0D] via-[#0F0A0D]/40 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#351019] via-[#351019]/40 to-transparent" />
           <div className="absolute bottom-4 left-5 right-5">
             <h2 className="text-2xl font-extrabold text-white leading-tight drop-shadow-xl">{taller.nombre}</h2>
-            <p className="text-white/40 text-xs font-medium mt-1">{taller.categoria}</p>
+            <p className="text-white/75 text-xs font-medium mt-1">{taller.categoria}</p>
           </div>
         </div>
 
         <div className="p-5 space-y-5 max-h-[50vh] overflow-y-auto">
           {taller.descripcion && (
-            <p className="text-white/60 text-sm leading-relaxed">{taller.descripcion}</p>
+            <p className="text-[#765c64] text-sm leading-relaxed">{taller.descripcion}</p>
           )}
 
           <div className="grid grid-cols-2 gap-3">
-            <div className="flex items-center gap-3 bg-white/[0.03] rounded-xl p-3 border border-white/[0.05]">
+            <div className="flex items-center gap-3 bg-[#fff7f8] rounded-xl p-3 border border-[#721422]/10">
               <div className="w-8 h-8 rounded-lg bg-[#8B1A32]/15 flex items-center justify-center shrink-0">
                 <UserIcon size={14} className="text-[#B8354D]" />
               </div>
               <div className="min-w-0">
-                <p className="text-[10px] text-white/30 font-semibold uppercase tracking-wider">Instructor</p>
-                <p className="text-[13px] text-white/70 font-medium truncate">{taller.instructor}</p>
+                <p className="text-[10px] text-[#9b7881] font-semibold uppercase tracking-wider">Instructor</p>
+                <p className="text-[13px] text-[#4d2630] font-medium truncate">{taller.instructor}</p>
               </div>
             </div>
-            <div className="flex items-center gap-3 bg-white/[0.03] rounded-xl p-3 border border-white/[0.05]">
+            <div className="flex items-center gap-3 bg-[#fff7f8] rounded-xl p-3 border border-[#721422]/10">
               <div className="w-8 h-8 rounded-lg bg-[#8B1A32]/15 flex items-center justify-center shrink-0">
                 <MapPin size={14} className="text-[#B8354D]" />
               </div>
               <div className="min-w-0">
-                <p className="text-[10px] text-white/30 font-semibold uppercase tracking-wider">Lugar</p>
-                <p className="text-[13px] text-white/70 font-medium truncate">{taller.lugar}</p>
+                <p className="text-[10px] text-[#9b7881] font-semibold uppercase tracking-wider">Lugar</p>
+                <p className="text-[13px] text-[#4d2630] font-medium truncate">{taller.lugar}</p>
               </div>
             </div>
           </div>
@@ -98,21 +98,21 @@ function TallerDetalleModal({
           <div>
             <div className="flex items-center gap-2 mb-3">
               <Clock size={14} className="text-[#B8354D]" />
-              <p className="text-[10px] text-white/30 font-semibold uppercase tracking-wider">Horarios</p>
+              <p className="text-[10px] text-[#9b7881] font-semibold uppercase tracking-wider">Horarios</p>
             </div>
             <div className="space-y-2">
               {taller.horarios.map(h => (
-                <div key={h.id} className="flex items-center justify-between bg-white/[0.03] rounded-xl px-4 py-2.5 border border-white/[0.05]">
-                  <span className="text-[13px] text-white/70 font-medium capitalize">{h.dia}</span>
-                  <span className="text-[12px] text-white/40 font-mono font-semibold">{fmtHora(h.hora_inicio)} — {fmtHora(h.hora_fin)}</span>
+                <div key={h.id} className="flex items-center justify-between bg-[#fff7f8] rounded-xl px-4 py-2.5 border border-[#721422]/10">
+                  <span className="text-[13px] text-[#4d2630] font-medium capitalize">{h.dia}</span>
+                  <span className="text-[12px] text-[#765c64] font-mono font-semibold">{fmtHora(h.hora_inicio)} — {fmtHora(h.hora_fin)}</span>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="flex items-center gap-2 bg-white/[0.03] rounded-xl px-4 py-3 border border-white/[0.05]">
+          <div className="flex items-center gap-2 bg-[#fff7f8] rounded-xl px-4 py-3 border border-[#721422]/10">
             <Users size={14} className="text-[#B8354D]" />
-            <span className="text-[13px] text-white/70 font-medium">{taller.cupo} lugares disponibles</span>
+            <span className="text-[13px] text-[#4d2630] font-medium">{taller.cupo} lugares disponibles</span>
           </div>
         </div>
 
@@ -122,7 +122,7 @@ function TallerDetalleModal({
               type="button"
               onClick={onBaja}
               disabled={loading}
-              className="w-full py-3.5 rounded-2xl font-semibold text-[13px] bg-transparent border border-white/[0.08] text-white/50 hover:text-red-400 hover:border-red-500/30 hover:bg-red-500/[0.06] transition-all duration-300 disabled:opacity-40"
+              className="w-full py-3.5 rounded-2xl font-semibold text-[13px] bg-white border border-[#721422]/15 text-[#765c64] hover:text-red-700 hover:border-red-500/30 hover:bg-red-50 transition-all duration-300 disabled:opacity-40"
             >
               Darse de baja
             </button>
@@ -171,7 +171,12 @@ function CatalogoPage() {
   const filtered = React.useMemo(() => {
     let result = talleres;
     if (category) result = result.filter(t => t.categoria === category);
-    if (search) result = result.filter(t => t.nombre.toLowerCase().includes(search.toLowerCase()));
+    if (search) {
+      const query = search.toLowerCase().trim();
+      result = result.filter(t => [t.nombre, t.categoria, t.instructor, t.lugar]
+        .filter(Boolean)
+        .some(value => value.toLowerCase().includes(query)));
+    }
     return result;
   }, [talleres, category, search]);
 
@@ -282,9 +287,9 @@ function CatalogoPage() {
   );
 
   return (
-    <div className="flex flex-col pt-4 pb-20 overflow-visible max-w-[1400px] mx-auto px-4 md:px-8">
+    <div className="surface-page flex flex-col pt-4 pb-20 overflow-visible max-w-[1400px] mx-auto px-4 md:px-8">
       
-      <div className="sticky top-4 z-50 bg-[#0a0205]/80 backdrop-blur-[24px] border border-white/[0.04] mb-8 p-4 md:p-6 rounded-[2rem] space-y-4 shadow-lg shadow-black/20">
+      <div className="sticky top-4 z-50 bg-white/90 backdrop-blur-[24px] border border-[#721422]/10 mb-8 p-4 md:p-6 rounded-[2rem] space-y-4 shadow-[0_16px_40px_-24px_rgba(73,19,31,0.40)]">
         <Header />
         <div className="flex justify-between items-center px-2">
           <Filters 
@@ -292,11 +297,11 @@ function CatalogoPage() {
             search={search} setSearch={setSearch} 
           />
           {profile && (
-            <div className="hidden lg:flex items-center gap-3 bg-white/[0.03] px-4 py-2 rounded-2xl border border-white/[0.05]">
-              <span className="text-[10px] font-semibold text-white/30 uppercase tracking-wider">Cambios</span>
+            <div className="hidden lg:flex items-center gap-3 bg-[#fff7f8] px-4 py-2 rounded-2xl border border-[#721422]/10">
+              <span className="text-[10px] font-semibold text-[#9b7881] uppercase tracking-wider">Cambios</span>
               <div className="flex gap-1.5">
                 {[1, 2, 3].map(i => (
-                  <div key={i} className={`w-3 h-1.5 rounded-full transition-all duration-300 ${i <= (profile.cambios_restantes ?? 0) ? 'bg-gradient-to-r from-[#8B1A32] to-[#B8354D] shadow-[0_0_8px_rgba(139,26,50,0.3)]' : 'bg-white/[0.06]'}`} />
+                  <div key={i} className={`w-3 h-1.5 rounded-full transition-all duration-300 ${i <= (profile.cambios_restantes ?? 0) ? 'bg-gradient-to-r from-[#8B1A32] to-[#B8354D] shadow-[0_0_8px_rgba(139,26,50,0.3)]' : 'bg-[#ead9dd]'}`} />
                 ))}
               </div>
             </div>
@@ -331,12 +336,29 @@ function CatalogoPage() {
             })}
           </div>
 
+          {filtered.length === 0 && (
+            <div className="surface-panel rounded-[1.75rem] px-6 py-16 text-center">
+              <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-2xl bg-[#f7e5e9] text-[#721422]">
+                <Search size={24} />
+              </div>
+              <h2 className="text-xl font-extrabold text-[#4d0e18]">No encontramos talleres</h2>
+              <p className="mt-2 text-sm text-[#8f727b]">Prueba con otro nombre, categoría, instructor o lugar.</p>
+              <button
+                type="button"
+                onClick={() => { setSearch(''); setCategory(''); }}
+                className="mt-6 rounded-xl bg-[#721422] px-5 py-2.5 text-sm font-bold text-white shadow-[0_8px_18px_rgba(114,20,34,0.18)] transition hover:bg-[#5c1020]"
+              >
+                Limpiar filtros
+              </button>
+            </div>
+          )}
+
           {hasMore && (
             <div className="flex justify-center mt-12">
               <button
                 type="button"
                 onClick={() => setVisibleCount(prev => prev + ITEMS_PER_PAGE)}
-                className="px-8 py-4 rounded-2xl font-bold text-sm bg-white/[0.03] border border-white/[0.08] text-white/60 hover:text-white hover:border-[#8B1A32]/30 hover:bg-white/[0.06] transition-all duration-300"
+                className="px-8 py-4 rounded-2xl font-bold text-sm bg-white border border-[#721422]/15 text-[#765c64] hover:text-[#721422] hover:border-[#8B1A32]/30 hover:bg-[#fff7f8] transition-all duration-300"
               >
                 Mostrar más talleres ({filtered.length - visibleCount} restantes)
               </button>
