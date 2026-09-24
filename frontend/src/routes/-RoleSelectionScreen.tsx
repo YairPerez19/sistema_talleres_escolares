@@ -13,7 +13,7 @@ const roles: { id: Role; label: string; icon: ComponentType<any>; desc: string; 
 
 export function RoleSelectionScreen({ onSelect }: { onSelect: (r: Role) => void }) {
   return (
-    <div className="auth-page relative flex min-h-screen w-full flex-col overflow-hidden bg-[#310018] text-white">
+    <div className="auth-page route-enter relative flex min-h-screen w-full flex-col overflow-hidden bg-[#310018] text-white">
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_42%,rgba(128,25,62,0.34),transparent_58%),linear-gradient(135deg,#3b001d_0%,#210012_55%,#3b001d_100%)]" />
         <div className="absolute -left-[20%] -top-[30%] h-[150%] w-[78%] rotate-[34deg] rounded-[42%] bg-[#6c0030]/35" />
@@ -38,7 +38,8 @@ export function RoleSelectionScreen({ onSelect }: { onSelect: (r: Role) => void 
                 type="button"
                 key={r.id}
                 onClick={() => onSelect(r.id)}
-                className="group relative flex w-full items-center gap-4 overflow-hidden rounded-2xl border border-[#d47b91]/18 bg-[#260716]/35 p-4 text-left transition-all duration-300 hover:-translate-y-0.5 hover:border-[#f4d78e]/40 hover:bg-[#3c0d20]/55 hover:shadow-[0_12px_28px_rgba(0,0,0,0.2)]"
+                style={{ '--role-index': roles.indexOf(r) } as React.CSSProperties}
+                className="auth-role-card focus-ring-wine group relative flex w-full items-center gap-4 overflow-hidden rounded-2xl border border-[#d47b91]/18 bg-[#260716]/35 p-4 text-left transition-all duration-300 hover:border-[#f4d78e]/40 hover:bg-[#3c0d20]/55 hover:shadow-[0_12px_28px_rgba(0,0,0,0.2)]"
               >
                 <div className={`absolute inset-0 bg-gradient-to-br ${r.gradient} opacity-0 transition-opacity duration-500 group-hover:opacity-100`} />
                 <div className="relative z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-[#d47b91]/18 bg-[#5b1632]/45 text-[#f4d78e] transition-all duration-300 group-hover:scale-105 group-hover:border-[#f4d78e]/45">

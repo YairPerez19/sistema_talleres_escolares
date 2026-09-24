@@ -4,6 +4,7 @@ export type Taller = {
   categoria: string;
   lugar: string;
   instructor: string;
+  instructor_id?: string | null;
   descripcion: string | null;
   cupo: number;
   imagen_url: string | null;

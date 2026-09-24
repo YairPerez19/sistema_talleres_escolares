@@ -195,7 +195,7 @@ function VerifyOtpPage() {
   return (
     <div className="flex flex-col w-full min-h-screen bg-[#0C0810]">
       <div className="relative z-10 p-4 md:p-6 w-full max-w-[1400px] mx-auto">
-        <Header />
+        <Header tone="dark" />
       </div>
       <div className="flex-1 flex items-center justify-center p-4 relative">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[#8B1A32]/5 blur-[150px] rounded-full pointer-events-none" />

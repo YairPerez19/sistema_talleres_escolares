@@ -86,8 +86,8 @@ export function TallerCard({ taller, inscrito, onInscribir, onBaja, colisionaCon
     <article
       ref={cardRef}
       onClick={onClick}
-      className="group relative rounded-[1.75rem] bg-white border border-[#721422]/10 overflow-hidden flex flex-col transition-colors duration-500 hover:border-[#721422]/30 cursor-pointer shadow-[0_14px_35px_-20px_rgba(73,19,31,0.35)]"
-      style={{ boxShadow: '0 14px 35px -20px rgba(73,19,31,0.35)' }}
+      className="group relative rounded-[1.75rem] bg-[#5c1020] border border-white/10 overflow-hidden flex flex-col transition-colors duration-500 hover:border-[#d85c77]/50 cursor-pointer shadow-[0_18px_40px_-22px_rgba(18,2,8,0.8)]"
+      style={{ boxShadow: '0 18px 40px -22px rgba(18,2,8,0.8)' }}
     >
       <div ref={imageRef} className="relative h-72 overflow-hidden will-change-transform">
         <img
@@ -188,7 +188,7 @@ export function TallerCard({ taller, inscrito, onInscribir, onBaja, colisionaCon
               type="button"
               onClick={(e) => { e.stopPropagation(); onBaja?.(); }}
               disabled={loading}
-              className="w-full py-3.5 rounded-2xl font-semibold text-[13px] bg-white border border-[#721422]/15 text-[#765c64] hover:text-red-700 hover:border-red-500/30 hover:bg-red-50 transition-all duration-300 disabled:opacity-40 group/btn"
+              className="w-full py-3.5 rounded-2xl font-semibold text-[13px] bg-[#721422]/45 border border-white/15 text-white/80 hover:text-white hover:border-red-300/50 hover:bg-[#8b1a32] transition-all duration-300 disabled:opacity-40 group/btn"
             >
               <span className="group-hover/btn:hidden">Darse de baja</span>
               <span className="hidden group-hover/btn:inline">Confirmar baja</span>

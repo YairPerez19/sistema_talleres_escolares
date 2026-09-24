@@ -10,6 +10,7 @@ import { supabase } from '../integrations/supabase/client'
 import type { TallerConInstructor } from '../lib/types'
 import { usePageMeta } from '../hooks/usePageMeta'
 import { toast } from 'sonner'
+import { RouteAccessNotice } from '../components/RouteAccessNotice'
 import { Clock, Loader2 } from '@/components/AnimatedIcons'
 import {
   MapPin, ChevronRight, ArrowLeft,
@@ -261,7 +262,7 @@ function InstructorDashboard() {
     noindex: true,
   })
   const { user } = useAuth()
-  const { loading: roleLoading } = useRole(user?.id)
+  const { isInstructor, loading: roleLoading } = useRole(user?.id)
   const { talleres, loading: talleresLoading } = useInstructorTalleres(user?.id)
   const [selectedTaller, setSelectedTaller] = useState<TallerConInstructor | null>(null)
   const [activeTab, setActiveTab] = useState<'asistencia' | 'alumnos'>('asistencia')
@@ -284,8 +285,14 @@ function InstructorDashboard() {
 
   const { data: dayDetailData, loading: dayDetailLoading } = useDayDetail(selectedDay, tallerIds)
 
-  if (!user && !roleLoading) {
-    return <div className="pt-32 px-10 text-center">Inicia sesión para ver tu panel</div>
+  if ((!user || !isInstructor) && !roleLoading) {
+    return (
+      <RouteAccessNotice
+        tone="dark"
+        title="Panel de instructor"
+        description="Esta zona está reservada para cuentas instructoras. Inicia sesión con los permisos correspondientes para consultar tus talleres y registrar asistencia."
+      />
+    )
   }
 
   if (roleLoading) {
@@ -367,7 +374,7 @@ function InstructorDashboard() {
   return (
     <div className="flex flex-col pt-4 pb-20 w-full">
       <div className="bg-[#0a0205]/60 backdrop-blur-[24px] border border-white/[0.04] mb-8 p-4 md:p-6 rounded-[2rem] w-full max-w-[1400px] mx-auto shadow-lg shadow-black/20">
-        <Header />
+        <Header tone="dark" />
         <div className="pt-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <span className="text-[10px] uppercase font-black tracking-[0.2em] text-[#8B1A32]/70 mb-2 block">

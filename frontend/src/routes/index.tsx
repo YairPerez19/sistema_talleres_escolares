@@ -143,9 +143,9 @@ function LandingPage() {
   }, { scope: containerRef })
 
   return (
-    <div ref={containerRef} className="flex flex-col overflow-x-hidden min-h-screen bg-black">
+    <div ref={containerRef} className="landing-page flex flex-col overflow-x-hidden min-h-screen bg-white text-[#351019]">
       {/* === NAVBAR === */}
-      <nav className="fixed top-0 left-0 right-0 z-50 px-4 md:px-6 py-4 bg-black/50 backdrop-blur-md border-b border-white/5">
+      <nav className="fixed top-0 left-0 right-0 z-50 px-4 md:px-6 py-4 bg-white/90 backdrop-blur-md border-b border-[#721422]/10">
         <div className="max-w-[1400px] mx-auto flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
             <BrandLogo mode="dark" markClassName="size-9 rounded-xl" />
@@ -530,12 +530,12 @@ function LandingPage() {
           flex-direction: column;
           justify-content: space-between;
           border-radius: 1.5rem;
-          background: linear-gradient(145deg, rgba(20, 12, 16, 0.9) 0%, rgba(10, 5, 8, 0.95) 100%);
-          border: 1px solid rgba(255, 255, 255, 0.06);
+          background: linear-gradient(145deg, #ffffff 0%, #fff7f9 100%);
+          border: 1px solid rgba(114, 20, 34, 0.13);
           box-shadow:
-            0 4px 24px rgba(0, 0, 0, 0.4),
-            0 12px 48px rgba(0, 0, 0, 0.3),
-            inset 0 1px 0 rgba(255, 255, 255, 0.04);
+            0 4px 24px rgba(73, 19, 31, 0.08),
+            0 12px 48px rgba(73, 19, 31, 0.08),
+            inset 0 1px 0 rgba(255, 255, 255, 0.8);
           transform-style: preserve-3d;
           overflow: hidden;
           transition: box-shadow 0.6s cubic-bezier(0.23, 1, 0.32, 1), border-color 0.4s ease;
@@ -544,10 +544,10 @@ function LandingPage() {
         .testimonial-3d-card:hover .testimonial-3d-inner {
           border-color: rgba(139, 26, 50, 0.25);
           box-shadow:
-            0 8px 32px rgba(0, 0, 0, 0.5),
-            0 24px 64px rgba(0, 0, 0, 0.4),
+            0 8px 32px rgba(73, 19, 31, 0.12),
+            0 24px 64px rgba(73, 19, 31, 0.12),
             0 0 40px rgba(139, 26, 50, 0.08),
-            inset 0 1px 0 rgba(255, 255, 255, 0.06);
+            inset 0 1px 0 rgba(255, 255, 255, 0.9);
         }
 
         .testimonial-3d-reflection {
@@ -556,7 +556,7 @@ function LandingPage() {
           left: 0;
           right: 0;
           height: 50%;
-          background: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, transparent 100%);
+          background: linear-gradient(180deg, rgba(139, 26, 50, 0.06) 0%, transparent 100%);
           border-radius: 1.5rem 1.5rem 0 0;
           pointer-events: none;
           transition: opacity 0.4s ease;

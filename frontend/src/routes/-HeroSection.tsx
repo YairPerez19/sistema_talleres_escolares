@@ -3,15 +3,15 @@ import { useState, useEffect } from 'react'
 import { WorkshopParticles } from '@/components/WorkshopDecorations'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
-import ajedrezImg from '@/assets/talleres/ajedrez.jpg'
-import danzaImg from '@/assets/talleres/danza.jpg'
-import futbolImg from '@/assets/talleres/futbol.jpg'
-import basquetbolImg from '@/assets/talleres/basquetbol.jpg'
-import taekwondoImg from '@/assets/talleres/taekwondo.jpg'
-import teatroImg from '@/assets/talleres/teatro.jpg'
-import fotografiaImg from '@/assets/talleres/fotografia.jpg'
-import dibujoImg from '@/assets/talleres/dibujo.jpg'
-import atletismoImg from '@/assets/talleres/atletismo.jpg'
+import ajedrezImg from '@/assets/talleres/generated/ajedrez.jpg'
+import danzaImg from '@/assets/talleres/generated/danza.jpg'
+import futbolImg from '@/assets/talleres/generated/futbol.jpg'
+import basquetbolImg from '@/assets/talleres/generated/basquetbol.jpg'
+import taekwondoImg from '@/assets/talleres/generated/taekwondo.jpg'
+import teatroImg from '@/assets/talleres/generated/teatro.jpg'
+import fotografiaImg from '@/assets/talleres/generated/fotografia.jpg'
+import dibujoImg from '@/assets/talleres/generated/dibujo.jpg'
+import atletismoImg from '@/assets/talleres/generated/atletismo.jpg'
 
 interface TallerTheme {
   icon: string
@@ -178,7 +178,7 @@ export function HeroSection({ heroRef }: { heroRef: React.RefObject<HTMLDivEleme
           className="absolute inset-0 rounded-3xl transition-all duration-700"
           style={{ background: theme.pattern }}
         >
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-black/30" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#260711] via-[#4d0e18]/90 to-[#721422]/55" />
         </div>
 
         {/* Líneas decorativas laterales temáticas */}
@@ -197,9 +197,9 @@ export function HeroSection({ heroRef }: { heroRef: React.RefObject<HTMLDivEleme
           <button
             onClick={prevSlide}
             aria-label="Taller anterior"
-            className="absolute left-0 sm:left-4 z-30 w-12 h-12 rounded-full bg-black/60 backdrop-blur-md border border-white/10 flex items-center justify-center hover:bg-[#722F37]/70 transition-all duration-300 group"
+            className="absolute left-0 sm:left-4 z-30 w-12 h-12 rounded-full bg-white/95 backdrop-blur-md border border-[#721422]/15 shadow-[0_10px_24px_rgba(114,20,34,0.16)] flex items-center justify-center hover:bg-[#721422] transition-all duration-300 group"
           >
-            <ChevronLeft className="w-6 h-6 text-white group-hover:scale-110 transition-transform" />
+            <ChevronLeft className="w-6 h-6 text-[#721422] group-hover:text-white group-hover:scale-110 transition-transform" />
           </button>
 
           {/* Slides con diseño temático */}
@@ -248,7 +248,7 @@ export function HeroSection({ heroRef }: { heroRef: React.RefObject<HTMLDivEleme
                   }}
                 >
                   <div
-                    className={`relative w-full h-full rounded-2xl overflow-hidden shadow-2xl transition-all duration-500 ${
+                    className={`hero-carousel-card relative w-full h-full rounded-2xl overflow-hidden shadow-2xl transition-all duration-500 ${
                       isActive ? 'border-2' : 'border border-transparent'
                     }`}
                     style={isActive ? { borderColor: slideTheme.accentColor + '60' } : {}}
@@ -306,7 +306,7 @@ export function HeroSection({ heroRef }: { heroRef: React.RefObject<HTMLDivEleme
                     )}
 
                     {/* Contenido inferior */}
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/95 via-black/60 to-transparent p-4 sm:p-6">
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-[#351019]/95 via-[#351019]/65 to-transparent p-4 sm:p-6">
                       {isActive ? (
                         <div className="animate-theme-slide-up">
                           <div className="flex items-center gap-2 mb-2">
@@ -350,9 +350,9 @@ export function HeroSection({ heroRef }: { heroRef: React.RefObject<HTMLDivEleme
           <button
             onClick={nextSlide}
             aria-label="Siguiente taller"
-            className="absolute right-0 sm:right-4 z-30 w-12 h-12 rounded-full bg-black/60 backdrop-blur-md border border-white/10 flex items-center justify-center hover:bg-[#722F37]/70 transition-all duration-300 group"
+            className="absolute right-0 sm:right-4 z-30 w-12 h-12 rounded-full bg-white/95 backdrop-blur-md border border-[#721422]/15 shadow-[0_10px_24px_rgba(114,20,34,0.16)] flex items-center justify-center hover:bg-[#721422] transition-all duration-300 group"
           >
-            <ChevronRight className="w-6 h-6 text-white group-hover:scale-110 transition-transform" />
+            <ChevronRight className="w-6 h-6 text-[#721422] group-hover:text-white group-hover:scale-110 transition-transform" />
           </button>
         </div>
 

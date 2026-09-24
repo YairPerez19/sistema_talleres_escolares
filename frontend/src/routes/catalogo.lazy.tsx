@@ -290,7 +290,7 @@ function CatalogoPage() {
     <div className="surface-page flex flex-col pt-4 pb-20 overflow-visible max-w-[1400px] mx-auto px-4 md:px-8">
       
       <div className="sticky top-4 z-50 bg-white/90 backdrop-blur-[24px] border border-[#721422]/10 mb-8 p-4 md:p-6 rounded-[2rem] space-y-4 shadow-[0_16px_40px_-24px_rgba(73,19,31,0.40)]">
-        <Header />
+        <Header tone="dark" />
         <div className="flex justify-between items-center px-2">
           <Filters 
             category={category} setCategory={setCategory} 

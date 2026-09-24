@@ -1,10 +1,11 @@
-import { createRootRoute, Outlet, ScrollRestoration, useNavigate, useLocation } from '@tanstack/react-router';
+import { createRootRoute, Outlet, useNavigate, useLocation } from '@tanstack/react-router';
 import { AuthProvider, useAuth } from '../hooks/useAuth';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { Toaster } from 'sonner';
 import { useEffect, useRef } from 'react';
 import { Loader2 } from '@/components/AnimatedIcons';
 import { StructuredData } from '@/components/StructuredData';
+import { initializeColorMode } from '../lib/colorMode';
 
 export const Route = createRootRoute({
   component: RootComponent,
@@ -67,13 +68,17 @@ function RootComponent() {
   const location = useLocation();
   const isAuthPage = location.pathname === '/auth';
 
+  useEffect(() => {
+    initializeColorMode();
+  }, []);
+
   return (
     <AuthProvider>
       <ErrorBoundary>
       <AuthGuard>
         <StructuredData type="Organization" />
         <StructuredData type="WebSite" />
-        <div className="min-h-screen flex flex-col bg-background text-foreground selection:bg-primary-glow selection:text-white">
+        <div className="app-shell min-h-screen flex flex-col bg-background text-foreground selection:bg-primary-glow selection:text-white">
           <main className={
             isAuthPage 
               ? "flex-1 flex flex-col relative w-full h-full z-10" 
@@ -87,7 +92,6 @@ function RootComponent() {
             <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-primary/20 rounded-full blur-[150px] opacity-50" />
           </div>
           
-          <ScrollRestoration />
           <Toaster theme="light" toastOptions={{ className: 'glass text-foreground border-primary/20 bg-white/95 shadow-lg' }} position="bottom-right" />
         </div>
       </AuthGuard>

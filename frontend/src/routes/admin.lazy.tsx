@@ -8,14 +8,14 @@ import { toast } from 'sonner'
 import { usePageMeta } from '../hooks/usePageMeta'
 import { Plus, Loader2 } from '@/components/AnimatedIcons'
 import {
-  ShieldAlert, Edit, Trash2,
+  Edit, Trash2,
   Image as ImageIcon, Users, BarChart3, Calendar,
   Download, Wifi, TrendingUp, ChevronDown, Check, Sparkles, X, Upload,
   Activity, LayoutGrid, type LucideIcon,
   ArrowUp, ArrowDown, Minus, RefreshCw, Clock, AlertTriangle,
   CheckCircle2, XCircle, Timer, FileText, Layers,
   UserPlus, User, KeyRound, Mail, Hash,
-  Search, RotateCcw, AlertCircle,
+  Search, RotateCcw, AlertCircle, Settings, Moon, Sun,
 } from '@/components/icons'
 import { cn } from '../lib/utils'
 import { Button } from '@/components/ui/button'
@@ -25,6 +25,7 @@ import {
 } from '@/components/ui/dialog'
 import { useTalleres } from '../hooks/useTalleres'
 import type { Taller } from '../lib/talleres'
+import { imagenDeTaller } from '../lib/tallerImages'
 import { useAsistenciasAdmin, useEstadisticasAdmin, exportarCSV } from '../hooks/useAsistencias'
 import type { AdminStats } from '../hooks/useAsistencias'
 import { EstadoBadge } from '../components/asistencia/EstadoBadge'
@@ -32,6 +33,8 @@ import { ESTADO_CONFIG, type FiltroAsistencia, type TallerConInstructor, type Ho
 import { useRole } from '../hooks/useRole'
 import { generateWorkshopDescription } from '../services/aiService'
 import { registerInstructor } from '../services/authService'
+import { RouteAccessNotice } from '../components/RouteAccessNotice'
+import { applyColorMode, getColorMode, type ColorMode } from '../lib/colorMode'
 
 async function logAudit(action: string, entityType: string, entityId?: string, metadata?: Record<string, unknown>) {
   const { data: { user } } = await supabase.auth.getUser()
@@ -48,7 +51,7 @@ export const Route = createLazyFileRoute('/admin')({
   component: AdminPanel,
 })
 
-type TabId = 'monitoreo' | 'metricas' | 'talleres' | 'instructores' | 'alumnos'
+type TabId = 'monitoreo' | 'metricas' | 'talleres' | 'instructores' | 'alumnos' | 'configuracion'
 
 const TABS: { id: TabId; label: string; icon: LucideIcon; hint: string }[] = [
   { id: 'monitoreo', label: 'Asistencia RT', icon: Wifi, hint: 'Monitoreo en vivo' },
@@ -56,6 +59,7 @@ const TABS: { id: TabId; label: string; icon: LucideIcon; hint: string }[] = [
   { id: 'talleres', label: 'Talleres', icon: LayoutGrid, hint: 'Catálogo' },
   { id: 'instructores', label: 'Instructores', icon: UserPlus, hint: 'Alta de cuentas' },
   { id: 'alumnos', label: 'Alumnos', icon: Users, hint: 'Gestión escolar' },
+  { id: 'configuracion', label: 'Configuración', icon: Settings, hint: 'Apariencia del sistema' },
 ]
 
 function AdminPanel() {
@@ -101,27 +105,14 @@ function AdminPanel() {
   }
 
   if (!isAdmin) {
-    return (
-      <div className="admin-shell flex flex-col pt-4 pb-20 w-full min-h-screen">
-        <div className="admin-card max-w-[1400px] mx-auto w-full px-4 md:px-0">
-          <Header />
-          <div className="py-24 text-center">
-            <div className="inline-flex items-center justify-center size-20 rounded-full bg-[#721422]/15 border border-[#721422]/30 mb-6">
-              <ShieldAlert className="size-10 text-[#721422]" />
-            </div>
-            <h2 className="text-3xl font-extrabold text-white">Acceso Denegado</h2>
-            <p className="text-white/50 mt-2 text-sm">No tienes permisos administrativos.</p>
-          </div>
-        </div>
-      </div>
-    );
+    return <RouteAccessNotice tone="dark" title="Acceso administrativo" description="Esta zona está reservada para cuentas administradoras. Inicia sesión con los permisos correspondientes para continuar." />;
   }
 
   return (
     <div className="admin-shell flex flex-col pt-4 pb-20 w-full min-h-screen">
       <div className="relative max-w-[1400px] mx-auto w-full px-4 md:px-0 z-10">
         <div className="admin-card admin-card-elevated p-5 md:p-7">
-          <Header />
+          <Header tone="dark" />
 
           <div className="pt-6 flex flex-col gap-6">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
@@ -139,7 +130,7 @@ function AdminPanel() {
                 </p>
               </div>
 
-              <div className="flex bg-black/40 p-1 rounded-xl border border-white/[0.06] self-start md:self-end">
+              <div className="flex flex-wrap items-center gap-x-5 gap-y-2 self-start md:self-end">
                 {TABS.map((tab) => {
                   const Icon = tab.icon
                   const active = activeTab === tab.id
@@ -313,15 +304,19 @@ function AdminPanel() {
         {activeTab === 'alumnos' && (
           <AlumnosView />
         )}
+        {activeTab === 'configuracion' && (
+          <ConfiguracionView />
+        )}
       </div>
 
       <Dialog open={showModal} onOpenChange={setShowModal}>
         <DialogContent
           showCloseButton={false}
-          className="max-w-2xl w-full max-h-[90vh] overflow-hidden p-0 rounded-3xl border border-white/10 bg-transparent shadow-none"
+          className="w-full max-h-[92vh] overflow-hidden p-0 rounded-3xl border border-[#721422]/15 bg-transparent shadow-none"
+          style={{ maxWidth: 'min(960px, calc(100vw - 2rem))' }}
           overlayClassName="bg-black/70 backdrop-blur-md"
         >
-          <div className="admin-card admin-card-elevated overflow-y-auto custom-scrollbar max-h-[90vh]">
+          <div className="admin-dialog admin-card admin-card-elevated overflow-y-auto custom-scrollbar max-h-[92vh]">
             <TallerModal
               taller={editingTaller}
               onClose={() => setShowModal(false)}
@@ -334,6 +329,72 @@ function AdminPanel() {
         </DialogContent>
       </Dialog>
     </div>
+  )
+}
+
+function ConfiguracionView() {
+  const [colorMode, setColorMode] = useState<ColorMode>(() => getColorMode())
+
+  const selectColorMode = (mode: ColorMode) => {
+    applyColorMode(mode)
+    setColorMode(mode)
+  }
+
+  return (
+    <section className="admin-card p-6 md:p-8 admin-fade-in">
+      <div className="flex items-start gap-4 mb-8">
+        <div className="size-11 rounded-2xl bg-[#721422]/15 border border-[#d85c77]/25 text-[#f0a2b4] flex items-center justify-center shrink-0">
+          <Settings className="size-5" />
+        </div>
+        <div>
+          <p className="text-[10px] uppercase tracking-[0.22em] font-bold text-white/40 mb-1">Preferencias del sistema</p>
+          <h2 className="text-xl font-extrabold text-white">Apariencia</h2>
+          <p className="text-sm text-white/55 mt-2 max-w-xl">Elige la paleta que prefieras. El cambio se aplica a todas las vistas y se conserva al volver a entrar.</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 max-w-3xl">
+        <button
+          type="button"
+          onClick={() => selectColorMode('wine')}
+          aria-pressed={colorMode === 'wine'}
+          data-selected={colorMode === 'wine'}
+          className="theme-mode-card text-left"
+        >
+          <div className="theme-mode-preview theme-mode-preview-wine">
+            <Moon className="size-5" />
+            <span className="rounded-full bg-white/15 px-2 py-1 text-[9px] font-bold uppercase tracking-widest">Vino</span>
+          </div>
+          <div className="flex items-start justify-between gap-3 mt-5">
+            <div>
+              <h3 className="font-bold text-white">Modo vino</h3>
+              <p className="text-xs text-white/50 mt-1 leading-5">Fondo oscuro vino con superficies profundas y acentos rosa claro.</p>
+            </div>
+            {colorMode === 'wine' && <Check className="size-5 text-[#f0a2b4] shrink-0" />}
+          </div>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => selectColorMode('light')}
+          aria-pressed={colorMode === 'light'}
+          data-selected={colorMode === 'light'}
+          className="theme-mode-card text-left"
+        >
+          <div className="theme-mode-preview theme-mode-preview-light">
+            <Sun className="size-5" />
+            <span className="rounded-full bg-[#721422]/10 px-2 py-1 text-[9px] font-bold uppercase tracking-widest">Blanco</span>
+          </div>
+          <div className="flex items-start justify-between gap-3 mt-5">
+            <div>
+              <h3 className="font-bold text-white">Modo blanco</h3>
+              <p className="text-xs text-white/50 mt-1 leading-5">Lienzo claro, tarjetas blancas y vino reservado para acciones y estados importantes.</p>
+            </div>
+            {colorMode === 'light' && <Check className="size-5 text-[#721422] shrink-0" />}
+          </div>
+        </button>
+      </div>
+    </section>
   )
 }
 
@@ -395,48 +456,58 @@ function TalleresView({ talleres, onEdit, onNew, refreshTalleres }: { talleres: 
                 key={t.id}
                 className="admin-card group overflow-hidden"
               >
-                <div className="p-5 flex flex-col">
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="size-12 rounded-2xl bg-white/5 flex items-center justify-center overflow-hidden border border-white/10 group-hover:border-[#721422]/40 transition-colors">
-                      {t.imagen_url ? (
-                        <img src={t.imagen_url} className="w-full h-full object-cover" alt={t.nombre} />
-                      ) : (
-                        <ImageIcon className="size-5 text-white/20" />
-                      )}
-                    </div>
-                    <div className="flex gap-1.5">
+                <div className="admin-workshop-hero relative h-36 overflow-hidden bg-[#f7eef1]">
+                  <img
+                    src={t.imagen_url || imagenDeTaller(t.nombre)}
+                    alt={`Imagen del taller ${t.nombre}`}
+                    loading="lazy"
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    onError={(event) => {
+                      const image = event.currentTarget;
+                      image.onerror = null;
+                      image.src = imagenDeTaller('taller');
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#351019]/85 via-[#351019]/20 to-transparent" />
+                  <div className="absolute inset-x-3 top-3 flex items-start justify-between gap-2">
+                    <span className="rounded-full border border-white/40 bg-[#351019]/55 px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.14em] text-white backdrop-blur-sm">
+                      {t.imagen_url ? 'Imagen personalizada' : 'Imagen sugerida'}
+                    </span>
+                    <div className="flex gap-1 rounded-xl border border-white/25 bg-[#351019]/45 p-1 backdrop-blur-sm">
                       <Button
                         variant="ghost"
                         size="icon-sm"
                         onClick={() => onEdit(t as TallerConInstructor & { horarios: Horario[] })}
-                        className="text-white/40 hover:text-white hover:bg-white/5"
+                        className="size-7 text-white hover:bg-white/20 hover:text-white"
                       >
                         <Edit />
-                        <span className="sr-only">Editar</span>
+                        <span className="sr-only">Editar imagen y taller</span>
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon-sm"
                         onClick={() => setDeletingTaller(t)}
-                        className="text-white/40 hover:text-red-400 hover:bg-red-500/10"
+                        className="size-7 text-white hover:bg-red-500/30 hover:text-white"
                       >
                         <Trash2 />
                         <span className="sr-only">Eliminar</span>
                       </Button>
                     </div>
                   </div>
-
-                  <div className="space-y-1.5">
-                    <span className="admin-pill bg-[#721422]/10 text-[#d24a6b] border border-[#721422]/25">
+                  <div className="absolute inset-x-4 bottom-3">
+                    <span className="text-[9px] font-bold uppercase tracking-[0.16em] text-white/75">
                       {t.categoria}
                     </span>
-                    <p className="text-white font-bold text-lg leading-tight group-hover:text-[#d24a6b] transition-colors">
+                    <p className="mt-1 text-xl font-extrabold leading-tight tracking-tight text-white drop-shadow-sm">
                       {t.nombre}
                     </p>
-                    <p className="text-[11px] text-white/40 font-medium">
-                      {t.instructor || 'Sin instructor asignado'}
-                    </p>
                   </div>
+                </div>
+
+                <div className="p-5 flex flex-col">
+                  <p className="text-[11px] text-white/40 font-medium">
+                    {t.instructor || 'Sin instructor asignado'}
+                  </p>
 
                   <div className="mt-5 pt-4 border-t border-white/5 flex items-center justify-between">
                     <div className="flex items-center gap-1.5 text-white/50">
@@ -527,6 +598,15 @@ function TallerModal({ taller, onClose, onSuccess }: { taller: TallerConInstruct
   const [horarios, setHorarios] = useState<Partial<Horario>[]>(taller?.horarios || []);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>(taller?.imagen_url || '');
+  const suggestedImageUrl = imagenDeTaller(formData.nombre || 'taller');
+  const displayedPreviewUrl = previewUrl || suggestedImageUrl;
+  const usingSuggestedImage = !formData.imagen_url && !imageFile;
+
+  useEffect(() => {
+    return () => {
+      if (previewUrl.startsWith('blob:')) URL.revokeObjectURL(previewUrl);
+    };
+  }, [previewUrl]);
 
   useEffect(() => {
     async function fetchInstructores() {
@@ -559,6 +639,12 @@ function TallerModal({ taller, onClose, onSuccess }: { taller: TallerConInstruct
       setImageFile(file);
       setPreviewUrl(URL.createObjectURL(file));
     }
+  };
+
+  const useSuggestedImage = () => {
+    setImageFile(null);
+    setFormData(prev => ({ ...prev, imagen_url: '' }));
+    setPreviewUrl('');
   };
 
   const generateAIDescription = async () => {
@@ -817,12 +903,21 @@ function TallerModal({ taller, onClose, onSuccess }: { taller: TallerConInstruct
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div
               onClick={() => document.getElementById('image-upload')?.click()}
-              className="relative h-40 bg-white/[0.02] border-2 border-dashed border-white/10 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:border-[#721422]/50 hover:bg-[#721422]/[0.04] transition-all group overflow-hidden"
+              className="relative h-44 bg-white/[0.02] border-2 border-dashed border-white/10 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:border-[#721422]/50 hover:bg-[#721422]/[0.04] transition-all group overflow-hidden"
             >
-              {previewUrl ? (
+              {displayedPreviewUrl ? (
                 <>
-                  <img src={previewUrl} className="w-full h-full object-cover opacity-50 group-hover:opacity-30 transition-opacity" />
-                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/20">
+                  <img
+                    src={displayedPreviewUrl}
+                    alt={`Vista previa del taller ${formData.nombre || 'nuevo'}`}
+                    className="w-full h-full object-cover opacity-75 group-hover:opacity-45 transition-opacity"
+                    onError={(event) => {
+                      const image = event.currentTarget;
+                      image.onerror = null;
+                      image.src = imagenDeTaller('taller');
+                    }}
+                  />
+                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#351019]/30">
                     <Upload className="size-6 text-white mb-2" />
                     <span className="text-[10px] font-bold uppercase tracking-widest text-white">Cambiar imagen</span>
                   </div>
@@ -839,8 +934,24 @@ function TallerModal({ taller, onClose, onSuccess }: { taller: TallerConInstruct
               <p className="text-[10px] text-white/30 leading-relaxed">
                 Recomendado: 800x400px o superior.<br />
                 La imagen se mostrará en el catálogo.<br />
-                Si no subes ninguna, se usará una por defecto.
+                Si no subes ninguna, se usará una relacionada con el taller.
               </p>
+              {usingSuggestedImage && (
+                <div className="flex items-center gap-2 rounded-xl border border-[#721422]/15 bg-[#721422]/[0.06] px-3 py-2 text-[10px] font-semibold text-[#721422]">
+                  <Sparkles className="size-3.5" />
+                  Imagen sugerida automáticamente por el nombre
+                </div>
+              )}
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={useSuggestedImage}
+                className="h-8 px-2.5 text-[10px] font-bold uppercase tracking-widest text-[#721422] hover:bg-[#721422]/10 hover:text-[#a82a3e]"
+              >
+                <Sparkles data-icon="inline-start" />
+                Usar imagen sugerida
+              </Button>
               <div className="space-y-2 mt-4">
                 <label className="text-[9px] uppercase font-bold text-white/25 tracking-widest">O URL externa</label>
                 <input
@@ -849,6 +960,7 @@ function TallerModal({ taller, onClose, onSuccess }: { taller: TallerConInstruct
                   onChange={e => {
                     setFormData({...formData, imagen_url: e.target.value});
                     setPreviewUrl(e.target.value);
+                    setImageFile(null);
                   }}
                   className="admin-input text-xs"
                   placeholder="https://..."
@@ -1232,7 +1344,9 @@ function InstructoresView({ talleres, onSuccess }: { talleres: (Taller & { horar
     }
   };
 
-  const talleresSinAsignar = talleres;
+  const talleresSinAsignar = talleres.filter(
+    (t) => !t.instructor_id && (!t.instructor || t.instructor === '(asignar)'),
+  );
 
   return (
     <div className="space-y-6 admin-fade-in">
@@ -1292,15 +1406,17 @@ function InstructoresView({ talleres, onSuccess }: { talleres: (Taller & { horar
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div className="space-y-2">
-              <label className="text-[10px] uppercase font-bold text-white/30 ml-1 tracking-widest">
+              <label htmlFor="instructor-nombre" className="text-[10px] uppercase font-bold text-white/30 ml-1 tracking-widest">
                 Nombre completo
               </label>
               <div className="relative">
                 <User className="size-4 text-white/30 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input
+                  id="instructor-nombre"
                   required
                   minLength={3}
                   type="text"
+                  autoComplete="name"
                   value={formData.nombre}
                   onChange={e => setFormData({ ...formData, nombre: e.target.value })}
                   className="admin-input pl-10"
@@ -1310,12 +1426,13 @@ function InstructoresView({ talleres, onSuccess }: { talleres: (Taller & { horar
             </div>
 
             <div className="space-y-2">
-              <label className="text-[10px] uppercase font-bold text-white/30 ml-1 tracking-widest">
+              <label htmlFor="instructor-matricula" className="text-[10px] uppercase font-bold text-white/30 ml-1 tracking-widest">
                 Matrícula
               </label>
               <div className="relative">
                 <Hash className="size-4 text-white/30 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input
+                  id="instructor-matricula"
                   required
                   minLength={4}
                   type="text"
@@ -1329,14 +1446,16 @@ function InstructoresView({ talleres, onSuccess }: { talleres: (Taller & { horar
           </div>
 
           <div className="space-y-2">
-            <label className="text-[10px] uppercase font-bold text-white/30 ml-1 tracking-widest">
+              <label htmlFor="instructor-email" className="text-[10px] uppercase font-bold text-white/30 ml-1 tracking-widest">
               Correo electrónico
             </label>
             <div className="relative">
               <Mail className="size-4 text-white/30 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
+                id="instructor-email"
                 required
                 type="email"
+                autoComplete="email"
                 value={formData.email}
                 onChange={e => setFormData({ ...formData, email: e.target.value })}
                 className="admin-input pl-10"
@@ -1346,15 +1465,17 @@ function InstructoresView({ talleres, onSuccess }: { talleres: (Taller & { horar
           </div>
 
           <div className="space-y-2">
-            <label className="text-[10px] uppercase font-bold text-white/30 ml-1 tracking-widest">
+              <label htmlFor="instructor-password" className="text-[10px] uppercase font-bold text-white/30 ml-1 tracking-widest">
               Contraseña inicial
             </label>
             <div className="relative">
               <KeyRound className="size-4 text-white/30 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
+                id="instructor-password"
                 required
                 minLength={6}
-                type="text"
+                type="password"
+                autoComplete="new-password"
                 value={formData.password}
                 onChange={e => setFormData({ ...formData, password: e.target.value })}
                 className="admin-input pl-10 font-mono"
@@ -1367,7 +1488,7 @@ function InstructoresView({ talleres, onSuccess }: { talleres: (Taller & { horar
           </div>
 
           <div className="space-y-2">
-            <label className="text-[10px] uppercase font-bold text-white/30 ml-1 tracking-widest">
+              <label htmlFor="instructor-taller" className="text-[10px] uppercase font-bold text-white/30 ml-1 tracking-widest">
               Asignar a taller
             </label>
             {talleresSinAsignar.length === 0 ? (
@@ -1380,31 +1501,26 @@ function InstructoresView({ talleres, onSuccess }: { talleres: (Taller & { horar
               <div className="relative">
                 <LayoutGrid className="size-4 text-white/30 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <select
+                  id="instructor-taller"
                   required
                   value={formData.taller_id}
                   onChange={e => setFormData({ ...formData, taller_id: e.target.value })}
-                  className="admin-input pl-10 [color-scheme:dark] appearance-none cursor-pointer"
-                  style={{
-                    backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.3)' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E\")",
-                    backgroundRepeat: 'no-repeat',
-                    backgroundPosition: 'right 0.75rem center',
-                    backgroundSize: '1rem',
-                    paddingRight: '2.5rem',
-                  }}
+                  className="admin-input pl-10 pr-10 appearance-none cursor-pointer"
                 >
                   {talleresSinAsignar.map(t => (
                     <option key={t.id} value={t.id}>{t.nombre} — {t.categoria}</option>
                   ))}
                 </select>
+                <ChevronDown className="size-4 text-white/40 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
               </div>
             )}
           </div>
 
-          <div className="pt-2 flex flex-col sm:flex-row gap-3 border-t border-white/5">
+          <div className="pt-2 flex flex-col sm:flex-row justify-center gap-3 border-t border-white/5">
             <Button
               type="submit"
               disabled={loading || talleresSinAsignar.length === 0}
-              className="btn-wine-glow h-11 text-sm w-full sm:w-auto sm:px-8"
+              className="btn-wine-glow h-11 text-sm w-full sm:w-auto sm:min-w-[220px] sm:px-8"
             >
               {loading ? (
                 <Loader2 data-icon="inline-start" className="animate-spin" />

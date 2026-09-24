@@ -1,0 +1,49 @@
+<svg width="520" height="620" viewBox="0 0 520 620" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">CBTIS 61</title>
+  <desc id="desc">Emblema institucional con engrane y cabeza de águila</desc>
+
+  <defs>
+    <filter id="softShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="12" stdDeviation="12" flood-color="#19040c" flood-opacity="0.28"/>
+    </filter>
+  </defs>
+
+  <g filter="url(#softShadow)">
+    <g fill="#76152D">
+      <rect x="244" y="18" width="32" height="92" rx="8"/>
+      <rect x="244" y="18" width="32" height="92" rx="8" transform="rotate(30 260 260)"/>
+      <rect x="244" y="18" width="32" height="92" rx="8" transform="rotate(60 260 260)"/>
+      <rect x="244" y="18" width="32" height="92" rx="8" transform="rotate(90 260 260)"/>
+      <rect x="244" y="18" width="32" height="92" rx="8" transform="rotate(120 260 260)"/>
+      <rect x="244" y="18" width="32" height="92" rx="8" transform="rotate(150 260 260)"/>
+      <rect x="244" y="18" width="32" height="92" rx="8" transform="rotate(180 260 260)"/>
+      <rect x="244" y="18" width="32" height="92" rx="8" transform="rotate(210 260 260)"/>
+      <rect x="244" y="18" width="32" height="92" rx="8" transform="rotate(240 260 260)"/>
+      <rect x="244" y="18" width="32" height="92" rx="8" transform="rotate(270 260 260)"/>
+      <rect x="244" y="18" width="32" height="92" rx="8" transform="rotate(300 260 260)"/>
+      <rect x="244" y="18" width="32" height="92" rx="8" transform="rotate(330 260 260)"/>
+      <circle cx="260" cy="260" r="190"/>
+    </g>
+
+    <circle cx="260" cy="260" r="148" fill="#FFFDF9"/>
+    <circle cx="260" cy="260" r="148" stroke="#76152D" stroke-width="8"/>
+
+    <path fill="#76152D" d="M119 267L151 251C165 231 184 213 207 200C231 186 256 180 282 183C308 186 331 196 350 211C332 210 314 214 298 222C320 228 338 239 351 254C330 250 310 254 292 266C308 275 321 287 329 302C311 295 294 298 278 310C293 321 304 334 309 350C293 342 278 343 265 352C274 367 278 380 278 392C258 374 240 360 219 347C198 334 180 316 166 297L141 284L119 274C115 272 115 269 119 267Z"/>
+
+    <g fill="none" stroke="#FFFDF9" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M157 255C180 237 206 225 235 220C257 216 276 218 294 224" stroke-width="7"/>
+      <path d="M169 279C198 261 228 251 258 250C278 250 295 255 309 264" stroke-width="7"/>
+      <path d="M184 305C211 286 239 278 266 281C286 283 302 290 314 302" stroke-width="7"/>
+      <path d="M203 327C226 312 249 307 270 312C284 315 296 322 304 333" stroke-width="7"/>
+      <path d="M227 348C244 339 260 338 275 345" stroke-width="7"/>
+      <path d="M157 252L137 267L158 278" stroke-width="6"/>
+      <path d="M208 201C218 212 226 222 232 234" stroke-width="6"/>
+    </g>
+
+    <circle cx="207" cy="226" r="9" fill="#FFFDF9"/>
+    <circle cx="208" cy="226" r="4" fill="#76152D"/>
+  </g>
+
+  <text x="260" y="560" text-anchor="middle" fill="#FFFDF9" font-family="Arial, Helvetica, sans-serif" font-size="54" font-weight="800" letter-spacing="3">CBTIS 61</text>
+  <path d="M108 580H412" stroke="#F4D78E" stroke-width="4" stroke-linecap="round" opacity="0.8"/>
+</svg>

@@ -15,6 +15,7 @@ import gsap from 'gsap'
 import { useGSAP } from '@gsap/react'
 import { BajaDialog } from '../components/BajaDialog'
 import { EstadoBadge } from '../components/asistencia/EstadoBadge'
+import { RouteAccessNotice } from '../components/RouteAccessNotice'
 import type { EstadoAsistencia } from '../lib/types'
 
 export const Route = createLazyFileRoute('/dashboard')({
@@ -163,13 +164,13 @@ function Dashboard() {
   };
 
   if (!user && !talleresLoading) {
-    return <div className="pt-32 px-10 text-center">Inicia sesión para ver tu horario</div>;
+    return <RouteAccessNotice title="Tu horario te espera" description="Inicia sesión como alumno para consultar tus talleres, horarios, cambios y asistencia." />;
   }
 
   return (
     <div className="surface-page flex flex-col pt-4 pb-20 w-full">
       <div className="bg-white/90 backdrop-blur-[24px] border border-[#721422]/10 mb-10 p-4 md:p-6 rounded-[2rem] w-full max-w-[1400px] mx-auto shadow-[0_16px_40px_-24px_rgba(73,19,31,0.40)]">
-        <Header />
+        <Header tone="dark" />
         <div className="pt-6">
           <span className="text-[10px] uppercase font-black tracking-[0.2em] text-[#8B1A32] mb-2 block">Mi Dashboard</span>
           <h1 className="text-3xl md:text-4xl font-extrabold text-[#4d0e18]">Mi Horario Escolar</h1>

@@ -50,7 +50,7 @@ export default function LoginSite({
   const canRegister = role === "student";
 
   return (
-    <div className="auth-page relative flex min-h-screen w-full flex-col overflow-hidden font-sans text-white">
+    <div className="auth-page route-enter relative flex min-h-screen w-full flex-col overflow-hidden font-sans text-white">
       <BackgroundAmbience />
 
       <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-6xl flex-col items-center justify-start px-4 py-7 sm:px-6 lg:py-10">
@@ -1004,7 +1004,7 @@ function EagleLogo() {
       <div className="relative flex h-full w-full items-center justify-center">
         <img
           alt="Logotipo oficial CBTIS 61"
-          className="relative z-10 h-auto w-[72%] max-w-[330px] rounded-[28px] bg-white p-3 object-contain drop-shadow-[0_22px_22px_rgba(20,0,10,0.38)]"
+          className="relative z-10 h-auto w-[54%] max-w-[250px] rounded-[24px] bg-white p-4 object-contain drop-shadow-[0_22px_22px_rgba(20,0,10,0.38)]"
           src={officialLogo}
         />
       </div>
