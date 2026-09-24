@@ -8,8 +8,11 @@
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "prestart": "node scripts/kill-port.mjs",
     "start": "nest start",
+    "prestart:dev": "node scripts/kill-port.mjs",
     "start:dev": "nest start --watch",
+    "prestart:debug": "node scripts/kill-port.mjs",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",

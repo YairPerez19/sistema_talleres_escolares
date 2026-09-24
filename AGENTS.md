@@ -8,6 +8,8 @@ pnpm workspace with two packages:
 
 Database: Supabase (PostgreSQL). Frontend talks to Supabase directly for most operations; the NestJS backend handles auth (OTP flow, registration) and runs on port 3000.
 
+In dev, the frontend reaches the backend through a Vite proxy (`/api` → `http://127.0.0.1:3000`, configured in `frontend/vite.config.ts`; `VITE_API_URL=/api` in `frontend/.env`). The browser only talks to the Vite origin — this avoids CORS/HSTS/private-network-access issues with port 3000.
+
 ## Essential commands
 
 ```bash
@@ -17,6 +19,8 @@ pnpm build            # frontend build (tsc + vite build)
 ```
 
 Root scripts just delegate to packages via `pnpm --filter`. The frontend must pass `tsc` before `vite build`. Backend build: run `pnpm --filter backend dev` or `cd backend/api && nest start --watch`.
+
+The backend `start`, `start:dev` and `start:debug` scripts have `pre*` hooks that run `backend/api/scripts/kill-port.mjs`, which kills any orphaned process listening on port 3000 before Nest boots — this prevents `EADDRINUSE` errors.
 
 ## TanStack Router (frontend)
 

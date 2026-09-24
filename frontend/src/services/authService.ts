@@ -52,6 +52,16 @@ class AuthServiceError extends Error {
   }
 }
 
+async function apiFetch(url: string, init: RequestInit): Promise<Response> {
+  try {
+    return await fetch(url, init);
+  } catch {
+    throw new AuthServiceError(
+      'No se pudo conectar con el servidor. Verifica que el backend esté corriendo e inténtalo de nuevo.',
+    );
+  }
+}
+
 async function handleResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
     let errorMessage = 'Error de conexión';
@@ -68,7 +78,7 @@ async function handleResponse<T>(response: Response): Promise<T> {
 }
 
 export async function verifyIdentity(params: VerifyIdentityParams): Promise<VerifyIdentityResponse> {
-  const res = await fetch(`${API_URL}/auth/verify-identity`, {
+  const res = await apiFetch(`${API_URL}/auth/verify-identity`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(params),
@@ -83,7 +93,7 @@ interface RegisterStudentResponse {
 }
 
 export async function registerStudent(params: Omit<VerifyIdentityParams, 'role' | 'taller_id'> & { nombre: string; turno: 'matutino' | 'vespertino' }): Promise<RegisterStudentResponse> {
-  const res = await fetch(`${API_URL}/auth/register-student`, {
+  const res = await apiFetch(`${API_URL}/auth/register-student`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(params),
@@ -115,7 +125,7 @@ export async function registerInstructor(
     throw new AuthServiceError('No hay sesión activa. Inicia sesión nuevamente.');
   }
 
-  const res = await fetch(`${API_URL}/auth/register-instructor`, {
+  const res = await apiFetch(`${API_URL}/auth/register-instructor`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -127,7 +137,7 @@ export async function registerInstructor(
 }
 
 export async function sendOtp(pendingToken: string): Promise<SendOtpResponse> {
-  const res = await fetch(`${API_URL}/auth/send-otp`, {
+  const res = await apiFetch(`${API_URL}/auth/send-otp`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ pending_token: pendingToken }),
@@ -136,7 +146,7 @@ export async function sendOtp(pendingToken: string): Promise<SendOtpResponse> {
 }
 
 export async function verifyOtp(pendingToken: string, code: string): Promise<VerifyOtpResponse> {
-  const res = await fetch(`${API_URL}/auth/verify-otp`, {
+  const res = await apiFetch(`${API_URL}/auth/verify-otp`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ pending_token: pendingToken, code }),

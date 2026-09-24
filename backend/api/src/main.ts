@@ -33,6 +33,9 @@ async function bootstrap() {
 
   app.use(
     helmet({
+      // Servidor local HTTP: HSTS haría que el navegador fuerce HTTPS y
+      // rompiera las peticiones del frontend (Failed to fetch).
+      strictTransportSecurity: false,
       contentSecurityPolicy: {
         directives: {
           'default-src': ["'self'"],
@@ -43,6 +46,8 @@ async function bootstrap() {
           'connect-src': ["'self'", supabaseUrl, ...allowedOrigins].filter(
             Boolean,
           ),
+          // Quitar upgrade-insecure-requests (rompe HTTP local en Swagger/docs)
+          'upgrade-insecure-requests': null,
         },
       },
       crossOriginResourcePolicy: { policy: 'cross-origin' },

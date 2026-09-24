@@ -24,6 +24,14 @@ export default defineConfig({
     hmr: {
       host: '127.0.0.1',
     },
+    proxy: {
+      // El navegador solo habla con el origen de Vite (5173); Vite reenvía
+      // /api al backend. Evita problemas de CORS/HSTS/PNA con el puerto 3000.
+      '/api': {
+        target: 'http://127.0.0.1:3000',
+        changeOrigin: true,
+      },
+    },
   },
   test: {
     globals: true,
